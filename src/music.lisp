@@ -1,8 +1,84 @@
 (in-package :ld-music)
 
+; Background
+; This project is my exploration in representing musical information with LISP.
+; What kind of musical information is there to represent? Notes, Scales, and Chords.
+
+;;;; Notes - the most basic unit of musical pitch information.
+;;;;;; These are currently represented as integers (MIDI) and
+;;;;;; symbolically as moveable-do solfege like (DO RE MI) and
+;;;;;; absolute name "C#".
+
+;;;; Scales - collections of notes based on scale patterns (major, minor, etc)
+;;;; Chords - collections of notes usually derived from a scale
+
+;;;; This program deals only with the notes on a standard 88 key piano.
+;;;; Limiting the notes to 88 seems to be practical at this time.
+
+;; The initial and most fundamental data we have is a list of MIDI INTEGERS (27..108)
+;;;; (midi-integers)
+
+;;  Then there is a list of absolute note names and octave
+
+;;;; (first (midi-note-octave)) ; A0
+;;;; (last (midi-note-octave))  ; (C7)
+;;;; (length (midi-note-octave)); 88
+
+;; The  #'midi-notes function pairs up the MIDI integers and the absolute note names
+;;;; (first (midi-notes)) (A0 . 21)
+;;;; (last (midi-notes)) ((C7 . 108))
+;;;; (length (midi-notes))   ; 88
+
+;; At this point, we have a basic representation of all notes on the keyboard.
+;; The next step is to build scales.
+
+;; The #'make-scale-template function is used to make scale templates.
+;; Scale templates are used to realize scales from the patterns they define.
+;; The major scale uses a pattern of "W W H W W W H" where W is 2 semitones and H is 1 semitone.
+
+;; To define a major scale template, set the pattern and the solfege syllables:
+;; (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
+;;   => ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+
+;; And then to realize the scale, use the #'make-scale-from-template function
+;; (let ((major-scale-template
+;; 	(make-scale-template '(w w h w w w h)
+;; 			     '(do re mi fa so la ti do))))
+;;   (make-scale-from-template 'C4 'C5 major-scale-template))
+;;=> (((C4 . 72) . DO) ((D4 . 74) . RE) ((E4 . 76) . MI) ((F4 . 77) . FA) ((G4 . 79) . SO) ((A5 . 81) . LA) ((B5 . 83) . TI) ((C5 . 84) . DO))
+
+;; At this point we have a list representing the C major scale from  C4 to C5.
+;; Each item in the list is a NOTE -- a pairing of SOLFEGENAME with a pair of NOTENAME and MIDI-INT
+;; The functions #'note-name, #'note-value, #'note-solfege are used to get note data
+;; (note-name '((C4 . 72) . DO))   ;=> C4
+;; (note-value '((C4 . 72) . DO))  ;=> 72
+;; (note-solfege '((C4 . 72) . DO));=> DO
+
+;; DATA FORMATS
+
+;; NOTE -- a pairing of SOLFEGENAME with a pair of NOTENAME and MIDI-INT
+;;; '((NOTENAME . MIDI-INT) . SOLFEGENAME)
+;;; For example: '((C4 . 77) . DO)
+
+;; SCALE -- a list of NOTES
+;;; '(((C4 . 77) . DO))
+
+;; SCALE TEMPLATE -- a list of scale steps and solfege used to realize scales
+;;;((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+
+;; INTERNAL MAKER FUNCTIONS
+;;; (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
+;;; (make-note2 'C4) -> '((C4 . 72) . NIL) -> '((NOTENAME . NOTEVALUE) . SOLFEGENAME)
+;;; (make-scale-from-pattern 'C4 'C5 (major-scale))
+;;; (make-scale scale-steps solfege-list) 
+
+;; External maker functions
+
+;; TODO - don't use globals
 (defvar *midi-out3* nil)
 (setf *midi-out3* nil)
 
+;; TODO - don't use globals
 (defun pm-reload ()
   (if *midi-out3*
       (progn
@@ -12,11 +88,36 @@
   (pm:list-devices)
   (pm:terminate)
   (pm:initialize)
-  (setf *midi-out3* (pm:open-output 2 1024 0)))
+  (setf *midi-out3* (pm:open-output 6 1024 0)))
 
-;(pm-reload)
+;; TODO - don't use globals
+(defun pm-terminate ()
+  (if *midi-out3*
+      (progn
+	(let ((oldid *midi-out3*))
+	  (setf *midi-out3* nil)
+	  (pm:close-midi oldid))))
+  (pm:list-devices)
+  (pm:terminate))
 
 ;; Helpers
+
+(defun pairup (l1 l2)
+  (if (and l1 l2)
+  (cons
+   (cons (car l1) (car l2))
+   (pairup (cdr l1) (cdr l2)))))
+
+(defun take (n l)
+  (subseq l 0 n))
+
+(defun nshuffle (sequence)
+  (loop for i from (length sequence) downto 2
+        do (rotatef (elt sequence (random i))
+                    (elt sequence (1- i))))
+  sequence)
+
+
 (defun any? (i l)
    (if l
        (if (eq i (car l))
@@ -50,16 +151,15 @@
 	      (find-solfege1 los (cdr lis))))))
 
 ;; Scale Functions
-(defun make-scale (steps solfege)
-  (if steps
-      (cons (cons (car steps) (car solfege))
-	    (make-scale (cdr steps) (cdr solfege)))))
-(defun chromatic-scale ()
-  (make-scale '(h h h h h h h h h h h h) '(do (di ra) (re) (ri me) mi fa (fi se) so (si le) la (li te) ti do)))
-(defun major-scale () (make-scale '(w w h w w w h) '(do re mi fa so la ti do)))
-(defun minor-scale () (make-scale '(w h w w h w w) '(do re me fa so le te do)))
-(defun dorian-scale () (make-scale '(w h w w w h) '(do re me fa so la ti do)))
-(defun phrygian-scale () (make-scale '(h w w w h w) '(do ra me fa so le te do)))
+(defun make-scale-template (steps solfege)
+  (if steps (pairup steps solfege)))
+
+(defun chromatic-scale-template ()
+  (make-scale-template '(h h h h h h h h h h h h) '(do (di ra) (re) (ri me) mi fa (fi se) so (si le) la (li te) ti do)))
+(defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do)))
+(defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te do)))
+(defun dorian-scale-template () (make-scale-template '(w h w w w h) '(do re me fa so la ti do)))
+(defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te do)))
 
 (defun scaleints (scale)
   (mapcar (lambda (i) (if (eq 'w (car i))
@@ -67,9 +167,14 @@
 			  (cons 1 (cdr i)))) scale))
 
 (defun midi-note-octave ()
-  '(A0 A#0 B0 C0 C#0 D0 D#0 E0    F0    F#0    G0    G#0 A1    A#1    B1    C1    C#1    D1    D#1    E1    F1    F#1    G1    G#1 A2    A#2    B2    C2    C#2    D2    D#2    E2    F2    F#2    G2    G#2 A3    A#3    B3    C3    C#3    D3    D#3    E3    F3    F#3    G3    G#3  A4    A#4    B4    C4    C#4    D4    D#4    E4    F4    F#4    G4    G#4 A5    A#5    B5    C5    C#5    D5    D#5    E5    F5    F#5    G5    G#5 A6    A#6    B6    C6    C#6    D6    D#6    E6    F6    F#6    G6    G#6  A7    A#7    B7    C7    C#7    D7    D#7    E7    F7    F#7    G7    G#7 A8    A#8    B8    C8    C#8    D8    D#8    E8    F8    F#8    G8    G#8 A9  A#9    B9    C9    C#9    D9    D#9    E9    F9    F#9    G9))
+  '(A0 A#0 B0 C0 C#0 D0 D#0 E0    F0    F#0    G0    G#0 A1    A#1    B1    C1    C#1    D1    D#1    E1    F1    F#1    G1    G#1 A2    A#2    B2    C2    C#2    D2    D#2    E2    F2    F#2    G2    G#2 A3    A#3    B3    C3    C#3    D3    D#3    E3    F3    F#3    G3    G#3  A4    A#4    B4    C4    C#4    D4    D#4    E4    F4    F#4    G4    G#4 A5    A#5    B5    C5    C#5    D5    D#5    E5    F5    F#5    G5    G#5 A6    A#6    B6    C6    C#6    D6    D#6    E6    F6    F#6    G6    G#6  A7    A#7    B7    C7))
 
-(defun midi-notes () (loop for x from 0 to 87 collect (cons (nth x (midi-note-octave)) (+ 21 x))))
+;; Boiler plate
+(defun midi-integers ()
+  (loop for x from 0 to 87 collect (+ 21 x)))
+
+(defun midi-notes ()
+  (pairup (midi-note-octave) (midi-integers)))
 
 (defun midi-notes-from-scale (midi-notes original-scale scale)
   (if (and midi-notes scale)
@@ -82,47 +187,31 @@
 	  (midi-notes-from-scale midi-notes original-scale original-scale))))
 
 (defun scale-range (n1 n2 scale)
-  (let* ((eqfn (lambda (x y) (eq (note-name (make-note x)) (car y))))
+  (let* ((eqfn (lambda (x y) (eq x (car y))))
 	 (p1 (position n1 scale :test eqfn ))
 	(p2 (position n2 scale :test eqfn)))
     (subseq scale p1 (+ 1 p2))))
 
-(defun solfege-scale-template (scale-template) (mapcar #'cdr scale-template))
+(defun make-scale-from-template (p1 p2 scale-template)
+  (midi-notes-from-scale (scale-range p1 p2 (midi-notes)) scale-template scale-template))
 
 ;;FIXME
 ;;(defun modes (scale) (mapcar (lambda (i) (rotate-n (cdr i) scale)) (map-idx scale)))
-
-(defun make-scale-from-pattern (p1 p2 scale-pattern)
-  (midi-notes-from-scale (scale-range p1 p2 (midi-notes)) scale-pattern scale-pattern))
 
 (defvar *current-scale* nil)
 (defun set-scale (scale)
   (setf *current-scale* scale))
 
+;; Note selector functions
+(defun note-name (note) (car (car note)))
+(defun note-value (note) (cdr (car note)))
+(defun note-solfege (note) (cdr note))
+
 ;; Note functions
-(defun make-note (n &optional (notes (midi-notes)))
-  (if notes
-      (if (eq n (car (car notes)))
-	  (car notes)
-	  (make-note n (cdr notes)))))
-(defun note-name (note) (car note))
-(defun note-value (note) (cdr note))
-;(pm-reload)
-;(note-play (make-note 'c4))
-
-(defun note-play (note)
-  (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value note) 80))
-  (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value note) 0)))
-
-(defun note-play-sleep (note)
-  (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value note) 80))
-  (sleep 0.25)
-  (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value note) 0)))
-
 (defun prev-note (n l)
   (if (and n l)
       (if (equal n
-		 (car (cdr l)))
+		 (car (car (cdr l))))
 	  (car l)
 	  (prev-note n (cdr l)))))
 (defun prev-notes (n note)
@@ -132,27 +221,54 @@
 (defun next-note (n l)
   (if (and n l)
       (if (equal n
-	      (car (cdr l)))
+	      (car (car l)))
 	  (car (cdr l))
 	  (next-note n (cdr l)))))
 (defun next-notes (n note)
   (if (> n 0)
       (next-notes (- n 1) (next-note note (midi-notes)))
       note))
-
 (defun octave-down (note) (prev-notes 12 note))
 (defun octave-up (note) (next-notes 12 note))
 
 ;;MIDI functions
+(defun play-note (note &optional (on-time 0) off-time (velocity 80))
+  "Play a note."
+  (let ((value (note-value note))
+	(off-time (or off-time (+ on-time 1))))
+    (schedule on-time #'note-play note velocity)
+    (schedule off-time #'note-off note)))
 
+;; TODO - don't use globals
+(defun note-play (note &optional (velocity 80))
+  (pm:write-short-midi *midi-out3* 0 (pm:note-on 0 (note-value note) 80)))
+(defun note-off (note)
+  (princ (note-value note))
+  (pm:write-short-midi *midi-out3* 0 (pm:note-off 0 (note-value note) 0)))
+
+;(play-note '((c4 . 72)) 0 0.01)
+
+;; (progn
+;; (note-play '((c4 . 72)))
+;; (note-off '((c4 . 72))))
+
+;; TODO - don't use globals
+(defun note-play-sleep (note)
+  (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value note) 80))
+  (sleep 0.25)
+  (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value note) 0)))
+
+;; TODO - don't use globals
 (defun play-scale (scale)
   (dolist (n scale)
-    (note-play (car n))
-    (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value (car n)) 80))
-    (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value (car n)) 0))
-    (sleep 0.1)))
+    (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value n) 80))
+    (sleep 0.1)
+    (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value n) 0))
+    (sleep 0.3)))
 
-(defun solfege-chord (l) (dolist (x (find-solfege1 l *current-scale*)) (note-play (car x))))
+;(play-scale (make-scale-from-pattern 'C0 'C7 (major-scale-template)))
+
+(defun solfege-chord (l) (dolist (note (find-solfege1 l *current-scale*)) (note-play-sleep note)))
 
 (defun arp (l) (dolist
 		   (x (find-solfege1 l *current-scale*))
@@ -173,22 +289,64 @@
 (defun play-tonic-subdominant-dominant (scale)
   (progn
     (note-play (octave-down (car (car scale))))
-    (chord '(DO MI SO))
+    (solfege-chord '(DO MI SO))
     (sleep 0.5)
-    (chord '(FA LA DO))
+    (solfege-chord '(FA LA DO))
     (sleep 0.5)
-    (chord '(SO TI RE))
+    (solfege-chord '(SO TI RE))
     (sleep 0.5)
     (play-tonic scale)))
 
 (defun random-note (scale) (nth (random (length scale)) scale))
 (defun random-notes (y) (loop for x from 1 to y collect (random-note *current-scale*)))
 (defun play-random (scale) (note-play (car (random-note scale))))
-(defun note-solfege (note) (cdr note))
 
 (defun set-random-scale ()
   (let* ((letters '(A B C D E F G))
 	 (random-letter (nth (random (length letters)) letters)))
     (set-scale (make-scale-from-pattern (intern (format nil "~A~d" random-letter 3))
 					(intern (format nil "~A~d" random-letter 4))
-					(major-scale)))))
+					(major-scale-template)))))
+
+(defun quick-test ()
+  (pm-reload)
+  (note-play '((C4 . 72))))
+;;(quick-test)
+;;(pm-reload)
+
+(defun chord-builder (l)
+  (if l
+      (cons (list (car l) ; 1
+		  (nth 1 (cdr l)) ;3
+		  (nth 3 (cdr l)) ; 5
+		  (nth 5 (cdr l)) ; 7
+		  (nth 7 (cdr l)) ; 9 
+		  (nth 9 (cdr l)) ; 11
+		  (nth 11 (cdr l)) ; 13
+		  )
+	    (chord-builder (cdr l)))))
+
+(defun modes2 (scale)
+  (chord-builder scale))
+(defun triads (myl)
+  (mapcar (lambda (l) (take 3 l) ) myl))
+(defun sevenths (myl)
+  (mapcar (lambda (l) (take 4 l) ) myl))
+
+(defun chord-play (listofchords)
+  (dolist (n listofchords)
+    (note-play n)
+    (sleep 1)))
+
+;; (mapcar #'chord-play (take 8 (triads (modes2 (make-scale-from-pattern 'C2 'B5 (major-scale-template))))))
+
+;; (loop while *playing* do
+;; (mapcar (lambda (n) 
+;; 	  (dolist (i  (take (+ 1 (random 3)) n))
+;; 	    (note-play i)
+;; 	    (note-off i))
+;; 	  (sleep 1))
+;; 	(nshuffle
+;; 	 (take 8 (chord-builder (make-scale-from-pattern 'C2 'B5 (major-scale-template)))))))
+
+;; (setf *playing* nil)

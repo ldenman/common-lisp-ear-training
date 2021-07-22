@@ -11,7 +11,7 @@
     (set-scale (make-scale-from-pattern
 		(intern (format nil "~A~d" random-letter 1))
 		(intern (format nil "~A~d" random-letter 2))
-		(major-scale)))))
+		(major-scale-template)))))
 
 (defun read-guess () (mapcar #'intern (cl-ppcre:split "\\s+" (read-line))))
 
@@ -145,7 +145,7 @@
 						      (list 'guess guess)
 						      (list 'scale *current-scale*))) game)
 		    (setf *game-state* (append *game-state* (list 0)))
-		    (prompt-guess answer game))))))))
+		    (prompt-bass-guess answer game))))))))
 
 
 (defun run-melody-game (game)
@@ -159,7 +159,6 @@
     (set-bass-scale)
     (sleep 1)
     (prompt-bass-guess (random-notes 3) game)))
-
 
 ;(run-melody-game)
 
