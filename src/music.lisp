@@ -17,8 +17,11 @@
 
 ;; The initial and most fundamental data we have is a list of MIDI INTEGERS (27..108)
 ;;;; (midi-integers)
+;;;; => (21 22 23 24 25 26 27 28 29 ... 108)
 
-;;  Then there is a list of absolute note names and octave
+;;  Then there is the #'midi-note-octave list of absolute note names and octave
+;;;(midi-note-octave)
+;;;; => (A0 |A#0| B0 C0 |C#0| D0 |D#0| ... C7)
 
 ;;;; (first (midi-note-octave)) ; A0
 ;;;; (last (midi-note-octave))  ; (C7)
@@ -40,7 +43,12 @@
 ;; (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
 ;;   => ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
 
-;; And then to realize the scale, use the #'make-scale-from-template function
+;; And then to realize the scale, use the #'make-scale-from-template
+;; This function looks at all the notes available and reduces the result to only the notes found according to the scale pattern.
+;; The function signature requires a starting note and ending note used to return a range of notes.
+
+;; The following creates a C major scale from C4 to C5:
+
 ;; (let ((major-scale-template
 ;; 	(make-scale-template '(w w h w w w h)
 ;; 			     '(do re mi fa so la ti do))))
@@ -69,7 +77,7 @@
 ;; INTERNAL MAKER FUNCTIONS
 ;;; (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
 ;;; (make-note2 'C4) -> '((C4 . 72) . NIL) -> '((NOTENAME . NOTEVALUE) . SOLFEGENAME)
-;;; (make-scale-from-pattern 'C4 'C5 (major-scale))
+;;; (make-scale-from-template 'C4 'C5 (major-scale))
 ;;; (make-scale scale-steps solfege-list) 
 
 ;; External maker functions
@@ -266,7 +274,7 @@
     (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value n) 0))
     (sleep 0.3)))
 
-;(play-scale (make-scale-from-pattern 'C0 'C7 (major-scale-template)))
+;(play-scale (make-scale-from-template 'C0 'C7 (major-scale-template)))
 
 (defun solfege-chord (l) (dolist (note (find-solfege1 l *current-scale*)) (note-play-sleep note)))
 
@@ -304,7 +312,7 @@
 (defun set-random-scale ()
   (let* ((letters '(A B C D E F G))
 	 (random-letter (nth (random (length letters)) letters)))
-    (set-scale (make-scale-from-pattern (intern (format nil "~A~d" random-letter 3))
+    (set-scale (make-scale-from-template (intern (format nil "~A~d" random-letter 3))
 					(intern (format nil "~A~d" random-letter 4))
 					(major-scale-template)))))
 
@@ -338,7 +346,7 @@
     (note-play n)
     (sleep 1)))
 
-;; (mapcar #'chord-play (take 8 (triads (modes2 (make-scale-from-pattern 'C2 'B5 (major-scale-template))))))
+;; (mapcar #'chord-play (take 8 (triads (modes2 (make-scale-from-template 'C2 'B5 (major-scale-template))))))
 
 ;; (loop while *playing* do
 ;; (mapcar (lambda (n) 
@@ -347,6 +355,6 @@
 ;; 	    (note-off i))
 ;; 	  (sleep 1))
 ;; 	(nshuffle
-;; 	 (take 8 (chord-builder (make-scale-from-pattern 'C2 'B5 (major-scale-template)))))))
+;; 	 (take 8 (chord-builder (make-scale-from-template 'C2 'B5 (major-scale-template)))))))
 
 ;; (setf *playing* nil)
