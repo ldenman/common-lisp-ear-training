@@ -62,6 +62,49 @@
 ;; (note-value '((C4 . 72) . DO))  ;=> 72
 ;; (note-solfege '((C4 . 72) . DO));=> DO
 
+;; --CHORDS--
+;; The next step would be to build up chords.
+;; The C Major scale notes are C D E F G A B. To make chords, you combine every other note in scale:
+;; The triads in C major are "CEG" "DFA" "EGB" "FAC" "GBD" "ACE" "BDF".
+;; The seventh chords in C major are "CEGA" "DFAG" "EGBD" "FACE" "GBDF" "ACEG" "BDFA".
+;; Use the #'chord-builder function to get a list of chords back.
+;; #'chord-builder takes a scale and generates a list of chords up the the 13th (remember, a chord is just a list of notes)
+ 
+;; (defun test-chord-builder ()
+;;   (let* ((c-major-scale
+;; 	   (make-scale-from-template 'C2 'C7
+;; 				     (make-scale-template '(w w h w w w h)
+;; 							  '(do re mi fa so la ti do)))))
+;;     (take-octaves 2 (chord-builder c-major-scale))))
+
+;; (nth 0 (test-chord-builder))
+;; => (((C2 . 48) . DO) ((E2 . 52) . MI) ((G2 . 55) . SO) ((B3 . 59) . TI) ((D3 . 62) . RE) ((F3 . 65) . FA) ((A4 . 69) . LA))
+;; (nth 1 (test-chord-builder))
+;; => (((D2 . 50) . RE) ((F2 . 53) . FA) ((A3 . 57) . LA) ((C3 . 60) . DO) ((E3 . 64) . MI) ((G3 . 67) . SO) ((B4 . 71) . TI))
+
+;; --TRIADS AND SEVENTHS--
+;; The #'triads and #'sevenths functions take a list of chords and reduce each chord to a specific number of notes, 3 and 4 respectively.
+;; The #'chord-take function takes an integer and list of chords 
+;; (car (triads (test-chord-builder)))
+;;=> (((C2 . 48) . DO) ((E2 . 52) . MI) ((G2 . 55) . SO))
+
+;; (car (sevenths (test-chord-builder)))
+;;=> (((C2 . 48) . DO) ((E2 . 52) . MI) ((G2 . 55) . SO) ((B3 . 59) . TI)) 
+
+;; (car (chord-take 2 (test-chord-builder)))
+;; => (((C2 . 48) . DO) ((E2 . 52) . MI))
+
+
+;; For exTo generate the triads in the C major scale 
+
+(defun chord-range (p1 p2 chords)
+  (let ((i (position p1 chords :test (lambda (x y) (eq x (note-name (car y))))))
+	(e (position p2 chords :test (lambda (x y) (eq x (note-name (car y)))))))
+    (subseq chords i (+ 1 e))))
+
+(defun take-octaves (n list)
+  (take (+ 1 (* 7 n)) list))
+
 ;; DATA FORMATS
 
 ;; NOTE -- a pairing of SOLFEGENAME with a pair of NOTENAME and MIDI-INT
@@ -96,8 +139,8 @@
   (pm:list-devices)
   (pm:terminate)
   (pm:initialize)
-  (setf *midi-out3* (pm:open-output 6 1024 0)))
-
+  (setf *midi-out3* (pm:open-output 2 1024 0)))
+(pm-reload)
 ;; TODO - don't use globals
 (defun pm-terminate ()
   (if *midi-out3*
@@ -240,12 +283,12 @@
 (defun octave-up (note) (next-notes 12 note))
 
 ;;MIDI functions
-(defun play-note (note &optional (on-time 0) off-time (velocity 80))
-  "Play a note."
-  (let ((value (note-value note))
-	(off-time (or off-time (+ on-time 1))))
-    (schedule on-time #'note-play note velocity)
-    (schedule off-time #'note-off note)))
+;; (defun play-note (note &optional (on-time 0) off-time (velocity 80))
+;;   "Play a note."
+;;   (let ((value (note-value note))
+;; 	(off-time (or off-time (+ on-time 1))))
+;;     (schedule on-time #'note-play note velocity)
+;;     (schedule off-time #'note-off note)))
 
 ;; TODO - don't use globals
 (defun note-play (note &optional (velocity 80))
@@ -256,10 +299,12 @@
 
 ;(play-note '((c4 . 72)) 0 0.01)
 
+(pm-reload)
+(pm:list-devices)
+*midi-out3*
 ;; (progn
 ;; (note-play '((c4 . 72)))
 ;; (note-off '((c4 . 72))))
-
 ;; TODO - don't use globals
 (defun note-play-sleep (note)
   (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value note) 80))
@@ -336,10 +381,12 @@
 
 (defun modes2 (scale)
   (chord-builder scale))
+(defun chord-take (n listofchords)
+  (mapcar (lambda (l) (take n l) ) listofchords))
 (defun triads (myl)
-  (mapcar (lambda (l) (take 3 l) ) myl))
+  (chord-take 3 myl))
 (defun sevenths (myl)
-  (mapcar (lambda (l) (take 4 l) ) myl))
+  (chord-take 4 myl))
 
 (defun chord-play (listofchords)
   (dolist (n listofchords)
