@@ -27,9 +27,9 @@
 ;;;; (last (midi-note-octave))  ; (C7)
 ;;;; (length (midi-note-octave)); 88
 
-;; The  #'midi-notes function pairs up the MIDI integers and the absolute note names
-;;;; (first (midi-notes)) (A0 . 21)
-;;;; (last (midi-notes)) ((C7 . 108))
+;; The  #'midi-notes function turns the MIDI integers and absolute note names into the NOTE data structure
+;;;; (first (midi-notes)); ((TYPE . NOTE) (NAME . A0) (VALUE . 21) (SOLFEGE))  
+;;;; (last (midi-notes)) ; (((TYPE . NOTE) (NAME . C7) (VALUE . 108) (SOLFEGE))) 
 ;;;; (length (midi-notes))   ; 88
 
 ;; At this point, we have a basic representation of all notes on the keyboard.
@@ -53,14 +53,24 @@
 ;; 	(make-scale-template '(w w h w w w h)
 ;; 			     '(do re mi fa so la ti do))))
 ;;   (make-scale-from-template 'C4 'C5 major-scale-template))
-;;=> (((C4 . 72) . DO) ((D4 . 74) . RE) ((E4 . 76) . MI) ((F4 . 77) . FA) ((G4 . 79) . SO) ((A5 . 81) . LA) ((B5 . 83) . TI) ((C5 . 84) . DO))
+
+;=>(((TYPE NOTE) (NAME C4) (VALUE 72) (SOLFEGE DO))
+  ; ((TYPE NOTE) (NAME D4) (VALUE 74) (SOLFEGE RE))
+  ; ((TYPE NOTE) (NAME E4) (VALUE 76) (SOLFEGE MI))
+  ; ((TYPE NOTE) (NAME F4) (VALUE 77) (SOLFEGE FA))
+  ; ((TYPE NOTE) (NAME G4) (VALUE 79) (SOLFEGE SO))
+  ; ((TYPE NOTE) (NAME A5) (VALUE 81) (SOLFEGE LA))
+  ; ((TYPE NOTE) (NAME B5) (VALUE 83) (SOLFEGE TI))
+  ; ((TYPE NOTE) (NAME C5) (VALUE 84) (SOLFEGE DO)))
 
 ;; At this point we have a list representing the C major scale from  C4 to C5.
 ;; Each item in the list is a NOTE -- a pairing of SOLFEGENAME with a pair of NOTENAME and MIDI-INT
 ;; The functions #'note-name, #'note-value, #'note-solfege are used to get note data
-;; (note-name '((C4 . 72) . DO))   ;=> C4
-;; (note-value '((C4 . 72) . DO))  ;=> 72
-;; (note-solfege '((C4 . 72) . DO));=> DO
+;; (let ((note (make-note 'C4 72 'DO)))
+;;   (list (note-name note) 
+;; 	(note-value note)  
+;; 	(note-solfege note)
+;;   ));=> (C4 72 DO)
 
 ;; --CHORDS--
 ;; The next step would be to build up chords.
@@ -129,7 +139,7 @@
   (pm:terminate)
   (pm:initialize)
   (setf *midi-out3* (pm:open-output 2 1024 0)))
-(pm-reload)
+
 ;; TODO - don't use globals
 (defun pm-terminate ()
   (if *midi-out3*
@@ -139,6 +149,12 @@
 	  (pm:close-midi oldid))))
   (pm:list-devices)
   (pm:terminate))
+
+(defun pm-initialize ()
+  (pm-reload)
+  (pm-reload))
+
+(pm-initialize)
 
 ;; Helpers
 
@@ -163,12 +179,14 @@
                     (elt sequence (1- i))))
   sequence)
 
-
 (defun any? (i l)
    (if l
        (if (eq i (car l))
  	  (cons i (any? i (cdr l)))
  	  (any? i (cdr l)))))
+
+(defun prepend-tail (lis)
+  (append (last lis) (butlast lis)))
 
 ;; ROTATE SCALES
 ;; (defun rotate (scale) (append (cdr scale) (list (car scale))))
@@ -210,25 +228,45 @@
 (defun midi-note-octave ()
   '(A0 A#0 B0 C0 C#0 D0 D#0 E0    F0    F#0    G0    G#0 A1    A#1    B1    C1    C#1    D1    D#1    E1    F1    F#1    G1    G#1 A2    A#2    B2    C2    C#2    D2    D#2    E2    F2    F#2    G2    G#2 A3    A#3    B3    C3    C#3    D3    D#3    E3    F3    F#3    G3    G#3  A4    A#4    B4    C4    C#4    D4    D#4    E4    F4    F#4    G4    G#4 A5    A#5    B5    C5    C#5    D5    D#5    E5    F5    F#5    G5    G#5 A6    A#6    B6    C6    C#6    D6    D#6    E6    F6    F#6    G6    G#6  A7    A#7    B7    C7))
 
-;; (defun take-octaves (n list)
-;;   (take (+ 1 (* 7 n)) list))
+(defun take-octaves (n list)
+  (take (+ 1 (* 7 n)) list))
 
 ;; Boiler plate
+
+;; Note Data boiler plate
 (defun midi-integers ()
   (loop for x from 0 to 87 collect (+ 21 x)))
 
 (defun midi-notes ()
-  (pairup (midi-note-octave) (midi-integers)))
+  (loop for octave in (midi-note-octave)
+	for integer in (midi-integers)
+	collect (make-note octave integer nil)))
+
+(defun note-name-position (note-name)
+  (position note-name (midi-notes) :test (lambda (x y) (equal x (note-name y)))))
+
+
+(defun midi-notes-from-scale2 (midi-notes original-scale scale)
+  (assign-solfege
+   (if (and midi-notes scale)
+      (if (eq 'w (car (car scale)))
+	  (cons (car midi-notes) (midi-notes-from-scale2 (cdr (cdr midi-notes)) original-scale (cdr scale)))
+	  (cons (car midi-notes) (midi-notes-from-scale2 (cdr midi-notes) original-scale (cdr scale))))
+      (if (and (not scale) midi-notes)
+	  (midi-notes-from-scale2 midi-notes original-scale original-scale)))
+   original-scale))
+
 
 (defun midi-notes-from-scale (midi-notes original-scale scale)
   (if (and midi-notes scale)
+      (let ((newnote (make-note (note-name (car midi-notes)) (note-value (car midi-notes)) (cdr (car scale)))))
       (if (eq 'w (car (car scale)))
-	  (cons (cons (car midi-notes) (cdr (car scale)))
-		(midi-notes-from-scale (cdr (cdr midi-notes)) original-scale (cdr scale)))
-	  (cons (cons (car midi-notes) (cdr (car scale)))
-		(midi-notes-from-scale (cdr midi-notes) original-scale (cdr scale))))
+	  (cons newnote (midi-notes-from-scale (cdr (cdr midi-notes)) original-scale (cdr scale)))
+	  (cons newnote (midi-notes-from-scale (cdr midi-notes) original-scale (cdr scale)))))
       (if (and (not scale) midi-notes)
 	  (midi-notes-from-scale midi-notes original-scale original-scale))))
+
+;(make-scale-from-template 'C3 'C5 (major-scale-template))
 
 (defun midi-notes-from-scale-down-helper (midi-notes original-scale scale)
   (if (and midi-notes scale)
@@ -240,81 +278,137 @@
       (if (and (not scale) midi-notes)
 	  (midi-notes-from-scale-down-helper midi-notes original-scale original-scale))))
 
-
 (defun midi-notes-from-scale-down (midi-notes scale)
   (assign-solfege (midi-notes-from-scale-down-helper midi-notes scale scale)
 		  (prepend-tail (reverse (mapcar #'cdr (major-scale-template))))))
 
+(defun note-p (item)
+ (and (listp item) (assoc 'type item)))
+
 (defun scale-range (n1 n2 scale)
-  (let* ((eqfn (lambda (x y) (eq x (car y))))
+  (let* ((eqfn (lambda (x y) (eq x (note-attr y 'name))))
 	 (p1 (position n1 scale :test eqfn ))
-	(p2 (position n2 scale :test eqfn)))
+	 (p2 (position n2 scale :test eqfn)))
     (subseq scale p1 (+ 1 p2))))
 
 (defun make-scale-from-template (p1 p2 scale-template)
   (midi-notes-from-scale (scale-range p1 p2 (midi-notes)) scale-template scale-template))
 
-(defun note-name-position (note-name)
-  (position note-name (midi-notes) :test (lambda (x y) (equal x (car y)))))
-
 (defun build-scale-up (from-note-pos)
-  (midi-notes-from-scale (subseq  (midi-notes) from-note-pos 88) (major-scale-template) (major-scale-template)))
+  (midi-notes-from-scale (subseq (midi-notes) from-note-pos 88) (major-scale-template) (major-scale-template)))
 
 (defun build-scale-down (from-note-pos)
   (midi-notes-from-scale-down (reverse (subseq (midi-notes) 0 (+ 1 from-note-pos)))
 			      (reverse (major-scale-template))))
 
 (defun assign-solfege (scale scale-template)
-  (pairup scale (grow scale scale-template)))
-
-(defun prepend-tail (s)
-  (append (last s) (butlast s)))
+  (loop for x in scale
+	for y in (grow scale scale-template)
+	collect (progn
+		  (setf (cdr (assoc 'solfege x)) y)
+		  x))
+  )
 
 (defun build-scale2 (start-note pattern &optional (notes (midi-notes)))
   (let ((pos (note-name-position start-note)))
     (append (reverse (build-scale-down pos))
-	    (list (car (build-scale-down pos)))
 	    (rest (build-scale-up pos)))))
 
+;; CHORDS functions
+(defun chord-builder (l)
+  (if l
+      (cons
+       (remove nil (list (car l) ; 1
+		  (nth 1 (cdr l)) ;3
+		  (nth 3 (cdr l)) ; 5
+		  (nth 5 (cdr l)) ; 7
+		  (nth 7 (cdr l)) ; 9 
+		  (nth 9 (cdr l)) ; 11
+		  (nth 11 (cdr l)) ; 13
+		  ))
+	    (chord-builder (cdr l)))))
+
+(defun chord-take (n listofchords)
+  (mapcar (lambda (l) (take n l) ) (remove-if (lambda (chord) (< (length chord) n)) listofchords)))
+(defun triads (myl)
+  (chord-take 3 myl))
+(defun sevenths (myl)
+  (chord-take 4 myl))
+
+(defun major-solfege-chords ()
+  '((do . I)
+    (re . II-)
+    (mi . III-)
+    (fa . IV)
+    (so . V)
+    (la . VI-)
+    (ti . VII)))
+
+(defun chord-roman-numerals (chord-list)
+  (mapcar (lambda (n)
+	    (cons 
+	     (cdr (find (note-solfege (car n)) (major-solfege-chords) :test (lambda (x y) (eq x (car y)))))
+	     n
+	     ))
+	  chord-list))
+
+(defun find-chord (romand-num chord-list)
+  (cdr (find romand-num chord-list :test (lambda (x y) (eq x (car y))))))
+
+(defun scale-chords (scale)
+  (chord-roman-numerals (chord-builder scale)))
+
+(defun chord-sequence (chords-sequence scale)
+  (mapcar (lambda (rn)
+	    (find-chord rn (scale-chords scale)))
+	  chords-sequence))
+
+(defun chord-play (listofchords)
+  ;(note-play (note-octave-down (car listofchords)))
+  (dolist (n listofchords)
+    (note-play n))
+  (sleep 1))
+
+(defun play-chords (chords)
+  (dolist (chord chords)
+    (chord-play chord)
+    (sleep 1)))
 
 ;;FIXME
 ;;(defun modes (scale) (mapcar (lambda (i) (rotate-n (cdr i) scale)) (map-idx scale)))
-
 (defun with-scale-helper (scale my-fn)
   (funcall my-fn scale))
 (defmacro with-scale (scale &body body)
   `(with-scale-helper ,scale (lambda (*current-scale*) ,@body )))
 
-(with-scale (make-scale-from-template 'C4 'C5 (major-scale-template))
-  (play-scale *current-scale*))
-
-
 (defun make-note (name value solfege)
-  (cons (cons name value) solfege))
+  (list
+   (cons 'type 'note)
+   (cons 'name name)
+   (cons 'value value)
+   (cons 'solfege solfege)))
 
 ;; Note selector functions
-(defun note-name (note) (car (car note)))
-(defun note-value (note) (cdr (car note)))
-(defun note-solfege (note) (cdr note))
-(defun note-pair (note)  (car note))
+(defun note-attr (note attr) (cdr (assoc attr note)))
+(defun note-name (note) (note-attr note 'name))
+(defun note-value (note) (note-attr note 'value))
+(defun note-solfege (note) (note-attr note 'solfege))
+(defun note-eql-p (x y)
+  (and (equal (note-value x)
+	      (note-value y))
+       (equal (note-name x)
+	      (note-name y))))
+(defun note-idx (note)
+  (position note (midi-notes) :test #'note-equal-p))
 
-(defun note-place (note)
-  (position (note-pair note) (midi-notes) :test #'equal))
 (defun note-octave-up (note)
-  (let* ((other-note (list (nth (+ 12 (note-place note)) (midi-notes)))))
+  (let* ((other-note (list (nth (+ 12 (note-idx note)) (midi-notes)))))
     (make-note (note-name other-note) (note-value other-note) (note-solfege note))))
 (defun note-octave-down (note)
-  (let* ((other-note (list (nth (- (note-place note) 12) (midi-notes)))))
+  (let* ((other-note (list (nth (- (note-idx note) 12) (midi-notes)))))
     (make-note (note-name other-note) (note-value other-note) (note-solfege note))))
 
-;;MIDI functions
-;; (defun play-note (note &optional (on-time 0) off-time (velocity 80))
-;;   "Play a note."
-;;   (let ((value (note-value note))
-;; 	(off-time (or off-time (+ on-time 1))))
-;;     (schedule on-time #'note-play note velocity)
-;;     (schedule off-time #'note-off note)))
-
+;;MIDI and Play functions
 ;; TODO - don't use globals
 (defun note-play (note &optional (velocity 80))
   (pm:write-short-midi *midi-out3* 0 (pm:note-on 0 (note-value note) 80)))
@@ -322,15 +416,6 @@
   (princ (note-value note))
   (pm:write-short-midi *midi-out3* 0 (pm:note-off 0 (note-value note) 0)))
 
-;(play-note '((c4 . 72)) 0 0.01)
-
-(pm-reload)
-(pm:list-devices)
-*midi-out3*
-;; (progn
-;; (note-play '((c4 . 72)))
-;; (note-off '((c4 . 72))))
-;; TODO - don't use globals
 (defun note-play-sleep (note)
   (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value note) 80))
   (sleep 0.25)
@@ -343,14 +428,15 @@
 
 (defun solfege-chord (l scale) (dolist (note (find-solfege1 l scale)) (note-play note)))
 
-(defun arp (l scale) (dolist
-		   (x (find-solfege1 l scale))
-		 (note-play (car x)) (sleep 0.5)))
+(defun arp (l scale)
+  (dolist
+      (x (find-solfege1 l scale))
+    (note-play (car x)) (sleep 0.5)))
+
 (defun darp (l) (find-solfege1 l scale))
 (defun rarp (l)
   (let ((m (reverse (find-solfege1 l scale))))
-    (dolist
-	(x m)
+    (dolist (x m)
       (note-play (car x)) (sleep 0.5))))
 
 (defmacro c (fn &body body) `(,fn (list ,@(mapcar (lambda (x) `',x) body))))
@@ -384,37 +470,13 @@
 
 (defun random-major-scale ()
   (random-scale (major-scale-template)))
-
-
+(random-scale (major-scale-template))
 (defun quick-test ()
   (pm-reload)
-  (note-play '((C4 . 72))))
+  (note-play (make-note 'C4 72 nil)))
 ;;(quick-test)
-;;(pm-reload)
 
-(defun chord-builder (l)
-  (if l
-      (cons (list (car l) ; 1
-		  (nth 1 (cdr l)) ;3
-		  (nth 3 (cdr l)) ; 5
-		  (nth 5 (cdr l)) ; 7
-		  (nth 7 (cdr l)) ; 9 
-		  (nth 9 (cdr l)) ; 11
-		  (nth 11 (cdr l)) ; 13
-		  )
-	    (chord-builder (cdr l)))))
 
-(defun chord-take (n listofchords)
-  (mapcar (lambda (l) (take n l) ) listofchords))
-(defun triads (myl)
-  (chord-take 3 myl))
-(defun sevenths (myl)
-  (chord-take 4 myl))
-
-(defun chord-play (listofchords)
-  (dolist (n listofchords)
-    (note-play n)
-    (sleep 1)))
 
 ;; (mapcar #'chord-play (take 8 (triads (modes2 (make-scale-from-template 'C2 'B5 (major-scale-template))))))
 
@@ -454,3 +516,20 @@
 
 ;; (with-scale (random-major-scale)
 ;;   (chord-builder *current-scale*))
+
+;; (mapcar #'chord-play (triads (chord-builder (build-scale2 'C4 (major-scale-template)))))
+;; (mapcar #'chord-play (subseq (triads (chord-builder (build-scale2 'C4 (major-scale-template)))) 16 24))
+
+
+;; (with-scale (build-scale2 'C4 (major-scale-template))
+;;   (play-chords (sevenths (chord-sequence '(I IV V I)
+;; 					 (scale-range 'C2 'G3 *current-scale*)))))
+
+;; (with-scale (build-scale2 'C4 (major-scale-template))
+;;   (let* ((chord-list (take-octaves 2 (chord-builder (scale-range 'A2 'C7 *current-scale*))))
+;; 	 (chords (chord-roman-numerals (triads chord-list)))
+;; 	 (chord-sequence '(I VI- II- V III- VI- II- V I)))
+
+;;     (play-chords (mapcar (lambda (rn)
+;; 			   (find-chord rn chords))
+;; 			 chord-sequence))))
