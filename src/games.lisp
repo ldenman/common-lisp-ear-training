@@ -8,10 +8,10 @@
 (defun set-bass-scale ()
   (let* ((letters '(A B C D E F G))
 	 (random-letter (nth (random (length letters)) letters)))
-    (set-scale (make-scale-from-pattern
+    (make-scale-from-template
 		(intern (format nil "~A~d" random-letter 1))
 		(intern (format nil "~A~d" random-letter 2))
-		(major-scale-template)))))
+		(major-scale-template))))
 
 (defun read-guess () (mapcar #'intern (cl-ppcre:split "\\s+" (read-line))))
 
@@ -41,11 +41,18 @@
   (pm-reload)
   *my-game*
   (my-play-game *my-game*))
+(defun chord-trainer ()
+  (setf *my-game*  (make-game 'chord-trainer #'run-chord-trainer))
+  (pm-reload)
+  *my-game*
+  (my-play-game *my-game*)
+  )
 
 (defun play-bass-game ()
   (setf *bass-game*  (make-game 'bass #'run-bass-game))
   (pm-reload)
   (my-play-game *bass-game*))
+
 ;(play-bass-game)
 ;(play-tonic *current-scale*)
 ;(pm-reload)
@@ -114,38 +121,82 @@
 		    (setf *game-state* (append *game-state* (list 0)))
 		    (prompt-guess answer game))))))))
 
-(defun prompt-bass-guess (answer game)
+(defun prompt-bass-guess (answer game scale)
   (if *playing*
       (progn
-	(play-tonic *current-scale*)
+	(play-tonic scale)
 	(sleep 0.5)
-	(play-subdominant *current-scale*)
+	(play-subdominant scale)
 	(sleep 0.5)
-	(play-dominant *current-scale*)
+	(play-dominant scale)
 	(sleep 0.5)
-	(play-tonic *current-scale*)
+	(play-tonic scale)
 	(sleep 1)
 	(dolist (a answer)
-	  (note-play (car a))
+	  (note-play a)
 	  (sleep 1))
 	(let ((guess (read-guess)))
 	  (if (string= "stop" (symbol-name (car guess)))
 	      (setf *playing* nil)
 	      (if (equal (mapcar #'string-upcase (mapcar #'symbol-name guess))
-			 (mapcar #'symbol-name (mapcar #'cdr answer)))
+			 (mapcar #'symbol-name (mapcar #'note-solfege answer)))
 		  (progn
 		    (update-game-lst 'answers (acons answer 'correct
 						     (list
-						      (list 'scale *current-scale*))) game)
+						      (list 'scale scale))) game)
 		    (write-line "good")
 		    )
 		  (progn
 		    (update-game-lst 'answers (acons answer 'incorrect
 						     (list
 						      (list 'guess guess)
-						      (list 'scale *current-scale*))) game)
+						      (list 'scale scale))) game)
 		    (setf *game-state* (append *game-state* (list 0)))
-		    (prompt-bass-guess answer game))))))))
+		    (prompt-bass-guess answer game scale))))))))
+
+
+(defun prompt-chord-guess (answer game scale)
+  (if *playing*
+      (progn
+	(play-tonic-subdominant-dominant scale)
+        (sleep 1)
+        (note-play (note-octave-down (car (cdr answer))))
+	(chord-play (cdr answer))
+	(let ((guess (read-guess)))
+	  (if (string= "stop" (symbol-name (car guess)))
+	      (setf *playing* nil)
+	      (if (equal (car (mapcar #'string-upcase (mapcar #'symbol-name guess)))
+			 (symbol-name (car answer)))
+		  (progn
+		    (dolist (note (cdr answer))
+		      (note-play note)
+		      (sleep 0.5)
+		      )
+		    (dolist (note (rest (reverse (cdr answer))))
+		      (note-play note)
+		      (sleep 0.5)
+		      )
+		    (chord-play (cdr answer))		    
+		    (update-game-lst 'answers (acons answer 'correct
+						     (list
+						      (list 'scale scale))) game)
+		    (write-line "good")
+		    )
+		  (progn
+		    (update-game-lst 'answers (acons answer 'incorrect
+						     (list
+						      (list 'guess guess)
+						      (list 'scale scale))) game)
+		    (setf *game-state* (append *game-state* (list 0)))
+		    (prompt-chord-guess answer game scale))))))))
+;(chord-trainer)
+(pm-reload)
+(defun run-chord-trainer (game)
+  (loop while *playing* do
+    (sleep 1)
+    (let* ((chords (remove-if-not (lambda (x) (= 4 (note-attr (car (cdr x )) 'octave))) (make-chords 'C4 #'triads)))
+	  (random-chord (nth (random (length chords)) chords)))
+	(prompt-chord-guess random-chord game (scale-range 'C4 'G5 (make-scale 'C4))))))
 
 
 (defun run-melody-game (game)
@@ -156,9 +207,9 @@
 
 (defun run-bass-game (game)
   (loop while *playing* do
-    (set-bass-scale)
     (sleep 1)
-    (prompt-bass-guess (random-notes 3) game)))
+    (with-scale (set-bass-scale)
+      (prompt-bass-guess (random-notes 3 *current-scale*) game *current-scale*))))
 
 ;(run-melody-game)
 
