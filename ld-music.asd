@@ -7,6 +7,9 @@
 		:serial t
 		:components
 		((:file "package")
+		 (:file "readme")
+		 (:file "util")
+		 (:file "midi")
 		 (:file "music")
 		 (:file "games")
 		 ))))

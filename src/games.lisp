@@ -190,14 +190,47 @@
 		    (setf *game-state* (append *game-state* (list 0)))
 		    (prompt-chord-guess answer game scale))))))))
 ;(chord-trainer)
-(pm-reload)
+
 (defun run-chord-trainer (game)
   (loop while *playing* do
     (sleep 1)
     (let* ((chords (remove-if-not (lambda (x) (= 4 (note-attr (car (cdr x )) 'octave))) (make-chords 'C4 #'triads)))
-	  (random-chord (nth (random (length chords)) chords)))
-	(prompt-chord-guess random-chord game (scale-range 'C4 'G5 (make-scale 'C4))))))
+	   (random-chord (nth (random (length chords)) chords)))
+      (prompt-chord-guess random-chord game (scale-range 'C4 'G5 (make-scale 'C4))))))
 
+(defun scale-chord-filter (fn &rest args)
+  (lambda (chord-data)
+    (let ((chords (funcall (apply fn args) (attr 'chords chord-data))))
+      (attr= chords 'chords chord-data)
+      (attr= (chord-roman-numerals chords) 'roman-numeral-chords chord-data)
+      chord-data)))
+
+(defun rebuild-chords ()
+  (lambda (chord-data)
+    (attr 'chords (make-scale-chords (attr 'scale chord-data)))))
+
+(defun octave-filter (octave)
+  (lambda (chords)
+    (remove-if-not
+     (lambda (chord)
+       (= octave (note-attr (chord-tone-note (car chord)) 'octave)))
+     chords)))
+
+(defun chord-filter (fn)
+  (lambda (chord-data) (mapcar fn chord-data)))
+
+(defun chord-type-filter (fn)
+  (lambda (chord-data) (funcall fn chord-data)))
+
+(defun chord-seq (seq &optional (octave 4))
+  (lambda (chord-data)
+    (chord-sequence seq (attr 'chords chord-data) octave)))
+
+(defun chord-seq-play (chord-seq)
+  (chord-sequence-play (chord-sequence-chords chord-seq)))
+
+;(pm-reload)
+;(quick-test)
 
 (defun run-melody-game (game)
   (loop while *playing* do
