@@ -2,7 +2,7 @@
 
 ;; External maker functions
 
-(pm-initialize)
+;(pm-initialize)
 
 ;; Finder functions
 (defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
@@ -10,10 +10,25 @@
 
 (defun find-solfege (solfege lis)
   (if lis
-      (if (eq solfege (note-solfege (car lis)))
-	  (car lis)
-	  (find-solfege solfege (cdr lis)))))
-(defun find-note (name &optional (scale (midi-notes))) (find-if (lambda (note) (eq (note-name note) name)) scale))
+      (if (listp (note-solfege (car lis)))
+	  (if (position solfege (note-solfege (car lis)))
+	      (car lis)
+	      (find-solfege solfege (cdr lis))
+	      )
+
+	  (if (eq solfege (note-solfege (car lis)))
+	      (car lis)
+	      (find-solfege solfege (cdr lis))))))
+
+(defun find-note (name &optional (scale (midi-notes)))
+  (find-if (lambda (note) (eq (note-name note) name)) scale))
+
+(defun find-chord2 (octave romand-num chord-list)
+  (find-if
+   (lambda (y)
+     (= (note-octave2 (chord-tone-note (car (cdr y))) (attr 'scale (make-scale 'c4))) octave))
+   (find-all-if (lambda (chord-tones) (eq romand-num (car chord-tones))) chord-list )))
+
 (defun find-chord (octave romand-num chord-list)
   (find-if
    (lambda (y)
@@ -25,7 +40,7 @@
   (if steps (pairup steps solfege)))
 
 (defun chromatic-scale-template ()
-  (make-scale-template '(h h h h h h h h h h h h) '(do (di ra) (re) (ri me) mi fa (fi se) so (si le) la (li te) ti do)))
+  (make-scale-template '(h h h h h h h h h h h h) '(do (di ra) re (ri me) mi fa (fi se) so (si le) la (li te) ti do)))
 (defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do) ))
 (defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te do)))
 (defun dorian-scale-template () (make-scale-template '(w h w w w h) '(do re me fa so la ti do)))
@@ -76,9 +91,8 @@
       (if (and (not scale) midi-notes)
 	  (midi-notes-from-scale-down-helper midi-notes original-scale original-scale))))
 
-(defun midi-notes-from-scale-down (midi-notes scale)
-  (assign-solfege (midi-notes-from-scale-down-helper midi-notes scale scale)
-		  (prepend-tail (reverse (mapcdr (major-scale-template))))))
+;; (defun midi-notes-from-scale-down (midi-notes scale)
+;;   (midi-notes-from-scale-down-helper midi-notes scale scale))
 
 (defun scale-range (n1 n2 scale)
   (let* ((eqfn (lambda (note other-note) (eq note (note-attr other-note 'name))))
@@ -89,12 +103,15 @@
 (defun make-scale-from-template (p1 p2 scale-template)
   (midi-notes-from-scale (scale-range p1 p2 (midi-notes)) scale-template scale-template))
 
-(defun build-scale-up (from-note-pos)
-  (midi-notes-from-scale (subseq (midi-notes) from-note-pos 88) (major-scale-template) (major-scale-template)))
+(defun build-scale-up (from-note-pos pattern)
+  (midi-notes-from-scale (subseq (midi-notes) from-note-pos 88) pattern pattern))
 
-(defun build-scale-down (from-note-pos)
-  (midi-notes-from-scale-down (reverse (subseq (midi-notes) 0 (+ 1 from-note-pos)))
-			      (reverse (major-scale-template))))
+(defun build-scale-down (from-note-pos pattern)
+  (assign-solfege
+   (midi-notes-from-scale-down-helper (reverse (subseq (midi-notes) 0 (+ 1 from-note-pos)))
+				      (reverse pattern)
+				      (reverse pattern))
+   (prepend-tail (reverse (mapcdr pattern)))))
 
 (defun assign-solfege (scale scale-template)
   (loop for note in scale
@@ -105,8 +122,8 @@
 
 (defun build-scale (start-note pattern &optional (notes (midi-notes)))
   (let ((pos (note-name-position start-note)))
-    (append (reverse (build-scale-down pos))
-	    (rest (build-scale-up pos)))))
+    (append (reverse (build-scale-down pos pattern))
+	    (rest (build-scale-up pos pattern)))))
 
 (defun make-chord-tone (note degree)
   (if note
@@ -142,16 +159,66 @@
 	(cons 'chords (chord-builder (attr 'scale scale)))
 	(cons 'roman-numeral-chords (chord-roman-numerals (chord-builder (attr 'scale scale))))))
 
-(defun scale-chords (scale-chord-data) (attr 'chords (scale-chord-data)))
+(defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
 (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
+(defun chord-root (chord)
+  (find-if (lambda (chord-tone) (= 1 (attr 'degree chord-tone))) chord))
+
 (defun chord-sequence-play (chord-sequence)
-  (dolist (chord chord-sequence)
-    (let ((chord-root (find-if (lambda (chord-tone) (= 1 (attr 'degree chord-tone))) chord)))
-      (note-play (note-octave-down (chord-tone-note chord-root) (make-scale 'c2)))
-      (chord-play (chord-invert (chord-butroot chord) (make-scale 'c2))))))
+  (dolist (chord (chord-sequence-chords chord-sequence))
+    (chord-play chord)))
 
 (defun chord-butroot (chord) (chord-remove-degree chord 1))
 (defun chord-butfifth (chord) (chord-remove-degree chord 5))
+(defun chord-drop-root (chord) 
+  (if (note-octave-down (chord-tone-note (chord-root chord)) (make-scale 'c4))
+      (setf
+       (cdr (assoc 'note (chord-root chord)))
+       (note-octave-down (chord-tone-note (chord-root chord)) (make-scale 'c4))))
+  chord)
+(defun chord-invert-upper (chord)
+  (append (list (chord-root chord))
+	  (chord-over-3 (chord-butroot chord)
+			(make-scale 'c4))))
+
+(defun scale-range2 (p1 p2 scale-data)
+  (let ((newscale (make-scale p1)))
+    (setf (cdr (assoc 'scale newscale))
+	  (scale-range p1 p2 (attr 'scale scale-data)))
+    newscale))
+
+(defun scale-octaves (scale &optional (count 0))
+  (if scale
+      (if (eq (note-solfege (car scale)) 'do)
+	  (cons
+	   (cons (car scale) (+ 1 count))
+	   (scale-octaves (cdr scale) (+ 1 count)))
+	  (cons
+	   (cons (car scale) count)
+	   (scale-octaves (cdr scale) count)))))
+
+(defun note-octave2 (note scale)
+  (cdr (find-if (lambda (n)
+	     (note-equal-p note (car n))) (scale-octaves scale))))
+
+;; (chord-sequence-play
+;;  (chord-sequence '(I  II- III- IV V VI- VII (octave . 3) I) 
+;; 		 (sevenths (scale-chords (make-scale-chords (make-scale 'C4))))
+;; 		 2
+;; 		 ))
+
+;; (chord-sequence-play
+;;  (chord-sequence '(II- V I I II- V I (octave . 4) I) 
+;; 		 (mapcar #'chord-drop-root (mapcar #'chord-drop-root (sevenths (scale-chords (make-scale-chords (make-scale 'C4))))))
+;; 		 2
+;; 		 ))
+
+
+
+;; (chord-play2 (car (mapcar #'chord-drop-root (triads (scale-chords (make-scale-chords (scale-range2 'C2 'C4 (make-scale 'c4))))))))
+
+;; (chord-play (car (mapcar #'chord-drop-root (triads (scale-chords (make-scale-chords (scale-range2 'C4 'G5 (make-scale 'c4))))))))
+
 (defun chord-tone-degree (chord-tone) (attr 'degree chord-tone))
 (defun chord-remove-degree (chord degree)
   (remove-if (lambda (chord-tone) (= degree (chord-tone-degree chord-tone))) chord))
@@ -194,7 +261,7 @@
   (if chord-sequence
       (if (and (listp (car chord-sequence)) (eq 'octave (car (car chord-sequence))))
 	  (chord-sequence (cdr chord-sequence) chords (cdr (car chord-sequence)))
-	  (cons (find-chord octave (car chord-sequence) (chord-roman-numerals chords))
+	  (cons (find-chord2 octave (car chord-sequence) (chord-roman-numerals chords))
 		(chord-sequence (cdr chord-sequence) chords octave)))))
 
 (defun chord-play (chord)
@@ -233,8 +300,8 @@
 	      (note-value y))
        (equal (note-name x)
 	      (note-name y))))
-(defun note-idx (note)
-  (position note (midi-notes) :test #'note-equal-p))
+(defun note-idx (note &optional (scale (midi-notes)))
+  (position note scale :test #'note-equal-p))
 
 (defun note-octave-up (note scale)
   (let* ((other-note (nth (+ 12 (note-idx note)) (midi-notes))))
@@ -242,14 +309,14 @@
       (attr= (note-solfege note) 'solfege other-note)
       other-note)))
 (defun note-octave-down (note scale)
-  (let* ((other-note (nth (- (note-idx note) 12) (midi-notes))))
-    (when other-note
-      (attr= (note-solfege note) 'solfege other-note)
-      other-note)))
+  (if (>= (- (note-idx note) 12) 0)
+      (let* ((other-note (nth (- (note-idx note) 12) (midi-notes))))
+	(when other-note
+	  (attr= (note-solfege note) 'solfege other-note)
+	  other-note))))
 
 (defun note-octave (note-name)
   (parse-integer (car (multiple-value-list (cl-ppcre:scan-to-strings "\\d" (symbol-name note-name))))))
-
 
 ;;MIDI and Play functions
 ;; TODO - don't use globals
@@ -285,7 +352,5 @@
 
     (play-tonic scale)))
 
-
-(defun quick-test ()
-  (pm-reload)
+(defun smoke-test ()
   (note-play (make-note 'C4 72 nil)))

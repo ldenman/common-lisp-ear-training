@@ -241,8 +241,9 @@
 
 
 ;; (-> (make-scale-chords (make-scale 'C2))
-;;     (scale-chord-filter #'chord-type-filter #'sevenths)
+;;     (scale-chord-filter #'chord-type-filter #'ninths)
 ;;     (scale-chord-filter #'chord-filter #'chord-butfifth)
+;;     (scale-chord-filter #'chord-filter #'chord-droproot)
 ;;     (chord-seq '(II-
 ;; 		 (octave . 2)
 ;; 		 V
@@ -257,6 +258,6 @@
 ;; 		 (octave . 3)
 ;; 		 I
 ;; 		 I
-;; 		 ) 3)
+;; 		 ) 3))
 
 ;;       #'chord-seq-play)

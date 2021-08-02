@@ -1,0 +1,359 @@
+* Background
+This project is my exploration in representing musical information with LISP.
+
+What kind of musical information is there to represent? To start... *Notes, Scales, and Chords.*
+
+*Notes* - the most basic unit of musical pitch information.
+These are currently represented as integers (MIDI) and symbolically as moveable-do solfege like (DO RE MI) and absolute name "C4" where "C" is the note and "4" is the octave on the keyboard.
+
+*Scales* - collections of notes based on scale patterns (major, minor, etc)
+*Chords* - collections of notes usually derived from a scale
+
+This program deals only with the notes on a standard 88 key piano as limiting the notes to 88 seems to be practical at this time.
+
+This project depends on the "portmidi" library to output midi to a hardware or software midi device of your choosing.
+
+* High level ideas
+
+  The piano is just a list of 88 notes.  From this we can fundamental
+  structure we can derive all sorts of musical structures.
+
+  I am personally interested in tonal structures such as the major and
+  minor scales, diatonic chords derived from major/minor scales, and
+  ear training concepts.
+
+  In general, I want to create musical structures using commonly used
+  symbols, the same symbols that used in music theory and ear
+  training...
+
+  Specifically, I want *solfege* symbols to represent notes, such as:
+  
+  Ex.) The major scale in solfege: DO RE MI FA SO LA TI DO
+  Ex.) The nat. minor scale in solfege: DO RE ME FA SO SE LE TE DO
+  Ex.) The asc. chromatic scale: DO DI RE RI MI FA FI SO SI LA LI TI DO
+  Ex.) The desc. chromatic scale: DO TI TE LA LE SO SE FA MI ME RE RA DO
+
+  Beyond solfege, I want to have symbols for referring to diatonic
+  chords. In music theory and ear training chords are usually referred
+  to by Roman Numerals:
+
+  Ex.) The most common chord progression: I V VI- IV
+  Ex.) The plagal cadence: I IV I
+  Ex.) The cycle V progression: I IV VII III- VI- III- V I
+
+* Setup
+
+#+begin_src lisp :session foo
+  (ql:quickload "ld-music")
+  (in-package :ld-music)
+#+end_src
+
+#+RESULTS:
+: #<PACKAGE "LD-MUSIC">
+
+* MIDI Smoke testing
+
+  
+** List the midi devices available on your system:
+
+  #+begin_src lisp :session foo
+    (in-package :ld-music)
+    (pm:list-devices)
+  #+end_src
+
+  #+RESULTS:
+  : ((0 . ALSA | Midi Through Port-0 | input: NIL | output: T) (1 . ALSA | Midi Through Port-0 | input: T | output: NIL) (2 . ALSA | Roland Digital Piano MIDI 1 | input: NIL | output: T) (3 . ALSA | Roland Digital Piano MIDI 1 | input: T | output: NIL) (4 . ALSA | Synth input port (Qsynth1:0) | input: NIL | output: T))
+
+  Find your MIDI device where output: T and copy the Integer.
+  For example, my device is (2 . ALSA | Roland Digital Piano MIDI 1 | input: NIL | output: T)
+  
+** Initialize the midi device and smoke test
+   
+  #+begin_src lisp :session foo
+    (in-package :ld-music)
+    (pm-initialize 2)
+  #+end_src
+
+  #+RESULTS:
+  : #.(SB-SYS:INT-SAP #X557F54C6EC90)
+
+  #+begin_src lisp :session foo
+    (in-package :ld-music)
+    (smoke-test)
+  #+end_src
+
+  #+RESULTS:
+  : NIL
+
+* Data and Functions
+
+The initial and most fundamental data we have is a list of MIDI INTEGERS (27..108)
+
+#+begin_src lisp :session foo
+  (in-package :ld-music)
+  (midi-integers)
+#+end_src
+
+#+RESULTS:
+| 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 | 65 | 66 | 67 | 68 | 69 | 70 | 71 | 72 | 73 | 74 | 75 | 76 | 77 | 78 | 79 | 80 | 81 | 82 | 83 | 84 | 85 | 86 | 87 | 88 | 89 | 90 | 91 | 92 | 93 | 94 | 95 | 96 | 97 | 98 | 99 | 100 | 101 | 102 | 103 | 104 | 105 | 106 | 107 | 108 |
+
+Then there is the #'midi-note-octave list of absolute note names and octave
+
+ #+begin_src lisp
+   (in-package :ld-music)
+   (midi-note-octave)
+ #+end_src
+
+ #+RESULTS:
+ : (A0 |A#0| B0 C0 |C#0| D0 |D#0| E0 F0 |F#0| G0 |G#0| A1 |A#1| B1 C1 |C#1| D1
+ :  |D#1| E1 F1 |F#1| G1 |G#1| A2 |A#2| B2 C2 |C#2| D2 |D#2| E2 F2 |F#2| G2 |G#2|
+ :  A3 |A#3| B3 C3 |C#3| D3 |D#3| E3 F3 |F#3| G3 |G#3| A4 |A#4| B4 C4 |C#4| D4
+ :  |D#4| E4 F4 |F#4| G4 |G#4| A5 |A#5| B5 C5 |C#5| D5 |D#5| E5 F5 |F#5| G5 |G#5|
+ :  A6 |A#6| B6 C6 |C#6| D6 |D#6| E6 F6 |F#6| G6 |G#6| A7 |A#7| B7 C7)
+
+ #+begin_src lisp
+   (in-package :ld-music)
+   (first (midi-note-octave)) ; A0
+   (last (midi-note-octave))  ; (C7)
+   (length (midi-note-octave)); 88
+ #+end_src
+
+The  #'midi-notes function turns the MIDI integers and absolute note names into the NOTE data structure
+
+#+begin_src lisp
+  (in-package :ld-music)
+  (first (midi-notes)); ((TYPE . NOTE) (NAME . A0) (VALUE . 21) (SOLFEGE) (OCTAVE . 0))
+  (last (midi-notes)); (((TYPE . NOTE) (NAME . C7) (VALUE . 108) (SOLFEGE) (OCTAVE . 7))) 
+  (length (midi-notes)); 88
+#+end_src
+
+At this point, we have a basic representation of all notes on the keyboard.
+The next step is to build scales.
+
+The #'make-scale-template function is used to make scale templates.
+Scale templates are used to realize scales from the patterns they define.
+The major scale uses a pattern of "W W H W W W H" where W is 2 semitones and H is 1 semitone.
+
+To define a major scale template, set the pattern and the solfege syllables:
+(make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
+  => ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+
+And then to realize the scale, use the #'make-scale-from-template
+This function looks at all the notes available and reduces the result to only the notes found according to the scale pattern.
+The function signature requires a starting note and ending note used to return a range of notes.
+
+The following creates a C major scale from C4 to C5:
+
+(let ((major-scale-template
+	(make-scale-template '(w w h w w w h)
+			     '(do re mi fa so la ti do))))
+  (make-scale-from-template 'C4 'C5 major-scale-template))
+
+=> (((TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (OCTAVE . 4))
+ ((TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (OCTAVE . 4))
+ ((TYPE . NOTE) (NAME . E4) (VALUE . 76) (SOLFEGE . MI) (OCTAVE . 4))
+ ((TYPE . NOTE) (NAME . F4) (VALUE . 77) (SOLFEGE . FA) (OCTAVE . 4))
+ ((TYPE . NOTE) (NAME . G4) (VALUE . 79) (SOLFEGE . SO) (OCTAVE . 4))
+ ((TYPE . NOTE) (NAME . A5) (VALUE . 81) (SOLFEGE . LA) (OCTAVE . 5))
+ ((TYPE . NOTE) (NAME . B5) (VALUE . 83) (SOLFEGE . TI) (OCTAVE . 5))
+ ((TYPE . NOTE) (NAME . C5) (VALUE . 84) (SOLFEGE . DO) (OCTAVE . 5)))
+
+At this point we have a list representing the C major scale from  C4 to C5.
+Each item in the list is a NOTE -- a pairing of SOLFEGENAME with a pair of NOTENAME and MIDI-INT
+The functions #'note-name, #'note-value, #'note-solfege are used to get note data
+(let ((note (make-note 'C4 72 'DO)))
+  (list (note-name note) 
+	(note-value note)  
+	(note-solfege note)
+  ));=> (C4 72 DO)
+
+--CHORDS--
+The next step would be to build up chords.
+The C Major scale notes are C D E F G A B. To make chords, you combine every other note in scale:
+The triads in C major are "CEG" "DFA" "EGB" "FAC" "GBD" "ACE" "BDF".
+The seventh chords in C major are "CEGA" "DFAG" "EGBD" "FACE" "GBDF" "ACEG" "BDFA".
+Use the #'chord-builder function to get a list of chords back.
+#'chord-builder takes a scale and generates a list of chords up the the 13th (remember, a chord is just a list of notes)
+
+(defun test-chord-builder ()
+  (let* ((c-major-scale
+	   (make-scale-from-template 'C2 'C4
+				     (make-scale-template '(w w h w w w h)
+							  '(do re mi fa so la ti do)))))
+    (chord-builder c-major-scale)))
+
+=> (nth 0 (test-chord-builder))
+(((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . C2) (VALUE . 48) (SOLFEGE . DO) (OCTAVE . 2))
+  (DEGREE . 1))
+ ((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . E2) (VALUE . 52) (SOLFEGE . MI) (OCTAVE . 2))
+  (DEGREE . 3))
+ ((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . G2) (VALUE . 55) (SOLFEGE . SO) (OCTAVE . 2))
+  (DEGREE . 5))
+ ((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . B3) (VALUE . 59) (SOLFEGE . TI) (OCTAVE . 3))
+  (DEGREE . 7))
+ ((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3))
+  (DEGREE . 9))
+ ((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3))
+  (DEGREE . 11))
+ ((TYPE . CHORD-TONE)
+  (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4))
+  (DEGREE . 13)))
+
+
+--TRIADS AND SEVENTHS--
+The #'triads and #'sevenths functions take a list of chords and reduce each chord to a specific number of notes, 3 and 4 respectively.
+The #'chord-take function takes an integer and list of chords 
+(car (triads (test-chord-builder)))
+=> (((C2 . 48) . DO) ((E2 . 52) . MI) ((G2 . 55) . SO))
+
+(car (sevenths (test-chord-builder)))
+=> (((C2 . 48) . DO) ((E2 . 52) . MI) ((G2 . 55) . SO) ((B3 . 59) . TI)) 
+
+(car (chord-take 2 (test-chord-builder)))
+=> (((C2 . 48) . DO) ((E2 . 52) . MI))
+
+DATA FORMATS
+
+NOTE -- a pairing of SOLFEGENAME with a pair of NOTENAME and MIDI-INT
+'((NOTENAME . MIDI-INT) . SOLFEGENAME)
+For example: '((C4 . 77) . DO)
+
+SCALE -- a list of NOTES
+'(((C4 . 77) . DO))
+
+SCALE TEMPLATE -- a list of scale steps and solfege used to realize scales
+((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+
+INTERNAL MAKER FUNCTIONS
+(make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
+(make-note2 'C4) -> '((C4 . 72) . NIL) -> '((NOTENAME . NOTEVALUE) . SOLFEGENAME)
+(make-scale-from-template 'C4 'C5 (major-scale))
+(make-scale scale-steps solfege-list) 
+
+
+
+
+
+
+(quick-test)
+
+
+(defun inversion-test ()
+  (chord-play (car (triads (chord-builder (scale-range 'C3 'G5 (make-scale 'c4))))))
+
+  (chord-play (chord-over-3 (car (triads (chord-builder (scale-range 'C3 'G5 (make-scale 'c4)))))  (make-scale 'c4)))
+
+  (chord-play (chord-over-5 (car (triads (chord-builder (scale-range 'C3 'G5 (make-scale 'c4))))) (make-scale 'c4)))
+
+  (chord-play (car (triads (chord-builder (scale-range 'C4 'G5 (make-scale 'c4))))))
+
+  )
+
+
+
+(mapcar #'chord-play (take 8 (triads (modes2 (make-scale-from-template 'C2 'B5 (major-scale-template))))))
+
+(loop while *playing* do
+(mapcar (lambda (n) 
+	  (dolist (i  (take (+ 1 (random 3)) n))
+	    (note-play i)
+	    (note-off i))
+	  (sleep 1))
+	(nshuffle
+	 (take 8 (chord-builder (make-scale-from-template 'C2 'B5 (major-scale-template)))))))
+
+(setf *playing* nil)
+
+TESTS
+
+(with-scale (random-major-scale)
+  (play-scale *current-scale*))
+
+(with-scale (random-major-scale)
+  (play-tonic-subdominant-dominant  *current-scale*))
+
+(with-scale (random-major-scale)
+  (play-tonic *current-scale*)
+  (sleep 0.5)
+  (play-subdominant *current-scale*)
+  (sleep 0.5)
+  (play-dominant *current-scale*)
+  (sleep 0.5)
+  (play-tonic *current-scale*))
+
+(with-scale (random-major-scale)
+  (solfege-chord '(DO MI SO) *current-scale*))
+
+(with-scale (random-major-scale)
+  (play-tonic-subdominant-dominant *current-scale*))
+
+(with-scale (random-major-scale)
+  (chord-builder *current-scale*))
+
+(mapcar #'chord-play (triads (chord-builder (build-scale 'C4 (major-scale-template)))))
+(mapcar #'chord-play (subseq (triads (chord-builder (build-scale 'C4 (major-scale-template)))) 16 24))
+
+(with-scale (build-scale 'C4 (major-scale-template))
+  (play-chords (sevenths (chord-sequence '(I IV V I)
+					 (scale-range 'C2 'G3 *current-scale*)))))
+
+(with-scale (build-scale 'C4 (major-scale-template))
+  (let* ((chord-list (take-octaves 2 (chord-builder (scale-range 'A2 'C7 *current-scale*))))
+	 (chords (chord-roman-numerals (triads chord-list)))
+	 (chord-sequence '(I VI- II- V III- VI- II- V I)))
+
+    (play-chords (mapcar (lambda (rn)
+			   (find-chord rn chords))
+			 chord-sequence))))
+
+
+
+(with-scale (scale-range 'C4 'G5 (make-scale 'C4))
+ (solfege-chord '(Do mi so) *current-scale*)
+ (solfege-chord '(re fa la) *current-scale*)
+ (solfege-chord '(mi so ti) *current-scale*)
+ (arp '(do mi so) *current-scale*)
+ (rarp '(do mi so) *current-scale*))
+
+
+
+(chord-sequence-play
+ (chord-sequence-chords
+  (chord-sequence
+   '((octave . 3) I (octave . 3) VI- (octave . 3)  II- (octave . 2) V (octave . 3) I)
+   (chords (make-scale 'C4) #'sevenths))))
+
+(chords (make-scale 'C4) #'sevenths)
+
+(chord-play (chord-invert (car (chords (scale-range 'c3 'G5 (make-scale 'c4)))) (make-scale 'c4)))
+
+(chord-invert (chord-remove-degree (chord-upper (car (cdr (chords (scale-range 'c3 'G5 (make-scale 'c4)) #'sevenths)))) 5) (make-scale 'c4))
+
+
+(-> (make-scale-chords (make-scale 'C2))
+    (scale-chord-filter #'chord-type-filter #'ninths)
+    (scale-chord-filter #'chord-filter #'chord-butfifth)
+    (scale-chord-filter #'chord-filter #'chord-droproot)
+    (chord-seq '(II-
+		 (octave . 2)
+		 V
+		 (octave . 3)
+		 I
+		 (octave . 3)
+		 VI-
+		 (octave . 3)
+		 II-
+		 (octave . 2)
+		 V
+		 (octave . 3)
+		 I
+		 I
+		 ) 3))
+
+      #'chord-seq-play)

@@ -20,6 +20,26 @@
 
 ;; CODE
 
+(defun solfege-trainer ()
+  (let* ((scale (make-scale 'c4))
+	 (notes (scale-range 'c2 'c3 (attr 'scale scale))))
+
+    (dolist (l (loop
+		 for x from 0 to 100
+		 collect (random-element notes) )
+	       )
+      (princ (note-solfege l))
+      (finish-output)
+      (note-play l)
+      (sleep 1)
+      )
+
+    ))
+
+
+;(setf *playing* t)
+;(solfege-trainer)
+
 (defun make-game (name logic-fn)
   (acons 'correct nil
 	 (list (list 'name name)
@@ -228,6 +248,27 @@
 
 (defun chord-seq-play (chord-seq)
   (chord-sequence-play (chord-sequence-chords chord-seq)))
+
+;; (-> (make-scale-chords (make-scale 'C2))
+;;     (scale-chord-filter #'chord-type-filter #'sevenths)
+;;     (scale-chord-filter #'chord-filter #'chord-butfifth)
+;;     (chord-seq '(II-
+;; 		 (octave . 2)
+;; 		 V
+;; 		 (octave . 3)
+;; 		 I
+;; 		 (octave . 3)
+;; 		 VI-
+;; 		 (octave . 3)
+;; 		 II-
+;; 		 (octave . 2)
+;; 		 V
+;; 		 (octave . 3)
+;; 		 I
+;; 		 I
+;; 		 ) 3)
+
+;;       #'chord-seq-play)
 
 ;(pm-reload)
 ;(quick-test)
