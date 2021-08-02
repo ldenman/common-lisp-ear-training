@@ -13,8 +13,7 @@
       (if (listp (note-solfege (car lis)))
 	  (if (position solfege (note-solfege (car lis)))
 	      (car lis)
-	      (find-solfege solfege (cdr lis))
-	      )
+	      (find-solfege solfege (cdr lis)))
 
 	  (if (eq solfege (note-solfege (car lis)))
 	      (car lis)
@@ -26,7 +25,7 @@
 (defun find-chord2 (octave romand-num chord-list)
   (find-if
    (lambda (y)
-     (= (note-octave2 (chord-tone-note (car (cdr y))) (attr 'scale (make-scale 'c4))) octave))
+     (= (note-octave2 (chord-tone-note (car (cdr y))) (scale-notes (make-scale 'c4))) octave))
    (find-all-if (lambda (chord-tones) (eq romand-num (car chord-tones))) chord-list )))
 
 (defun find-chord (octave romand-num chord-list)
@@ -47,7 +46,7 @@
 (defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te do)))
 
 (defun random-scale (template)
-  (let* ((letters '(A B C D E F G))
+  (let* ((letters '(A B C D E F G C# D# F# G# A#))
 	 (random-letter (nth (random (length letters)) letters)))
     (make-scale-from-template (intern (format nil "~A~d" random-letter 3))
 			      (intern (format nil "~A~d" random-letter 4))
@@ -55,12 +54,12 @@
 
 (defun random-major-scale () (random-scale (major-scale-template)))
 
-(defun scale (scale)
-  (attr 'scale scale))
+(defun scale-notes (scale)
+  (attr 'notes scale))
 
 (defun make-scale (scale-root &optional (template (major-scale-template)))
   (list
-   (cons 'scale (build-scale scale-root template))
+   (cons 'notes (build-scale scale-root template))
    (cons 'template template)))
 
 (defun random-note (scale) (nth (random (length scale)) scale))
@@ -156,8 +155,8 @@
 
 (defun make-scale-chords (scale)
   (list (cons 'scale scale)
-	(cons 'chords (chord-builder (attr 'scale scale)))
-	(cons 'roman-numeral-chords (chord-roman-numerals (chord-builder (attr 'scale scale))))))
+	(cons 'chords (chord-builder (scale-notes scale)))
+	(cons 'roman-numeral-chords (chord-roman-numerals (chord-builder (scale-notes scale))))))
 
 (defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
 (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
@@ -184,7 +183,7 @@
 (defun scale-range2 (p1 p2 scale-data)
   (let ((newscale (make-scale p1)))
     (setf (cdr (assoc 'scale newscale))
-	  (scale-range p1 p2 (attr 'scale scale-data)))
+	  (scale-range p1 p2 (scale-notes scale-data)))
     newscale))
 
 (defun scale-octaves (scale &optional (count 0))

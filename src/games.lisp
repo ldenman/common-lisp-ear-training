@@ -22,7 +22,7 @@
 
 (defun solfege-trainer ()
   (let* ((scale (make-scale 'c4))
-	 (notes (scale-range 'c2 'c3 (attr 'scale scale))))
+	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (l (loop
 		 for x from 0 to 100

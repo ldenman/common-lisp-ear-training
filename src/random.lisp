@@ -42,7 +42,7 @@
 
 (defun random-notes ()
   (let* ((scale (make-scale 'c4))
-	 (notes (scale-range 'c2 'c3 (attr 'scale scale))))
+	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (l (loop
 		 for x from 0 to 100
@@ -56,7 +56,7 @@
 
 (defun random-chromatic2 ()
   (let* ((scale (make-scale 'c4 (chromatic-scale-template)))
-	 (notes (scale-range 'c2 'c3 (attr 'scale scale))))
+	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (note (loop
 		    for x from 0 to 1000
@@ -73,7 +73,7 @@
 
 (defun random-chromatic ()
   (let* ((scale (make-scale 'c4 (chromatic-scale-template)))
-	 (notes (scale-range 'c2 'c3 (attr 'scale scale))))
+	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (note-list (loop
 			 for x from 0 to 1000
@@ -90,14 +90,10 @@
 ;(pm-reload)
 ;(random-chromatic2)
 
-(;; dolist (note (mapcar
-
- ;; 	       (lambda (solfege)
- ;; 		 (find-solfege solfege
- ;; 			       (scale-range 'c3 'c4 (attr 'scale (make-scale 'c4 (chromatic-scale-template))))))
-
- ;; 	       '(do ti do di do re ra do mi me do fa mi do so se do)))
-
- ;;  (note-play note)
- ;;  (sleep 1)
- ;;  )
+;; (dolist (note (mapcar (lambda (solfege)
+;; 			 (find-solfege solfege
+;; 				       (scale-range 'c3 'c4 (scale-notes (make-scale 'c4 (chromatic-scale-template))))))
+;; 		       '(do ti do di do re ra do mi me do fa mi do so se do)))
+;;   (note-play note)
+;;   (sleep 1)
+;;   )
