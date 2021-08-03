@@ -1,5 +1,3 @@
-# -*- mode:org;coding:utf-8;slime-buffer-package:"ld-music" -*-
-
 * Background
   #+begin_quote
   "This program is ugly, dirty, disgusting, not the way I would write this as a professional. It is written with concrete syntax, meaning I'm going to use lots of cars and cdrs..."
@@ -80,6 +78,8 @@ This project depends on the "portmidi" library to output midi to a hardware or s
 
   #+RESULTS:
   : #.(SB-SYS:INT-SAP #X56314455E0B0)
+
+You should hear a note play when you run #'smoke-test.
 
   #+begin_src lisp :package ld-music
     (smoke-test)

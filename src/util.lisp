@@ -41,6 +41,9 @@
  	  (cons i (any? i (cdr l)))
  	  (any? i (cdr l)))))
 
+(defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
+  (apply #'remove-if (complement pred) sequ keyword-args))
+
 ;; ROTATE SCALES
 ;; (defun rotate (scale) (append (cdr scale) (list (car scale))))
 ;; (defun rotate-n (n scale)

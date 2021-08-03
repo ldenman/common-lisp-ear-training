@@ -88,7 +88,7 @@
       (write-line ""))))
 
 ;(pm-reload)
-(random-chromatic2)
+;(random-chromatic2)
 
 ;; (dolist (note (mapcar (lambda (solfege)
 ;; 			 (find-solfege solfege
