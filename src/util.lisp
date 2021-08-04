@@ -1,6 +1,10 @@
 (in-package :ld-music)
 
 ;; Helpers
+(defmacro dbug (code)
+  `(progn (princ (format nil "~A" ,code))
+	  ,code))
+
 (defun mapcdr (seq) (mapcar #'cdr seq))
 (defun attr (item alist) (cdr (assoc item alist)))
 (defun attr= (value item alist) (setf (cdr (assoc item alist)) value))

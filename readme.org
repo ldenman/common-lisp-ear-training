@@ -64,7 +64,7 @@ This project depends on the "portmidi" library to output midi to a hardware or s
   #+end_src
 
   #+RESULTS:
-  : ((0 . ALSA | Midi Through Port-0 | input: NIL | output: T) (1 . ALSA | Midi Through Port-0 | input: T | output: NIL) (2 . ALSA | Roland Digital Piano MIDI 1 | input: NIL | output: T) (3 . ALSA | Roland Digital Piano MIDI 1 | input: T | output: NIL) (4 . ALSA | Synth input port (Qsynth1:0) | input: NIL | output: T))
+  : ((0 . ALSA | Midi Through Port-0 | input: NIL | output: T) (1 . ALSA | Midi Through Port-0 | input: T | output: NIL) (2 . ALSA | Roland Digital Piano MIDI 1 | input: NIL | output: T) (3 . ALSA | Roland Digital Piano MIDI 1 | input: T | output: NIL))
 
 
   Find your MIDI device where output: T and copy the Integer.
@@ -107,6 +107,19 @@ INTERNAL MAKER FUNCTIONS
   (make-scale-chords scale)
   (make-chords start-note)
 #+end_example
+
+* Concepts
+
+  
+** Notes
+
+** Scale
+
+** Chord
+
+** Chord Tones
+
+** Scale Chords
 
 * Data and Functions
 
@@ -363,3 +376,12 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 
 	   #'chord-seq-play)
    #+end_example
+
+   
+** Games
+   
+*** Solfege trainer
+
+*** Melody Game
+
+*** Bass Game

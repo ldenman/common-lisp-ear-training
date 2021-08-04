@@ -2,10 +2,13 @@
 
 (defun play-random (scale) (note-play (car (random-note scale))))
 
-(defun chord-play (chord)
+(defun chord-play (chord &optional (sleep 1))
   (dolist (note (chord-notes chord))
     (note-play note))
-  (sleep 1))
+  (sleep sleep))
+
+(defun chord-seq-play (chord-seq)
+  (chord-sequence-play (chord-sequence-chords chord-seq)))
 
 (defun play-chords (chords)
   (dolist (chord chords)
@@ -30,7 +33,7 @@
 
 (defun play-tonic-subdominant-dominant (scale)
   (progn
-    (note-play (note-octave-down (car scale)))
+    (note-play (note-octave-down (car scale) scale))
     (solfege-chord '(DO MI SO) scale)
 
     (solfege-chord '(FA LA DO) scale)
@@ -41,3 +44,4 @@
 
 (defun smoke-test ()
   (note-play (make-note 'C4 72 nil)))
+
