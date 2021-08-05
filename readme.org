@@ -77,7 +77,7 @@ This project depends on the "portmidi" library to output midi to a hardware or s
   #+end_src
 
   #+RESULTS:
-  : #.(SB-SYS:INT-SAP #X56314455E0B0)
+  : #.(SB-SYS:INT-SAP #X55AE35D700D0)
 
 You should hear a note play when you run #'smoke-test.
 
@@ -109,11 +109,98 @@ INTERNAL MAKER FUNCTIONS
 #+end_example
 
 * Concepts
-
   
 ** Notes
 
-** Scale
+A note is technically a frequency like "A 440HZ". But in this program a note is represented as an ALIST with following attributes:
+
+#+begin_src lisp :package ld-music :exports both
+(make-note 'A4 69 nil)
+#+end_src
+
+#+RESULTS:
+: ((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE) (OCTAVE . 4))
+
+- TYPE -- The type of the object (NOTE)
+- NAME -- The absolute name of the note on the keyboard
+- VALUE -- The MIDI Value
+- OCTAVE -- The keyboard octave
+- SOLFEGE : The solfege syllable assigned to the note
+
+*** Note functions
+
+- make-note :: note constructor
+- note-name :: note name selector
+- note-value :: note midi value selector
+- note-solfege :: note solfege syllable selector
+- note-octave-up :: the note one octave up
+- note-octave-down :: the note one octave down
+- note-equal-p :: check for note equality matching *note-value* & *note-name*
+- note-name-position :: position of note in scale (by name)
+- note-idx :: note position in scale using #'note-equal-p
+- parse-note-octave :: Parse octave of the note from the absolute name
+- find-note-in-octave :: Find note in a scale sorted by octave relative to the scale (not absolute octaves)
+  
+
+** Scale templates
+
+Scale templates are represented by a list of pairs (X,Y) where X is
+either W or H and Y is a solfege syllable.
+
+- W :: represents 1 semitone
+- H :: represents 2 semitones
+
+This data is used when building scales to assign the correct solfege
+syllable to the note. 
+
+#+begin_src lisp :package ld-music :exports both
+(major-scale-template)
+#+end_src
+
+#+RESULTS:
+: ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+
+Making a scale template is done like so:
+
+#+begin_src lisp :package ld-music :exports both
+  (make-scale-template '(w w h w w w h)
+		       '(do re mi fa so la ti do) )
+#+end_src
+
+#+RESULTS:
+: ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+
+Other scale templates are defined already:
+
+- Chromatic scale template
+  #+begin_src lisp :package ld-music :exports both
+  (chromatic-scale-template)
+  #+end_src
+
+  #+RESULTS:
+  : ((H . DO) (H DI RA) (H . RE) (H RI ME) (H . MI) (H . FA) (H FI SE) (H . SO) (H SI LE) (H . LA) (H LI TE) (H . TI))
+
+- Minor scale template
+  #+begin_src lisp :package ld-music :exports both
+    (minor-scale-template)
+  #+end_src
+
+  #+RESULTS:
+  : ((W . DO) (H . RE) (W . ME) (W . FA) (H . SO) (W . LE) (W . TE))
+
+- Dorian scale template
+  #+begin_src lisp :package ld-music :exports both
+    (make-scale-template '(w h w w w h w) '(do re me fa so la ti do))
+  #+end_src
+
+  #+RESULTS:
+  : ((W . DO) (H . RE) (W . ME) (W . FA) (W . SO) (H . LA) (W . TI))
+
+*** Scale functions
+
+** Scales
+
+Scales are represented as ALISTS containing NOTES and a TEMPLATE.
 
 ** Chord
 
@@ -385,3 +472,18 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 *** Melody Game
 
 *** Bass Game
+
+** MIDI functions
+
+- program-change ::
+- note-play ::
+- note-off ::
+- note-play-sleep ::
+- make-message ::
+- make-message* ::
+- midi-notes ::
+- midi-integers ::
+- midi-instruments ::
+- pm-initialize ::
+- pm-terminate ::
+- pm-reload :: 

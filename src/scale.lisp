@@ -6,10 +6,10 @@
 
 (defun chromatic-scale-template ()
   (make-scale-template '(h h h h h h h h h h h h) '(do (di ra) re (ri me) mi fa (fi se) so (si le) la (li te) ti do)))
-(defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do) ))
-(defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te do)))
-(defun dorian-scale-template () (make-scale-template '(w h w w w h) '(do re me fa so la ti do)))
-(defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te do)))
+(defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti) ))
+(defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te)))
+(defun dorian-scale-template () (make-scale-template '(w h w w w h w) '(do re me fa so la ti)))
+(defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te)))
 
 (defun scale-range (n1 n2 scale)
   (let* ((eqfn (lambda (note other-note) (eq note (note-attr other-note 'name))))

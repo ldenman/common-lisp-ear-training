@@ -3,7 +3,7 @@
 (defun note-name-position (note-name &optional (scale (midi-notes)))
   (position note-name scale :test (lambda (x y) (equal x (note-name y)))))
 
-(defun note-octave2 (note scale)
+(defun find-note-in-octave (note scale)
   (cdr (find-if (lambda (n)
 	     (note-equal-p note (car n))) (scale-octaves scale))))
 
@@ -32,7 +32,7 @@
 	  (attr= (note-solfege note) 'solfege other-note)
 	  other-note))))
 
-(defun note-octave (note-name)
+(defun parse-note-octave (note-name)
   (parse-integer (car (multiple-value-list (cl-ppcre:scan-to-strings "\\d" (symbol-name note-name))))))
 
 (defun find-note (name &optional (scale (midi-notes)))
@@ -44,4 +44,4 @@
    (cons 'name name)
    (cons 'value value)
    (cons 'solfege solfege)
-   (cons 'octave (note-octave name ))))
+   (cons 'octave (parse-note-octave name ))))

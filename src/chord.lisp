@@ -1,17 +1,10 @@
 (in-package :ld-music)
 
-(defun find-chord2 (octave romand-num chord-list)
-  (find-if
-   (lambda (y)
-     (= (note-octave2 (chord-tone-note (car (cdr y))) (scale-notes (make-scale 'c4))) octave))
-   (find-all-if (lambda (chord-tones) (eq romand-num (car chord-tones))) chord-list )))
-
 (defun find-chord (octave romand-num chord-list)
   (find-if
    (lambda (y)
-     (eq octave (cdr (assoc 'octave (chord-tone-note (car (cdr y)))))))
+     (= (find-note-in-octave (chord-tone-note (car (cdr y))) (scale-notes (make-scale 'c4))) octave))
    (find-all-if (lambda (chord-tones) (eq romand-num (car chord-tones))) chord-list )))
-
 
 (defun make-chord-tone (note degree)
   (if note
@@ -111,9 +104,8 @@
   (if chord-sequence
       (if (and (listp (car chord-sequence)) (eq 'octave (car (car chord-sequence))))
 	  (chord-sequence (cdr chord-sequence) chords (cdr (car chord-sequence)))
-	  (cons (find-chord2 octave (car chord-sequence) (chord-roman-numerals chords))
+	  (cons (find-chord octave (car chord-sequence) (chord-roman-numerals chords))
 		(chord-sequence (cdr chord-sequence) chords octave)))))
-
 
 (defun scale-chord-filter (fn &rest args)
   (lambda (chord-data)

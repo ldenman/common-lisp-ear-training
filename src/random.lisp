@@ -12,10 +12,12 @@
 
 (defun resolve-down (note scale)
   (let* ((prev-do-pos (find-prev-do note scale)))
-   (remove-if-not
-	    (lambda (note)
-	      (position (note-solfege note) (mapcdr (major-scale-template))))
-	     (subseq scale prev-do-pos  (note-idx note scale)))))
+    (append 
+     (remove-if-not
+      (lambda (note)
+	(position (note-solfege note) (mapcdr (major-scale-template))))
+      (subseq scale prev-do-pos  (note-idx note scale)))
+     (list note))))
 
 (defun resolve-note (note scale)
   (let ((down-resolve (resolve-down note scale))
@@ -62,10 +64,7 @@
 		    for x from 0 to 1000
 		    collect (random-element notes)))
 
-      (write-line "")
-      (finish-output)
-
-      (if (evenp counter)
+      (if (= 0 (mod counter 4))
 
 	  (chord-sequence-play
 	   (chord-sequence '(I IV V I)
@@ -73,13 +72,28 @@
 				    (scale-range 'c2 'g5 (attr 'notes (make-scale 'c4 (major-scale-template)))))))
 	   0.5)
 	  )
-      (setf counter (+ 1 counter))
+
       (note-play note)
       (sleep 1)
-      (princ (note-solfege note))
-      (sleep 1)
-      )))
+      (note-play note)
+      (sleep 0.25)
+      (dolist (n (resolve-note note notes))
+	(princ (note-solfege n))
+	(finish-output)
+	(note-play n)
+	(write-line "")
+	(sleep 0.25)
+;	(note-play note)
+	)
 
+      (note-play (car notes))
+      (note-play note)
+      (sleep 1)
+      (setf counter (+ 1 counter))
+
+))
+
+  )
 
 (defun random-chromatic ()
   (let* ((scale (make-scale 'c4 (chromatic-scale-template)))
@@ -92,13 +106,17 @@
 	(princ (note-solfege note))
 	(finish-output)
 	(note-play note)
-	(sleep 1)
+	(write-line "")
+	(sleep 0.25)
+;	(note-play note)
 	)
-      (sleep 2)
-      (write-line ""))))
+)))
+
 
 ;(pm-reload 2)
-;(random-chromatic2)
+					;(random-chromatic2)
+					;(random-chromatic)
+;(smoke-test)
 
 ;; (dolist (note (mapcar (lambda (solfege)
 ;; 			 (find-solfege solfege
