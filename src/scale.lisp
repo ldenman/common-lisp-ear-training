@@ -5,7 +5,7 @@
   (if steps (pairup steps solfege)))
 
 (defun chromatic-scale-template ()
-  (make-scale-template '(h h h h h h h h h h h h) '(do (di ra) re (ri me) mi fa (fi se) so (si le) la (li te) ti do)))
+  (make-scale-template '(h h h h h h h h h h h h) '(do (di ra) re (ri me) mi fa (fi se) so (si le) la (li te) ti)))
 (defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti) ))
 (defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te)))
 (defun dorian-scale-template () (make-scale-template '(w h w w w h w) '(do re me fa so la ti)))
@@ -49,8 +49,14 @@
 			      (intern (format nil "~A~d" random-letter 4))
 			      template)))
 
+(defun random-scale2 (template)
+  (let* ((letters '(A B C D E F G C# D# F# G# A#))
+	 (random-letter (nth (random (length letters)) letters)))
+    (make-scale (intern (format nil "~A~d" random-letter 4)) template)))
 
 (defun random-major-scale () (random-scale (major-scale-template)))
+(defun random-major-scale2 () (random-scale2 (major-scale-template)))
+(defun random-chromatic-scale () (random-scale2 (chromatic-scale-template )))
 
 (defun scale-notes (scale)
   (attr 'notes scale))
