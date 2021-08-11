@@ -1,5 +1,4 @@
 (in-package :ld-music)
-(ql:quickload :cl-json)
 (ql:quickload :yason)
 
 (defun make-track () 
@@ -52,15 +51,15 @@
 (defun make-tracks ()
   (list (make-track)))
 
-(defun try-to-write-midi-file (midi-notes)
+(defun try-to-write-midi-file (outfile midi-notes)
   (let* ((my-midi-file (make-instance 'midi:midifile
 				      :format 0
 				      :tracks (list midi-notes)
 				      :division 60)))
-    (midi:write-midi-file my-midi-file "~/src/remotion-midi-piano-vizualiser/input.mid")))
+    (midi:write-midi-file my-midi-file outfile)))
 
-(defun read-in-frame-file ()
-  (with-open-file (stream "~/src/remotion-midi-piano-vizualiser/src/api/midi.json")
+(defun read-in-frame-file (infile)
+  (with-open-file (stream infile)
     (loop for line = (read-line stream nil)
 	  while line
 	  collect line)))
@@ -72,7 +71,8 @@
 
 (defun render-video ()
   (uiop:launch-program "/usr/bin/bash --login -c yarn run build" :directory "/home/lake/src/remotion-midi-piano-vizualiser/" :output :interactive))
-(render-video)
+
+;(render-video)
 
 (defvar *remotion-servers* '())
 (defun preview-video ()
@@ -93,12 +93,12 @@
 (defun print-entry (key value)
   (format t "~A => ~A~%" key value))
 
-(defun write-solfege-frames (string)
-  (with-open-file (stream "/home/lake/src/remotion-midi-piano-vizualiser/src/api/solfege.json"
+(defun write-solfege-frames (outfile string)
+  (with-open-file (stream outfile
 			  :direction :output)
     (format stream string)))
 
-(defun foo (value notes)
+(defun find-solfege-by-midi-value (value notes)
   (let ((x (find-if (lambda (note) (equal value (write-to-string (note-value note)))) notes)))
     (if x
 	(symbol-name (note-solfege x)))))
@@ -107,12 +107,12 @@
   (let ((newht (make-hash-table))
 	(myht (gethash "activeFramePerNote" json)))
     (loop for k being each hash-key of myht using (hash-value v)
-	  do (setf (gethash (foo k notes) newht) (append (gethash (foo k notes) newht) v))
+	  do (setf (gethash (find-solfege-by-midi-value k notes) newht) (append (gethash (find-solfege-by-midi-value k notes) newht) v))
     (setf (gethash "activeFramePerNote" json) newht))
     json))
 
-(defun decode-json ()
-  (let* ((frame-json (read-in-frame-file))
+(defun decode-json (infile)
+  (let* ((frame-json (read-in-frame-file infile))
 	 (decoded-json (with-input-from-string (s (car frame-json))
 			 (yason:parse s))))
     decoded-json))
@@ -121,14 +121,15 @@
   (with-scale (make-scale 'd4)
     (let* ((notes (attr 'notes *current-scale*)))
 
-      (try-to-write-midi-file (n notes))
+      (try-to-write-midi-file "~/src/remotion-midi-piano-vizualiser/input.mid" (make-midi-seq notes))
       (parse-midi-to-json)
 
       (write-solfege-frames
+       "/home/lake/src/remotion-midi-piano-vizualiser/src/api/solfege.json"
        (with-output-to-string (*standard-output*)
-	 (yason:encode (update-json (decode-json) notes)))))))
+	 (yason:encode (update-json (decode-json "~/src/remotion-midi-piano-vizualiser/src/api/midi.json") notes)))))))
 
-(defun n (notes)
+(defun make-midi-seq (notes)
   (let* ((duration 60)
 	 (time 0)
 	 (result '()))

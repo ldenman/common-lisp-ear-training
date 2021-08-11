@@ -32,7 +32,8 @@
 	 (chord-builder (cdr l))))))
 
 (defun make-chords (start-note &optional (filter-fn #'triads) (template (major-scale-template)))
-  (chord-roman-numerals (funcall filter-fn (chord-builder (build-scale start-note (major-scale-template)))))) 
+  (chord-roman-numerals
+   (funcall filter-fn (chord-builder (build-scale start-note (major-scale-template)))))) 
 
 (defun make-scale-chords (scale)
   (list (cons 'scale scale)

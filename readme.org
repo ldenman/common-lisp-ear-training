@@ -1,3 +1,11 @@
+
+* Dependencies
+- quicklisp
+- portmidi - Download it locally
+  - https://github.com/chfin/cl-portmidi
+  - cd ~/quicklisp/local-projects
+  - git clone https://github.com/chfin/cl-portmidi.git
+
 * Background
   #+begin_quote
   "This program is ugly, dirty, disgusting, not the way I would write this as a professional. It is written with concrete syntax, meaning I'm going to use lots of cars and cdrs..."
@@ -487,3 +495,73 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 - pm-initialize ::
 - pm-terminate ::
 - pm-reload :: 
+
+** Chord functions
+- find-chord (octave romand-num chord-list scale) ::
+- make-chord-tone (note degree) ::
+- chord-tone-note (chord-tone)(attr 'note chord-tone)) ::
+- chord-degree (chord-tone) (attr 'degree chord-tone)) ::
+- chord-notes (chord) (mapcar #'chord-tone-note chord)) ::
+- chord-builder (l) ::
+- make-chords (start-note &optional (filter-fn #'triads) (template (major-scale-template))) ::
+- make-scale-chords (scale) ::
+- scale-chords (scale-chord-data) (attr 'chords scale-chord-data)) ::
+- chord-sequence-chords (chord-sequence) (mapcdr chord-sequence)) ::
+- chord-root (chord) ::
+- chord-sequence-play (chord-sequence &optional (sleep 1)) ::
+- chord-butroot (chord) (chord-remove-degree chord 1)) ::
+- chord-butfifth (chord) (chord-remove-degree chord 5)) ::
+- chord-drop-root (chord)  ::
+- chord-invert-upper (chord) ::
+- chord-tone-degree (chord-tone) (attr 'degree chord-tone)) ::
+- chord-remove-degree (chord degree) ::
+- chord-take (n listofchords) ::
+- triads (myl) (chord-take 3 myl)) ::
+- sevenths (myl) (chord-take 4 myl)) ::
+- ninths (myl) (chord-take 5 myl)) ::
+- elevenths (myl) (chord-take 6 myl)) ::
+- thirteenths (myl) (chord-take 7 myl)) ::
+- chord-invert (chord scale) ::
+- chord-over-3 (root-position-chord scale) ::
+- chord-over-5 (root-position-chord scale) ::
+- major-solfege-chords () ::
+- chord-roman-numerals (chord-list) ::
+- chord-sequence (chord-sequence chords scale &optional (octave 4)) ::
+- scale-chord-filter (fn &rest args) ::
+- rebuild-chords () ::
+- octave-filter (octave) ::
+- chord-filter (fn) ::
+- chord-type-filter (fn) ::
+- chord-seq (seq &optional (octave 4)) ::
+
+** Scale functions
+- make-scale-template (steps solfege) ::
+- chromatic-scale-template () ::
+- major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti) )) ::
+- minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te))) ::
+- dorian-scale-template () (make-scale-template '(w h w w w h w) '(do re me fa so la ti))) ::
+- phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te))) ::
+- scale-range (n1 n2 scale) ::
+- make-scale-from-template (p1 p2 scale-template) ::
+- build-scale-up (from-note-pos pattern) ::
+- build-scale-down (from-note-pos pattern) ::
+- assign-solfege (scale scale-template) ::
+- build-scale (start-note pattern &optional (notes (midi-notes))) ::
+- random-scale (template) ::
+- random-scale2 (template) ::
+- random-major-scale () (random-scale (major-scale-template))) ::
+- random-major-scale2 () (random-scale2 (major-scale-template))) ::
+- random-chromatic-scale () (random-scale2 (chromatic-scale-template ))) ::
+- scale-notes (scale) ::
+- make-scale (scale-root &optional (template (major-scale-template))) ::
+- scale-range2 (p1 p2 scale-data) ::
+- scale-octaves (scale &optional (count 0)) ::
+- midi-notes-from-scale (midi-notes original-scale scale) ::
+- midi-notes-from-scale-down-helper (midi-notes original-scale scale) ::
+- with-scale-helper (scale my-fn) ::
+- random-note (scale) (nth (random (length scale)) scale)) ::
+- random-notes (y scale) (loop for x from 1 to y collect (random-note scale))) ::
+- solfege-chord (l scale) ::
+- find-solfege (solfege lis) ::
+- major-scales () ::
+- spell-scale (root) ::
