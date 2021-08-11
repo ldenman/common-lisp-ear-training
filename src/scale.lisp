@@ -124,3 +124,11 @@
 	  (if (eq solfege (note-solfege (car lis)))
 	      (car lis)
 	      (find-solfege solfege (cdr lis))))))
+
+(defun major-scales ()
+  '((c . (c d e f g a b))
+    (cs .  (cs ds es fs gs as bs))
+    (df . (df ef f gf af bf c))))
+
+(defun spell-scale (root)
+  (cdr (assoc root (major-scales))))

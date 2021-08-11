@@ -68,6 +68,28 @@
 (defun parse-midi-to-json ()
   (run-program "/usr/bin/bash" '("--login" "-c" "node src/api/parseMidiToJson.js") :directory "/home/lake/src/remotion-midi-piano-vizualiser/"))
 
+;(ql:quickload :uiop)
+
+(defun render-video ()
+  (uiop:launch-program "/usr/bin/bash --login -c yarn run build" :directory "/home/lake/src/remotion-midi-piano-vizualiser/" :output :interactive))
+(render-video)
+
+(defvar *remotion-servers* '())
+(defun preview-video ()
+  (let ((proc (uiop:launch-program "npm start" :directory "/home/lake/src/remotion-midi-piano-vizualiser/" :output :interactive)))
+    (setf *remotion-servers* (append *remotion-servers* (list proc)))
+    proc))
+
+;; (preview-video) 
+;; (car (last *remotion-servers*))
+;; (mapcar #'uiop:close-streams *remotion-servers*)
+;; (mapcar #'kill-process *remotion-servers*)
+;; (uiop:terminate-process (car *remotion-servers*) :urgent t )
+;; (last (mapcar #'uiop:process-info-pid *remotion-servers*))(104942)
+
+(defun kill-process (process-info)
+  (uiop:run-program (format nil "/usr/bin/kill ~a" (uiop:process-info-pid process-info) )))
+
 (defun print-entry (key value)
   (format t "~A => ~A~%" key value))
 
@@ -97,7 +119,7 @@
 
 (defun test ()
   (with-scale (make-scale 'd4)
-    (let* ((notes (scale-range 'd3 'a5 (attr 'notes *current-scale*))))
+    (let* ((notes (attr 'notes *current-scale*)))
 
       (try-to-write-midi-file (n notes))
       (parse-midi-to-json)
@@ -126,7 +148,7 @@
 			     :velocity 100
 			     :status 128)
 	      )))
-      (incf time (+ 30 duration)))
+      (incf time duration))
     result))
 
 (test)

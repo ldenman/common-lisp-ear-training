@@ -157,33 +157,91 @@
 
   )
 
-(defun random-chromatic ()
-  (let* ((scale (make-scale 'c4 (chromatic-scale-template)))
-	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
 
-    (dolist (note-list (loop
-			 for x from 0 to 1000
-			 collect (resolve-note (random-element notes) notes)))
-      (dolist (note note-list)
-	(princ (note-solfege note))
+
+
+(defun random-chromatic3 ()
+
+
+  (let*
+((scale (random-chromatic-scale))
+	 (notes (scale-octave-range 2 3 (attr 'notes scale)))
+	 (last-idx (position (car (last notes)) (attr 'notes scale)))
+	 (next-do (nth (+ 1 last-idx) (attr 'notes scale)))
+	 (notes2 (append notes (list next-do)))
+	 (counter 0))
+
+    (dolist (note (loop
+		    for x from 0 to 1000
+		    collect (random-element notes2)))
+
+      ;; (if (= 0 (mod counter 4))
+      ;; 	  (play-tonic-subdominant-dominant3 scale))
+
+      (dolist (n (resolve-note note notes2))
+	(princ (note-solfege n))
 	(finish-output)
-	(note-play note)
+	(note-play n)
 	(write-line "")
-	(sleep 0.25)
-;	(note-play note)
+	(sleep 1)
+					;	(note-play note)
 	)
-)))
+
+      ;; (note-play (car notes))
+      ;; (note-play note)
+      (sleep 1)
+      (setf counter (+ 1 counter))
+
+))
+
+  )
+
+;(random-chromatic3)
+
+(defun notes->midi ()
+  (let* ((scale (random-chromatic-scale))
+	 (notes (scale-octave-range 2 3 (attr 'notes scale)))
+	 (last-idx (position (car (last notes)) (attr 'notes scale)))
+	 (next-do (nth (+ 1 last-idx) (attr 'notes scale)))
+	 (notes2 (append notes (list next-do)))
+	 (counter 0))
+
+    notes2))
+
+(let* ((ticks/beat 60)
+       (measure-count 4)
+       (beats/min 60)
+       (timing-track
+
+	 (list
+	  (make-instance 'midi:time-signature-message
+			 :time 0)
+	  (make-instance 'midi:tempo-message
+			 :time 0
+			 :tempo (round 60000000 beats/min)))))
+       
+
+  
+  )
 
 
-;(pm-reload 2)
-					;(random-chromatic2)
-					;(random-chromatic)
-;(smoke-test)
 
-;; (dolist (note (mapcar (lambda (solfege)
-;; 			 (find-solfege solfege
-;; 				       (scale-range 'c3 'c4 (scale-notes (make-scale 'c4 (chromatic-scale-template))))))
-;; 		       '(do ti do di do re ra do mi me do fa mi do so se do)))
-;;   (note-play note)
-;;   (sleep 1)
-;;   )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
