@@ -51,7 +51,7 @@
 (defun make-tracks ()
   (list (make-track)))
 
-(defun try-to-write-midi-file (outfile midi-notes)
+(defun write-midi-file (outfile midi-notes)
   (let* ((my-midi-file (make-instance 'midi:midifile
 				      :format 0
 				      :tracks (list midi-notes)
@@ -117,17 +117,27 @@
 			 (yason:parse s))))
     decoded-json))
 
-(defun test ()
+(defun test (scale)
   (with-scale (make-scale 'd4)
     (let* ((notes (attr 'notes *current-scale*)))
 
-      (try-to-write-midi-file "~/src/remotion-midi-piano-vizualiser/input.mid" (make-midi-seq notes))
+      (write-midi-file "~/src/remotion-midi-piano-vizualiser/input.mid" (make-midi-seq notes))
       (parse-midi-to-json)
 
       (write-solfege-frames
        "/home/lake/src/remotion-midi-piano-vizualiser/src/api/solfege.json"
        (with-output-to-string (*standard-output*)
 	 (yason:encode (update-json (decode-json "~/src/remotion-midi-piano-vizualiser/src/api/midi.json") notes)))))))
+
+(defun prepare-remotion! (notes &optional (outfile "~/src/remotion-midi-piano-vizualiser/input.mid") )
+      (write-midi-file outfile (make-midi-seq notes))
+      (parse-midi-to-json)
+
+      (write-solfege-frames
+       "/home/lake/src/remotion-midi-piano-vizualiser/src/api/solfege.json"
+       (with-output-to-string (*standard-output*)
+	 (yason:encode (update-json (decode-json "~/src/remotion-midi-piano-vizualiser/src/api/midi.json") notes)))))
+
 
 (defun make-midi-seq (notes)
   (let* ((duration 60)
@@ -152,7 +162,7 @@
       (incf time duration))
     result))
 
-(test)
+;(test)
 
 
 

@@ -33,11 +33,15 @@
        (cons (car l1) (car l2))
        (pairup (cdr l1) (cdr l2)))))
 
-(defun nshuffle (sequence)
-  (loop for i from (length sequence) downto 2
-        do (rotatef (elt sequence (random i))
-                    (elt sequence (1- i))))
-  sequence)
+;; (make-random-state nil)
+;; (sb-ext:seed-random-state 50)
+
+(defun shuffle (sequence &optional (seed (make-random-state t)))
+  (let ((s (copy-list sequence)))
+    (loop for i from (length s) downto 2
+       do (rotatef (elt s (random i seed))
+                   (elt s (1- i))))
+    s))
 
 (defun any? (i l)
   (if l

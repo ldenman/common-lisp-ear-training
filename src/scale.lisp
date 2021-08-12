@@ -68,7 +68,7 @@
 
 (defun scale-range2 (p1 p2 scale-data)
   (let ((newscale (make-scale p1)))
-    (setf (cdr (assoc 'scale newscale))
+    (setf (cdr (assoc 'notes newscale))
 	  (scale-range p1 p2 (scale-notes scale-data)))
     newscale))
 
