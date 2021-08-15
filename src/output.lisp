@@ -70,7 +70,11 @@
 ;(ql:quickload :uiop)
 
 (defun render-video ()
-  (uiop:launch-program "/usr/bin/bash --login -c yarn run build" :directory "/home/lake/src/remotion-midi-piano-vizualiser/" :output :interactive))
+  (uiop:launch-program "yarn run build --concurrency 16" :directory "/home/lake/src/remotion-midi-piano-vizualiser/" :output :interactive))
+
+(defun render-video2 (name)
+  (uiop:run-program (format nil "yarn run prepare --concurrency 16 && npx remotion render src/index.tsx PianoComposition ~s.mp4 --concurrency 16 " name)
+		       :directory "/home/lake/src/remotion-midi-piano-vizualiser/" :output :interactive))
 
 ;(render-video)
 
@@ -95,19 +99,26 @@
 
 (defun write-solfege-frames (outfile string)
   (with-open-file (stream outfile
-			  :direction :output)
+			  :direction :output
+			  :if-exists :supersede)
     (format stream string)))
 
-(defun find-solfege-by-midi-value (value notes)
+(defun find-solfege-by-midi-value (value notes &optional (enharmonic-switch nil))
   (let ((x (find-if (lambda (note) (equal value (write-to-string (note-value note)))) notes)))
     (if x
-	(symbol-name (note-solfege x)))))
+	(if (listp (note-solfege x))
+	    (if enharmonic-switch
+		(symbol-name (car (cdr (note-solfege x))))
+		(symbol-name (car (note-solfege x))))	
+	    (symbol-name (note-solfege x)))
+
+	"HUH")))
 
 (defun update-json (json notes)
   (let ((newht (make-hash-table))
 	(myht (gethash "activeFramePerNote" json)))
     (loop for k being each hash-key of myht using (hash-value v)
-	  do (setf (gethash (find-solfege-by-midi-value k notes) newht) (append (gethash (find-solfege-by-midi-value k notes) newht) v))
+	  do (setf (gethash (find-solfege-by-midi-value k notes t) newht) (append (gethash (find-solfege-by-midi-value k notes t) newht) v))
     (setf (gethash "activeFramePerNote" json) newht))
     json))
 
@@ -117,18 +128,6 @@
 			 (yason:parse s))))
     decoded-json))
 
-(defun test (scale)
-  (with-scale (make-scale 'd4)
-    (let* ((notes (attr 'notes *current-scale*)))
-
-      (write-midi-file "~/src/remotion-midi-piano-vizualiser/input.mid" (make-midi-seq notes))
-      (parse-midi-to-json)
-
-      (write-solfege-frames
-       "/home/lake/src/remotion-midi-piano-vizualiser/src/api/solfege.json"
-       (with-output-to-string (*standard-output*)
-	 (yason:encode (update-json (decode-json "~/src/remotion-midi-piano-vizualiser/src/api/midi.json") notes)))))))
-
 (defun prepare-remotion! (notes &optional (outfile "~/src/remotion-midi-piano-vizualiser/input.mid") )
       (write-midi-file outfile (make-midi-seq notes))
       (parse-midi-to-json)
@@ -137,7 +136,6 @@
        "/home/lake/src/remotion-midi-piano-vizualiser/src/api/solfege.json"
        (with-output-to-string (*standard-output*)
 	 (yason:encode (update-json (decode-json "~/src/remotion-midi-piano-vizualiser/src/api/midi.json") notes)))))
-
 
 (defun make-midi-seq (notes)
   (let* ((duration 60)

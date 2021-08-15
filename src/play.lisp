@@ -4,7 +4,8 @@
 
 (defun chord-play (chord &optional (sleep 1))
   (dolist (note (chord-notes chord))
-    (note-play note))
+    (if note
+    (note-play note)))
   (sleep sleep))
 
 (defun chord-seq-play (chord-seq)

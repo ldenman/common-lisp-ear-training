@@ -55,7 +55,7 @@
 ;; Games
 ;; Bass Game
 (defun set-bass-scale ()
-  (let* ((letters '(A B C D E F G))
+  (let* ((letters '(A  ))
 	 (random-letter (nth (random (length letters)) letters)))
     (make-scale-from-template
 		(intern (format nil "~A~d" random-letter 1))
@@ -64,9 +64,8 @@
 
 (defun play-bass-game ()
   (setf *bass-game*  (make-game 'bass #'run-bass-game))
-  (pm-reload)
   (my-play-game *bass-game*))
-
+;(play-bass-game)
 ;; Solfege Trainer
 (defun solfege-trainer ()
   (let* ((scale (make-scale 'c4))
@@ -91,32 +90,32 @@
   *my-game*
   (my-play-game *my-game*))
 
-(defun prompt-guess (answer game)
+(defun prompt-guess (answer game current-scale)
   (if *playing*
       (progn
-	(play-tonic-subdominant-dominant *current-scale*)
+	(play-tonic-subdominant-dominant current-scale)
 	(sleep 1)
 	(dolist (a answer)
-	  (note-play (car a))
+	  (note-play a)
 	  (sleep 1))
 	(let ((guess (read-guess)))
 	  (if (string= "stop" (symbol-name (car guess)))
 	      (setf *playing* nil)
 	      (if (equal (mapcar #'string-upcase (mapcar #'symbol-name guess))
-			 (mapcar #'symbol-name (mapcar #'cdr answer)))
+			 (mapcar #'symbol-name (mapcar #'note-solfege answer)))
 		  (progn
 		    (update-game-lst 'answers (acons answer 'correct
 						     (list
-						      (list 'scale *current-scale*))) game)
+						      (list 'scale current-scale))) game)
 		    (write-line "good")
 		    )
 		  (progn
 		    (update-game-lst 'answers (acons answer 'incorrect
 						     (list
 						      (list 'guess guess)
-						      (list 'scale *current-scale*))) game)
+						      (list 'scale current-scale))) game)
 		    (setf *game-state* (append *game-state* (list 0)))
-		    (prompt-guess answer game))))))))
+		    (prompt-guess answer game current-scale))))))))
 
 (defun prompt-bass-guess (answer game scale)
   (if *playing*
@@ -157,7 +156,7 @@
       (progn
 	(play-tonic-subdominant-dominant scale)
         (sleep 1)
-        (note-play (note-octave-down (car (cdr answer))))
+        (note-play (note-octave-down (car (cdr answer)) scale))
 	(chord-play (cdr answer))
 	(let ((guess (read-guess)))
 	  (if (string= "stop" (symbol-name (car guess)))
@@ -186,7 +185,8 @@
 						      (list 'scale scale))) game)
 		    (setf *game-state* (append *game-state* (list 0)))
 		    (prompt-chord-guess answer game scale))))))))
-;(chord-trainer)
+;(play-melody-game)
+;(play-chord-trainer)
 
 (defun run-chord-trainer (game)
   (loop while *playing* do
@@ -197,17 +197,15 @@
 
 (defun run-melody-game (game)
   (loop while *playing* do
-    (set-random-scale)
-    (sleep 1)
-    (prompt-guess (random-notes 3) game)))
+    (let ((scale  (random-scale (major-scale-template))))
+      (sleep 1)
+      (prompt-guess (random-notes 3 scale) game scale))))
 
 (defun run-bass-game (game)
   (loop while *playing* do
     (sleep 1)
     (with-scale (set-bass-scale)
       (prompt-bass-guess (random-notes 3 *current-scale*) game *current-scale*))))
-
-;(run-melody-game)
 
 (defun run-game ()
   (loop while *playing* do
@@ -237,7 +235,6 @@
   game)
 
 (defun reset-game ()
-  (pm-reload)
   (setf *playing* nil)
   (setf *playing* t)
   (setf *game-state* '())

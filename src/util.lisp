@@ -49,6 +49,13 @@
  	  (cons i (any? i (cdr l)))
  	  (any? i (cdr l)))))
 
+(defun lcontains-p (lx l)
+  (some (lambda (x) (member x l)) lx ))
+
+(defun every-p (lx l)
+  (every (lambda (x) (member x l)) lx ))
+
+
 (defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
   (apply #'remove-if (complement pred) sequ keyword-args))
 

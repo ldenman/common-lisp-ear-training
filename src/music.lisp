@@ -32,9 +32,7 @@
   (progn
     (note-play (note-octave-down (car scale)))
     (solfege-chord '(DO MI SO) scale)
-
     (solfege-chord '(FA LA DO) scale)
-
     (solfege-chord '(SO TI RE) scale)
 
     (play-tonic scale)))
