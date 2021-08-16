@@ -208,21 +208,21 @@
 
     notes2))
 
-(let* ((ticks/beat 60)
-       (measure-count 4)
-       (beats/min 60)
-       (timing-track
+;; (let* ((ticks/beat 60)
+;;        (measure-count 4)
+;;        (beats/min 60)
+;;        (timing-track
 
-	 (list
-	  (make-instance 'midi:time-signature-message
-			 :time 0)
-	  (make-instance 'midi:tempo-message
-			 :time 0
-			 :tempo (round 60000000 beats/min)))))
+;; 	 (list
+;; 	  (make-instance 'midi:time-signature-message
+;; 			 :time 0)
+;; 	  (make-instance 'midi:tempo-message
+;; 			 :time 0
+;; 			 :tempo (round 60000000 beats/min)))))
        
 
   
-  )
+;;   )
 
 
 
