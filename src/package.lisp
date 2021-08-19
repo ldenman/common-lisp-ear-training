@@ -8,5 +8,6 @@
    :note
    :notes
    :note-solfege
-   :note-value)
+   :note-value
+)
   )

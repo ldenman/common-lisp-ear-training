@@ -16,4 +16,5 @@
 		 (:file "scale")
 		 (:file "play")
 		 (:file "games")
+                 (:file "sequencer")
 		 ))))
