@@ -568,44 +568,209 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 * Files
 ** package
 - Defines the package and exports
-** random
-Generating random notes and functions for use with games
--      3:(defun find-prev-do-helper (idx scale)
--      8:(defun find-prev-do (note scale)
--     13:(defun resolve-down (note scale)
--     22:(defun resolve-note (note scale)
--     29:(defun note-to-do (note scale)
--     37:(defun remove-after-do (scale)
--     44:(defun random-notes ()
--     60:(defun random-chromatic ()
--     91:(defun scale-octave-range-helper (o1 o2 scale)
--     98:(defun scale-octave-range (o1 o2 notes)
--    104:(defun play-tonic-subdominant-dominant2 (scale)
--    108:(defun play-tonic-subdominant-dominant3 (scale)
--    112:(defun sing-do ()
--    120:(defun random-chromatic2 ()
--    163:(defun random-chromatic3 ()
--    201:(defun notes->midi ()
+
+** random :cleanup:
+functions for generating random notes
+
+- (defun find-prev-do-helper (idx scale)
+- (defun find-prev-do (note scale)
+- (defun resolve-down (note scale)
+- (defun resolve-note (note scale)
+- (defun note-to-do (note scale)
+- (defun remove-after-do (scale)
+- (defun random-notes ()
+- (defun random-chromatic ()
+- (defun scale-octave-range-helper (o1 o2 scale)
+- (defun scale-octave-range (o1 o2 notes)
+- (defun play-tonic-subdominant-dominant2 (scale)
+- (defun play-tonic-subdominant-dominant3 (scale)
+- (defun sing-do ()
+- (defun random-chromatic2 ()
+- (defun random-chromatic3 ()
+- (defun notes->midi ()
 
 ** output.lisp
 - Should be taken out of this library.
+
 ** util
 - Utility functions
-** midi
+
+- (defun mapcdr (seq) (mapcar #'cdr seq))
+- (defun attr (item alist) (cdr (assoc item alist)))
+- (defun attr= (value item alist) (setf (cdr (assoc item alist)) value))
+- (defun random-element (l) (nth (random (length l)) l))
+- (defun take (n l) (subseq l 0 n))
+- (defun prepend-tail (lis) (append (last lis) (butlast lis)))
+- (defun attrs (item &rest attrlist)
+- (defun -> (item &rest fns)
+- (defun grow (l1 l2 &optional (idx 0))
+- (defun pairup (l1 l2)
+- (defun shuffle (sequence &optional (seed (make-random-state t)))
+- (defun any? (i l)
+- (defun lcontains-p (lx l)
+- (defun every-p (lx l)
+- (defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
+- (defun map-idx (s)
+
+** midi :cleanup:
 - Lower-level midi functions
+
+- (defun pm-reload (midi-device-id)
+- (defun ensure-midi ()
+- (defun pm-terminate ()
+- (defun pm-initialize (midi-device-id)
+- (defun midi-instruments () '(
+- (defun midi-note-octave ()
+- (defun midi-integers () (loop for x from 0 to 87 collect (+ 21 x)))
+- (defun midi-notes ()
+- (defun make-message (status data1 data2)
+- (defun make-message* (upper lower data1 data2) ;internal
+- (defun program-change (program &optional (channel 1) (stream *midi-out3*))
+- (defun panic (&optional (channel 1))
+- (defun note-on (value &optional (velocity 80) (channel 0) (stream *midi-out3*))
+- (defun note-off (value &optional (channel 0) (stream *midi-out3*))
+- (defun notes-on (values &optional (velocity 80) (channel 0) (stream *midi-out3*))
+- (defun notes-off (values &optional (channel 0) (stream *midi-out3*))
+- (defun note-play (note &optional (velocity 80) (channel 1))
+- (defun note-stop (note &optional (channel 1))
+- (defun note-play-sleep (note)
+- (defun write-midi-file-format-0 (outfile midi-notes)
+- (defun write-midi-file-format-1 (outfile midi-notes &optional (division 60))
+
 ** chord
 - chord representation and functions
+
+- (defun find-chord (octave romand-num chord-list scale)
+- (defun make-chord-tone (note degree)
+- (defun chord-tone-note (chord-tone)(attr 'note chord-tone))
+- (defun chord-degree (chord-tone) (attr 'degree chord-tone))
+- (defun chord-notes (chord) (mapcar #'chord-tone-note chord))
+- (defun chord-builder (l)
+- (defun make-chords (start-note &optional (filter-fn #'triads) (template (major-scale-template)))
+- (defun make-scale-chords (scale)
+- (defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
+- (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
+- (defun chord-root (chord)
+- (defun chord-sequence-play (chord-sequence &optional (sleep 1))
+- (defun chord-butroot (chord) (chord-remove-degree chord 1))
+- (defun chord-butfifth (chord) (chord-remove-degree chord 5))
+- (defun chord-drop-root (chord) 
+- (defun chord-invert-upper (chord)
+- (defun chord-tone-degree (chord-tone) (attr 'degree chord-tone))
+- (defun chord-remove-degree (chord degree)
+- (defun chord-take (n listofchords)
+- (defun triads (myl) (chord-take 3 myl))
+- (defun sevenths (myl) (chord-take 4 myl))
+- (defun ninths (myl) (chord-take 5 myl))
+- (defun elevenths (myl) (chord-take 6 myl))
+- (defun thirteenths (myl) (chord-take 7 myl))
+- (defun chord-invert (chord scale)
+- (defun chord-over-3 (root-position-chord scale)
+- (defun chord-over-5 (root-position-chord scale)
+- (defun major-solfege-chords ()
+- (defun chord-roman-numerals (chord-list)
+- (defun chord-sequence (chord-sequence chords scale &optional (octave 4))
+- (defun scale-chord-filter (fn &rest args)
+- (defun rebuild-chords ()
+- (defun octave-filter (octave)
+- (defun chord-filter (fn)
+- (defun chord-type-filter (fn)
+- (defun chord-seq (seq &optional (octave 4))
+
+
 ** note
 - note representation and functions
+
+- (defun note-name-position (note-name &optional (scale (midi-notes)))
+- (defun find-note-in-octave (note scale)
+- (defun note-attr (note attr) (cdr (assoc attr note)))
+- (defun note-name (note) (note-attr note 'name))
+- (defun note-value (note) (note-attr note 'value))
+- (defun note-solfege (note) (note-attr note 'solfege))
+- (defun note-equal-p (x y)
+- (defun note-idx (note &optional (scale (midi-notes)))
+- (defun note-octave-up (note scale)
+- (defun note-octave-down (note scale)
+- (defun parse-note-octave (note-name)
+- (defun find-note (name &optional (scale (midi-notes)))
+- (defun make-note (name value solfege)
+
 ** scale
 - note representation and functions
+
+- (defun make-scale-template (steps solfege)
+- (defun chromatic-scale-template ()
+- (defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti) ))
+- (defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te)))
+- (defun dorian-scale-template () (make-scale-template '(w h w w w h w) '(do re me fa so la ti)))
+- (defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te)))
+- (defun scale-range (n1 n2 scale)
+- (defun make-scale-from-template (p1 p2 scale-template)
+- (defun build-scale-up (from-note-pos pattern)
+- (defun build-scale-down (from-note-pos pattern)
+- (defun assign-solfege (scale scale-template)
+- (defun build-scale (start-note pattern &optional (notes (midi-notes)))
+- (defun random-scale (template)
+- (defun random-scale2 (template)
+- (defun random-major-scale () (random-scale (major-scale-template)))
+- (defun random-major-scale2 () (random-scale2 (major-scale-template)))
+- (defun random-chromatic-scale () (random-scale2 (chromatic-scale-template )))
+- (defun scale-notes (scale)
+- (defun make-scale (scale-root &optional (template (major-scale-template)))
+- (defun scale-range2 (p1 p2 scale-data)
+- (defun scale-octaves (scale &optional (count 0))
+- (defun midi-notes-from-scale (midi-notes original-scale scale)
+- (defun midi-notes-from-scale-down-helper (midi-notes original-scale scale)
+- (defun with-scale-helper (scale my-fn)
+- (defun random-note (scale) (nth (random (length scale)) scale))
+- (defun random-notes (y scale) (loop for x from 1 to y collect (random-note scale)))
+- (defun solfege-chord (l scale)
+- (defun find-solfege (solfege lis)
+- (defun solfege->notes (scale solfege-list)
+
 ** play
 - functions for playing notes
+
+- (defun play-random (scale) (note-play (car (random-note scale))))
+- (defun chord-play (chord &optional (sleep 1))
+- (defun chord-seq-play (chord-seq)
+- (defun play-chords (chords)
+- (defun arp (l scale)
+- (defun rarp (l scale)
+- (defun play-tonic (scale) (note-play (car scale)))
+- (defun play-subdominant (scale) (note-play (nth 3 scale)))
+- (defun play-dominant (scale) (note-play (nth 4 scale)))
+- (defun play-tonic-subdominant-dominant (scale)
+- (defun smoke-test ()
+
 ** games
 - logic/functions to support games
+
 ** sequencer
 - logic for generating/writing midi sequences to file
 - logic for generating midi sequences for portmidi
+
+- (defun schedule (time fn &rest args)
+- (defun schedule-note (note &optional (on-time 0) off-time (velocity 80))
+- (defun note->midi-message (note time-on time-off &optional (*midi-channel* 0))
+- (defun midi-timing-track (bpm &optional (*midi-channel* 9))
+- (defun midi-seq-format-1 (rhythmic-notes &optional (bpm 60))
+- (defun midi-seq-format-0 (notes)
+- (defun rhythmic-notes->midi-messages (notes/rhythms bpm)
+- (defun rhythmic-notes->pm-events (notes/rhythms bpm &optional (*midi-channel* 0))
+
+** rhythm
+- logic for calculating rhythm durations based on BPM   
+
+- (defun make-rhythmic-notes (notes rhythm-list)
+- (defun rhythm->duration-scaled (r bpm)
+- (defun beat-length (beat bpm)
+- (defun rhythm->seconds (r bpm)
+
+** event
+- (defun make-event (note on-time off-time velocity)
+- (defun play-event (event)
+- (defun play-events (events)
 
 * Issues
   - setting slot-value 'midi:dd/nn/cc/bb doesn't work out of the box
