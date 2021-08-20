@@ -99,11 +99,13 @@ You should hear a note play when you run #'smoke-test.
 
 - NOTE -- an ALIST grouping TYPE, NAME, VALUE, SOLFEGE, OCTAVE
 - SCALE -- an ALIST grouping NOTES and SCALE TEMPLATE
-- SCALE TEMPLATE -- an ALIST of scale steps and solfege used to realize scales
+- SCALE TEMPLATE -- a list of scale steps/solfege pairs used to realize scales
   ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
 - CHORD -- a list of CHORD-TONES
 - CHORD-TONE -- an ALIST grouping TYPE, NOTE, DEGREE
 - SCALE-CHORD -- an ALIST grouping SCALE, CHORDS, ROMAN-NUMERAL-CHORDS 
+- RHYTHMIC-NOTE -- a pairing of NOTE and RHYTHM-VALUE where RHYTHM-VALUE is 1,2,4,8,16
+- EVENT -- an ALIST grouping NOTE, ON-TIME, OFF-TIME, VELOCITY
 
 INTERNAL MAKER FUNCTIONS
 #+begin_example
@@ -604,3 +606,11 @@ Generating random notes and functions for use with games
 ** sequencer
 - logic for generating/writing midi sequences to file
 - logic for generating midi sequences for portmidi
+
+* Issues
+  - setting slot-value 'midi:dd/nn/cc/bb doesn't work out of the box
+    because not exported. had to fork cl-midi library and add exports
+  - update local cl-portmidi library to get updates and remove
+    make-message* fns as make-message now exported
+  - work on setting up exports in ASD file
+  - should every file be in the same namespace?

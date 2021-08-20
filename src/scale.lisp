@@ -125,6 +125,9 @@
 	      (car lis)
 	      (find-solfege solfege (cdr lis))))))
 
+(defun solfege->notes (scale solfege-list)
+  (mapcar (lambda (s) (find-solfege s (attr 'notes scale))) solfege-list))
+
 (defun major-scales ()
   '((c . (c d e f g a b))
     (cs .  (cs ds es fs gs as bs))

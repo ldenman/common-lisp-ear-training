@@ -36,11 +36,8 @@
   (progn
     (note-play (note-octave-down (car scale) scale))
     (solfege-chord '(DO MI SO) scale)
-
     (solfege-chord '(FA LA DO) scale)
-
     (solfege-chord '(SO TI RE) scale)
-
     (play-tonic scale)))
 
 (defun smoke-test ()

@@ -17,4 +17,5 @@
 		 (:file "play")
 		 (:file "games")
                  (:file "sequencer")
-		 ))))
+                 (:file "rhythm")
+		 (:file "event")))))

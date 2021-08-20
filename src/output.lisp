@@ -1,55 +1,4 @@
 (in-package :ld-music)
-(ql:quickload :yason)
-
-(defun make-track () 
-  (list
-   ;; The STATUS values you give to your messages gives the sequencer channel 
-   ;; information but, rather than taking the channel as you'd expect to see it
-   ;; (i.e. an integer between 0-15), it takes it in the form the MIDI itself 
-   ;; uses, which for NOTE-ON is (+ 144 channel) and for NOTE-OFF is 
-   ;; (+ 128 channel).
-   (make-instance 'midi:note-on-message
-          :time 0
-          :key 60 
-          :velocity 100
-          :status 144)
-   (make-instance 'midi:note-off-message
-          :time 350
-          :key 60 :velocity 100
-          :status 128)
-   (make-instance 'midi:note-on-message
-          :time 350
-          :key 62 
-          :velocity 100
-          :status 144)
-   (make-instance 'midi:note-off-message
-          :time 700
-          :key 62
-	  :velocity 100
-          :status 128)
-   (make-instance 'midi:note-on-message
-          :time 370
-          :key 64
-          :velocity 100
-          :status 144)
-   (make-instance 'midi:note-off-message
-          :time 700
-          :key 64
-	  :velocity 100
-          :status 128)
-   (make-instance 'midi:note-on-message
-          :time 715
-          :key 60
-          :velocity 100
-          :status 144)
-   (make-instance 'midi:note-off-message
-          :time 800
-          :key 60
-	  :velocity 100
-          :status 128)))
-
-(defun make-tracks ()
-  (list (make-track)))
 
 (defun read-in-frame-file (infile)
   (with-open-file (stream infile)
@@ -122,7 +71,7 @@
     decoded-json))
 
 (defun prepare-remotion! (notes &optional (outfile "~/src/remotion-midi-piano-vizualiser/input.mid") )
-      (write-midi-file-format-0 outfile (make-midi-seq notes))
+      (write-midi-file-format-0 outfile (midi-seq-format-0 notes))
       (parse-midi-to-json)
 
       (write-solfege-frames
@@ -130,28 +79,7 @@
        (with-output-to-string (*standard-output*)
 	 (yason:encode (update-json (decode-json "~/src/remotion-midi-piano-vizualiser/src/api/midi.json") notes)))))
 
-(defun make-midi-seq (notes)
-  (let* ((duration 60)
-	 (time 0)
-	 (result '()))
-    (dolist (note notes)
-      (setf result
-	    (append
-	     result
-	     (list
-	      (make-instance 'midi:note-on-message
-			     :time time
-			     :key (note-value note)
-			     :velocity 100
-			     :status 144)
-	      (make-instance 'midi:note-off-message
-			     :time (+ time duration)
-			     :key (note-value note)
-			     :velocity 100
-			     :status 128)
-	      )))
-      (incf time duration))
-    result))
+
 
 ;(test)
 
