@@ -4,12 +4,9 @@
 
 (defun chord-play (chord &optional (sleep 1))
   (dolist (note (chord-notes chord))
-    (if note
-    (note-play note)))
+    (when note
+      (note-play note)))
   (sleep sleep))
-
-(defun chord-seq-play (chord-seq)
-  (chord-sequence-play (chord-sequence-chords chord-seq)))
 
 (defun play-chords (chords)
   (dolist (chord chords)
@@ -31,6 +28,18 @@
 (defun play-tonic (scale) (note-play (car scale)))
 (defun play-subdominant (scale) (note-play (nth 3 scale)))
 (defun play-dominant (scale) (note-play (nth 4 scale)))
+
+(defun tonic-subdominant-dominant2 (scale)
+  (-> (make-scale-chords scale)
+      (scale-chord-filter #'chord-type-filter #'triads)
+      (scale-chord-filter #'chord-filter (lambda (x) (chord-drop-root x scale)))
+      (chord-seq '(I IV V I) 2)))
+
+(defun tonic-subdominant-dominant (scale)
+  (progn
+    (solfege-chord '(DO MI SO) scale)
+    (solfege-chord '(FA LA DO) scale)
+    (solfege-chord '(SO TI RE) scale)))
 
 (defun play-tonic-subdominant-dominant (scale)
   (progn

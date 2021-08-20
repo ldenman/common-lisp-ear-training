@@ -5,6 +5,9 @@
   - https://github.com/chfin/cl-portmidi
   - cd ~/quicklisp/local-projects
   - git clone https://github.com/chfin/cl-portmidi.git
+- midi library - Download it locally
+  - cd ~/quicklisp/local-projects
+  - git clone https://github.com/ldenman/midi
 
 * Setup
 #+begin_src lisp

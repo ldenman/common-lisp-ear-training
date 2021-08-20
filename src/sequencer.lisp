@@ -85,10 +85,7 @@
     (dolist (item notes/rhythms)
       (let ((rhythm (cdr item))
 	    (note (car item)))
-	(setf result
-	      (append
-	       result
-	       (note->midi-message note time (+ time (rhythm->duration-scaled rhythm bpm)))))
+	(setf result (append result (note->midi-message note time (+ time (rhythm->duration-scaled rhythm bpm)))))
 	(incf time (rhythm->duration-scaled rhythm bpm))))
     result))
 
@@ -99,11 +96,6 @@
     (dolist (item notes/rhythms)
       (let ((rhythm (cdr item))
 	    (note (car item)))
-	(setf result
-	      (append
-	       result
-	       (list (make-event note time (+ time (rhythm->seconds rhythm bpm)) 80))))
+	(setf result (append result (list (make-event note time (+ time (rhythm->seconds rhythm bpm)) 80))))
 	(incf time (rhythm->seconds rhythm bpm))))
     result))
-
-

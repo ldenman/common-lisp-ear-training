@@ -26,3 +26,11 @@
 	       (16 0.25))))
     (beat-length res bpm)))
 
+(defun rhythm-values (r)
+    (let ((res (case r
+	       (1 4)
+	       (2 2)
+	       (4 1)
+	       (8 0.5)
+	       (16 0.25))))
+    res))

@@ -146,10 +146,6 @@
 				 '(ra re me mi fa fi so si la li ti) )
 		     20 5)))
 
-(render-output (nth 16 outputs))
-
-(render-some-videos 14)
-
 (defun render-all-videos ()
   (dolist (output outputs)
     (let ((level (attr 'level output)))

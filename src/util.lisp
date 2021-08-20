@@ -1,6 +1,9 @@
 (in-package :ld-music)
 
 ;; Helpers
+(defun fdbug (code)
+  (dbug code)
+)
 (defmacro dbug (code)
   `(progn (princ (format nil "~A" ,code))
 	  ,code))
@@ -33,9 +36,6 @@
        (cons (car l1) (car l2))
        (pairup (cdr l1) (cdr l2)))))
 
-;; (make-random-state nil)
-;; (sb-ext:seed-random-state 50)
-
 (defun shuffle (sequence &optional (seed (make-random-state t)))
   (let ((s (copy-list sequence)))
     (loop for i from (length s) downto 2
@@ -55,7 +55,6 @@
 (defun every-p (lx l)
   (every (lambda (x) (member x l)) lx ))
 
-
 (defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
   (apply #'remove-if (complement pred) sequ keyword-args))
 
@@ -74,3 +73,17 @@
 	 (setf idx (+ 1 idx))
 	 r)  )
      s)))
+
+;; Higher level functions
+;; (mapcar (car-eq 1) '((1) (2)));=> (T NIL)
+(defun car-eq (item other)
+  (eq (car item) other))
+
+(defun car-fn (fn args)
+  (lambda (item)
+    (funcall fn item args)))
+
+(defun flatten (structure)
+  (cond ((null structure) nil)
+	((atom structure) (list structure))
+	(t (mapcan #'flatten structure))))

@@ -52,11 +52,11 @@
 
 (defun chord-butroot (chord) (chord-remove-degree chord 1))
 (defun chord-butfifth (chord) (chord-remove-degree chord 5))
-(defun chord-drop-root (chord) 
-  (if (note-octave-down (chord-tone-note (chord-root chord)) (make-scale 'c4))
+(defun chord-drop-root (chord scale) 
+  (if (note-octave-down (chord-tone-note (chord-root chord)) scale)
       (setf
        (cdr (assoc 'note (chord-root chord)))
-       (note-octave-down (chord-tone-note (chord-root chord)) (make-scale 'c4))))
+       (note-octave-down (chord-tone-note (chord-root chord)) scale)))
   chord)
 (defun chord-invert-upper (chord)
   (append (list (chord-root chord))
@@ -134,7 +134,7 @@
 
 (defun chord-seq (seq &optional (octave 4))
   (lambda (chord-data)
-    (chord-sequence seq (attr 'chords chord-data) octave)))
+    (chord-sequence seq (attr 'chords chord-data) (attr 'scale chord-data) octave)))
 
 ;; (-> (make-scale-chords (make-scale 'C2))
 ;;     (scale-chord-filter #'chord-type-filter #'sevenths)
