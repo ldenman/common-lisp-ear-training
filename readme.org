@@ -136,21 +136,6 @@ A note is technically a frequency like "A 440HZ". But in this program a note is 
 - OCTAVE -- The keyboard octave
 - SOLFEGE : The solfege syllable assigned to the note
 
-*** Note functions
-
-- make-note :: note constructor
-- note-name :: note name selector
-- note-value :: note midi value selector
-- note-solfege :: note solfege syllable selector
-- note-octave-up :: the note one octave up
-- note-octave-down :: the note one octave down
-- note-equal-p :: check for note equality matching *note-value* & *note-name*
-- note-name-position :: position of note in scale (by name)
-- note-idx :: note position in scale using #'note-equal-p
-- parse-note-octave :: Parse octave of the note from the absolute name
-- find-note-in-octave :: Find note in a scale sorted by octave relative to the scale (not absolute octaves)
-  
-
 ** Scale templates
 
 Scale templates are represented by a list of pairs (X,Y) where X is
