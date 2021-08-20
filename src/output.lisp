@@ -51,13 +51,6 @@
 (defun make-tracks ()
   (list (make-track)))
 
-(defun write-midi-file (outfile midi-notes)
-  (let* ((my-midi-file (make-instance 'midi:midifile
-				      :format 0
-				      :tracks (list midi-notes)
-				      :division 60)))
-    (midi:write-midi-file my-midi-file outfile)))
-
 (defun read-in-frame-file (infile)
   (with-open-file (stream infile)
     (loop for line = (read-line stream nil)
@@ -129,7 +122,7 @@
     decoded-json))
 
 (defun prepare-remotion! (notes &optional (outfile "~/src/remotion-midi-piano-vizualiser/input.mid") )
-      (write-midi-file outfile (make-midi-seq notes))
+      (write-midi-file-format-0 outfile (make-midi-seq notes))
       (parse-midi-to-json)
 
       (write-solfege-frames

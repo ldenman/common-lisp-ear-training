@@ -77,3 +77,11 @@ Works like `make-message` but combines `upper` and `lower` to the status byte."
   (pm:write-short-midi *midi-out3* 1 (pm:note-on 1 (note-value note) 80))
   (sleep 0.25)
   (pm:write-short-midi *midi-out3* 1 (pm:note-off 1 (note-value note) 0)))
+
+(defun write-midi-file-format-0 (outfile midi-notes)
+  (let* ((my-midi-file (make-instance 'midi:midifile
+				      :format 0
+				      :tracks (list midi-notes)
+				      :division 60)))
+    (midi:write-midi-file my-midi-file outfile)))
+

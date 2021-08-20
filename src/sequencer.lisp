@@ -1,14 +1,14 @@
 (in-package :ld-music)
 
-(defun write-midi-file2 (outfile midi-notes &optional (division 60))
+(defun write-midi-file-format-1 (outfile midi-notes &optional (division 60))
   (let* ((my-midi-file (make-instance 'midi:midifile
 				      :format 1
 				      :tracks midi-notes
 				      :division division)))
     (midi:write-midi-file my-midi-file outfile)))
 
-;(write-midi-file2 "output2.midi" (little-sequence))
-;(write-midi-file2 "output1.midi" (little-sequence 90) 90)
+;(write-midi-file-format-1 "output2.midi" (little-sequence))
+;(write-midi-file-format-1 "output1.midi" (little-sequence 90) 90)
 
 (defun notes->midi-messages (notes/rhythms bpm &optional (*midi-channel* 0))
   (let ((result '())
@@ -26,12 +26,12 @@
 				 :velocity 100
 				 :status (+ 144 *midi-channel*))
 		  (make-instance 'midi:note-off-message
-				 :time (+ time (rhythm->duration rhythm bpm))
+				 :time (+ time (rhythm->duration-scaled rhythm bpm))
 				 :key (note-value note)
 				 :velocity 100
 				 :status (+ 128 *midi-channel*))
 		  )))
-	  (incf time (rhythm->duration rhythm bpm))))
+	  (incf time (rhythm->duration-scaled rhythm bpm))))
     result))
 
 (defun make-midi-seq2 (notes &optional (bpm 60))
@@ -55,32 +55,38 @@
     (let ((*midi-channel* 0))
       (notes->midi-messages notes)))))
 
-(defun add-note-rhythms (notes rhythm-list)
-  (pairup notes rhythm-list))
-
 (defun little-sequence (&optional (division 60))
-  (make-midi-seq2 (add-note-rhythms
+  (make-midi-seq2 (make-rhythmic
 		   (take 15 (attr 'notes (scale-range2 'c3 'c5 (make-scale 'c4))))		   
  		   (grow (take 15 (attr 'notes (scale-range2 'c3 'c5 (make-scale 'c4))))
 			 '(1 2 2 4 4 4 4 8 8 8 8 8 8 8 ))) division))
 
-(defun make-motif (scale &rest solfege)
-  (mapcar (lambda (s) (find-solfege s (attr 'notes scale))) solfege))
-(defun make-rhythmic (notes rhythm-list)
-  (add-note-rhythms notes rhythm-list))
+(defun solfege->notes (scale solfege-list)
+  (mapcar (lambda (s) (find-solfege s (attr 'notes scale))) solfege-list))
+(defun make-rhythmic-notes (notes rhythm-list)
+  (pairup notes rhythm-list))
 
-
-;; convert rhythm to duration based on bpm
-
-(defun rhythm->duration (r bpm)
+;; convert rhythm to duration based on bpm the scaling and rounding so
+;; that we send positive integer time value in the notes->midi-messages fn.
+(defun rhythm->duration-scaled (r bpm)
   (let ((res (case r
 	       (1 (*  4 bpm))
 	       (2 (*  2 bpm))
 	       (4 (*  1 bpm ))
 	       (8 (*  0.5 bpm))
-	       (16 (* 0.25 bpm ))))
-	)
+	       (16 (* 0.25 bpm )))))
     (round  res)))
+
+(defun beat-length (beat bpm)
+  (/ 60 (/ bpm beat)))
+(defun rhythm->seconds (r bpm)
+    (let ((res (case r
+	       (1 4)
+	       (2 2)
+	       (4 1)
+	       (8 0.5)
+	       (16 0.25))))
+    (beat-length res bpm)))
 
 (defun schedule (time fn &rest args)
   "Schedule a function to be called after some amount of seconds."
@@ -103,8 +109,7 @@
   (let ((value (note-value note))
 	(off-time (or off-time (+ on-time 1))))
     (schedule on-time #'note-on value velocity)
-    (schedule off-time #'note-off value)
-    ))
+    (schedule off-time #'note-off value)))
 
 ;; (play2
 ;;  (make-event (car (attr 'notes (scale-range2 'c3 'c5 (make-scale 'c3)))) 0 1 80))
@@ -147,23 +152,16 @@
 ;; (pm-reload 2)
 ;; (smoke-test)
 
-;; (play-notes3
-;;   (notes->pm-event
-;;    (make-rhythmic
-;;     (make-motif (scale-range2 'c3 'c5 (make-scale 'c3)) 'do 'mi 'so) '(4 4 4)) 200))
+(play-notes3 
+ (rhythmic-notes->pm-event
+  (make-rhythmic-notes
+   (solfege->notes
+    (scale-range2 'c3 'c5 (make-scale 'c3))
+    '(do do do re mi mi re mi fa so))
+   '(4 4 8 8 4 8 8 8 8 2))
+  60))
 
-(defun beat-length (beat bpm)
-  (/ 60 (/ bpm beat)))
-(defun r->d (r bpm)
-    (let ((res (case r
-	       (1 4)
-	       (2 2)
-	       (4 1)
-	       (8 0.5)
-	       (16 0.25))))
-    (beat-length res bpm)))
-
-(defun notes->pm-event (notes/rhythms bpm &optional (*midi-channel* 0))
+(defun rhythmic-notes->pm-event (notes/rhythms bpm &optional (*midi-channel* 0))
   (let ((result '())
 	(time 0))
     (dolist (item notes/rhythms)
@@ -176,7 +174,7 @@
 		(make-event
 		 note
 		 time
-		 (+ time (r->d rhythm bpm)) 80))))
+		 (+ time (rhythm->seconds rhythm bpm)) 80))))
 	(incf time (r->d rhythm bpm))))
     result))
 

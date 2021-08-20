@@ -1,10 +1,19 @@
-
 * Dependencies
 - quicklisp
+- *sbcl* dependent
 - portmidi - Download it locally
   - https://github.com/chfin/cl-portmidi
   - cd ~/quicklisp/local-projects
   - git clone https://github.com/chfin/cl-portmidi.git
+
+* Setup
+#+begin_src lisp
+    (ql:quickload "ld-music")
+    (in-package :ld-music)
+#+end_src
+
+#+RESULTS:
+: #<PACKAGE "LD-MUSIC">
 
 * Background
   #+begin_quote
@@ -52,16 +61,6 @@ This project depends on the "portmidi" library to output midi to a hardware or s
   - Ex.) The most common chord progression: I V VI- IV
   - Ex.) The plagal cadence: I IV I
   - Ex.) The cycle V progression: I IV VII III- VI- III- V I
-
-* Setup
-
-#+begin_src lisp
-    (ql:quickload "ld-music")
-    (in-package :ld-music)
-#+end_src
-
-#+RESULTS:
-: #<PACKAGE "LD-MUSIC">
 
 * MIDI Smoke testing
   
@@ -446,7 +445,6 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 
    #+end_example
 
-
 ** Threading function
    #+begin_example
      (-> (make-scale-chords (make-scale 'C2))
@@ -472,7 +470,6 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 	   #'chord-seq-play)
    #+end_example
 
-   
 ** Games
    
 *** Solfege trainer
@@ -565,3 +562,45 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 - find-solfege (solfege lis) ::
 - major-scales () ::
 - spell-scale (root) ::
+
+* Files
+** package
+- Defines the package and exports
+** random
+Generating random notes and functions for use with games
+-      3:(defun find-prev-do-helper (idx scale)
+-      8:(defun find-prev-do (note scale)
+-     13:(defun resolve-down (note scale)
+-     22:(defun resolve-note (note scale)
+-     29:(defun note-to-do (note scale)
+-     37:(defun remove-after-do (scale)
+-     44:(defun random-notes ()
+-     60:(defun random-chromatic ()
+-     91:(defun scale-octave-range-helper (o1 o2 scale)
+-     98:(defun scale-octave-range (o1 o2 notes)
+-    104:(defun play-tonic-subdominant-dominant2 (scale)
+-    108:(defun play-tonic-subdominant-dominant3 (scale)
+-    112:(defun sing-do ()
+-    120:(defun random-chromatic2 ()
+-    163:(defun random-chromatic3 ()
+-    201:(defun notes->midi ()
+
+** output.lisp
+- Should be taken out of this library.
+** util
+- Utility functions
+** midi
+- Lower-level midi functions
+** chord
+- chord representation and functions
+** note
+- note representation and functions
+** scale
+- note representation and functions
+** play
+- functions for playing notes
+** games
+- logic/functions to support games
+** sequencer
+- logic for generating/writing midi sequences to file
+- logic for generating midi sequences for portmidi
