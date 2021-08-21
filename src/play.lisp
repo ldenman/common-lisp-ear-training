@@ -14,8 +14,7 @@
     (sleep 1)))
 
 (defun arp (l scale)
-  (dolist
-      (x (mapcar (lambda (x) (find-solfege x scale)) l))
+  (dolist (x (mapcar (lambda (x) (find-solfege x scale)) l))
     (note-play x) (sleep 0.5)))
 
 (defun rarp (l scale)

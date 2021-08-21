@@ -27,119 +27,56 @@
 
 (setf outputs
       (list
-       (output-option
-	(make-level  "do" (scale-range2 'c1 'c7 (make-scale 'c4)) '(do))
-	50 1)
-       (output-option
-	(make-level-1 "do-re" '(re))
-	50 1)
-       (output-option
-	(make-level-1 "do-mi" '(mi))
-	50 1)
-       (output-option
-	(make-level-1 "do-fa" '(fa))
-	50 1)
-       (output-option
-	(make-level-1 "do-so" '(so))
-	50 1)
-       (output-option
-	(make-level-1 "do-la" '(la))
-	50 1)
-       (output-option
-	(make-level-1 "do-ti" '(ti))
-	50 1)
-
-       (output-option
-	(make-level-2 "do-mi-so"  '(mi so))
-	50 1)
-       (output-option
-	(make-level-2 "re-fa-la"  '(re fa la))
-	50 1)
-       (output-option
-	(make-level-2 "mi-so-ti"  '(mi so ti) )
-	50 1)
-       (output-option
-	(make-level-2 "fa-la"  '(fa la))
-	50 1)
-       (output-option (make-level-2 "so-ti-re"  '(so ti re))
-		      50 1)
-       (output-option (make-level-2 "la-do-mi"  '(la do mi))
-		      50 1)
-       (output-option (make-level-2 "ti-re-fa"  '(ti re fa))
-		      50 1)
-
-       (output-option
-	(make-level "re-mi-fa-so-la-ti-three-octave" (scale-range2 'c2 'c5 (make-scale 'c4)) '(re mi fa so la ti))
-	10 5)
-       (output-option (make-level "ra-re-mi-fa-so-la-ti-three-octave"
-				  (scale-range2 'c2 'c5 (make-scale 'c4 (chromatic-scale-template)))
-				  '(re ra mi fa so la ti) )
-
-		      10 5)
+       (output-option (make-level  "do" (scale-range2 'c1 'c7 (make-scale 'c4)) '(do))	50 1)
+       (output-option (make-level-1 "do-re" '(re)) 50 1)
+       (output-option (make-level-1 "do-mi" '(mi)) 50 1)
+       (output-option (make-level-1 "do-fa" '(fa)) 50 1)
+       (output-option (make-level-1 "do-so" '(so)) 50 1)
+       (output-option  (make-level-1 "do-la" '(la)) 50 1)
+       (output-option  (make-level-1 "do-ti" '(ti)) 50 1)
+        (output-option (make-level-2 "do-mi-so"  '(mi so)) 50 1)
+       (output-option  (make-level-2 "re-fa-la"  '(re fa la)) 50 1)
+       (output-option  (make-level-2 "mi-so-ti"  '(mi so ti) ) 50 1)
+       (output-option  (make-level-2 "fa-la"  '(fa la)) 50 1)
+       (output-option (make-level-2 "so-ti-re"  '(so ti  re)) 50 1)
+       (output-option (make-level-2 "la-do-mi"  '(la do mi)) 50 1)
+       (output-option (make-level-2 "ti-re-fa"  '(ti re fa)) 50 1)
+       (output-option (make-level "re-mi-fa-so-la-ti-three-octave" (scale-range2 'c2 'c5 (make-scale 'c4)) '(re mi fa so la ti)) 10 5)
+       (output-option (make-level "ra-re-mi-fa-so-la-ti-three-octave" (scale-range2 'c2 'c5 (make-scale 'c4 (chromatic-scale-template))) '(re ra mi fa so la ti) ) 10 5)
        (output-option (make-level "ra-re-me-mi-fa-so-la-ti-three-octave"
 				  (scale-range2 'c2 'c5 (make-scale 'c4 (chromatic-scale-template)))
-				  '(ra re me mi fa so la ti) )
+				  '(ra re me mi fa so la ti))
 		      10 5)
        (output-option (make-level "ra-re-me-mi-fa-fi-so-la-li-ti-three-octave"
 				  (scale-range2 'c2 'c5 (make-scale 'c4 (chromatic-scale-template)))
 				  '(ra re me mi fa fi so la li ti) )
 		      10 5)
-       (output-option (make-level "do-two-octaves"
+       (output-option make-level "do-two-octaves"
 				  (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(do))
 		      10 5)
-       (output-option 
-	(make-level "re-two-octaves"
-		    (scale-range2 'c2 'c4 (make-scale 'c4)) '(re) )
-	10 5)
+       (output-option (make-level "re-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4)) '(re) )	10 5)
+       (output-option  (make-level "re-mi-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi) ) 10 5)
+       (output-option (make-level "re-mi-fa-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa)) 10 5)
+       (output-option (make-level "re-mi-fa-so-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa so)) 10 5)
+       (output-option (make-level "re-mi-fa-so-la-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa so la)) 10 5)
+       (output-option (make-level "re-mi-fa-so-la-ti-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa so la ti)) 10 5)
+       (output-option (make-level "do-di-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(do di) )	10 5)
 
-       (output-option  (make-level "re-mi-two-octaves"
-				   (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi) )
-		       10 5)
-       (output-option (make-level "re-mi-fa-two-octaves"
-				  (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa))
-		      10 5)
-       (output-option (make-level "re-mi-fa-so-two-octaves"
-				  (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa so))
-		      10 5)
-       (output-option (make-level "re-mi-fa-so-la-two-octaves"
-				  (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa so la))
-		      10 5)
-       (output-option (make-level "re-mi-fa-so-la-ti-two-octaves"
-				  (scale-range2 'c2 'c4 (make-scale 'c4)) '(re mi fa so la ti))
-		      10 5)
-       (output-option 
-	(make-level "do-di-two-octaves"
-		    (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(do di) )
-	10 5)
-
-       (output-option  (make-level "re-ra-two-octaves"
-				   (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(re ra) )
+       (output-option  (make-level "re-ra-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(re ra) )		       10 5)
+       (output-option  (make-level "mi-me-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(mi me) )
 		       10 5)
 
-       (output-option  (make-level "mi-me-two-octaves"
-				   (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(mi me) )
+       (output-option  (make-level "fa-fi-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(fa fi) )
 		       10 5)
-
-       (output-option  (make-level "fa-fi-two-octaves"
-				   (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(fa fi) )
+       (output-option  (make-level "la-li-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(la li) )
 		       10 5)
-
-       (output-option  (make-level "la-li-two-octaves"
-				   (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(la li) )
-		       10 5)
-       (output-option (make-level "te-ti-two-octaves"
-				  (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(te ti) )
+       (output-option (make-level "te-ti-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template))) '(te ti) )
 		      10 5)
-       (output-option 
-	(make-level "re-ra-mi-fa-so-la-ti-two-octaves"
-		    (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template)))
-		    '(re ra mi fa so la ti) )
-	20 5)
+       (output-option (make-level "re-ra-mi-fa-so-la-ti-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template)))
+				  '(re ra mi fa so la ti) )
+		      20 5)
 
-     (output-option  (make-level "ra-re-mi-fa-fi-so-la-ti-two-octaves"
-		   (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template)))
-				 '(re ra mi fa fi so si la ti) )
-		     20 5)
+       (output-option  (make-level "ra-re-mi-fa-fi-so-la-ti-two-octaves" (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template)))  '(re ra mi fa fi so si la ti) )  20 5)
 
      (output-option  (make-level "ra-re-me-mi-fa-fi-so-si-la-li-ti-two-octaves"
 		   (scale-range2 'c2 'c4 (make-scale 'c4 (chromatic-scale-template)))
@@ -175,7 +112,6 @@
 						(resolve-note (car notes)
 							      (scale-notes (attr 'scale level))))
 					    (resolve-notes level (cdr notes))))))))
-
 (defun do-try (level length seed result)
   (find-if
    (lambda (note)
@@ -187,6 +123,7 @@
 	    (if (eq 't seed)
 		(sb-ext:seed-random-state seed)
 		(sb-ext:seed-random-state (+ length seed))))))
+
 
 (defun generate-notes-helper (level length seed result)
   (if (>= length 0)

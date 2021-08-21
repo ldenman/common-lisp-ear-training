@@ -37,5 +37,7 @@
 
     (play-tonic scale)))
 
+(pm-reload 10)
+(smoke-test)
 (defun smoke-test ()
   (note-play (make-note 'C4 72 nil)))

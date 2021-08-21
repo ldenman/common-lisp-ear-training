@@ -47,30 +47,6 @@
   (let ((melody (random-melody 'do melody-rules (- n 1))))
     (append melody (list end-note))))
 
-;; Rhythms
-(defun measure-beats (measure)
-  (reduce #'+ (mapcar (lambda (beat)
-			(rhythm-values beat))
-		      measure)))
-
-(defun make-measure (&optional (result '()))
-  (if (= 4 (measure-beats result))
-      result
-      (if (> (measure-beats result) 4)
-	  (make-measure (butlast result))
-	  (make-measure
-	   (append result
-		   (list 
-		    (random-element '(4 8))))))))
-
-(defun make-measures (n)
-  (if (> n 0)
-      (cons 
-       (make-measure)
-       (make-measures (- n 1)))))
-
-
-
 ;; Sequences
 (defun make-random-note-sequence (scale)
   (let ((note (random-element (scale-notes scale))))
@@ -129,8 +105,9 @@
   (sleep 0.5)
   (play-events
    (rhythmic-notes->pm-events (select-melody cadence-sequence)  90)))
+;(pm-reload 10)
 
 ;; (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 4))
 ;; (play-cadence-progression-sequence (make-random-progression-sequence (make-scale 'c4)))
 ;; (play-cadence-note-sequence (make-random-note-sequence (make-scale 'c4)))
- (play-rhythmic-melody-sequence (make-rhythmic-melody-sequence (make-scale 'c4) 2 2))
+;; (play-rhythmic-melody-sequence (make-rhythmic-melody-sequence (make-scale 'c4) 2 2))

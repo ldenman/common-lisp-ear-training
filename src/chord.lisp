@@ -135,25 +135,3 @@
 (defun chord-seq (seq &optional (octave 4))
   (lambda (chord-data)
     (chord-sequence seq (attr 'chords chord-data) (attr 'scale chord-data) octave)))
-
-;; (-> (make-scale-chords (make-scale 'C2))
-;;     (scale-chord-filter #'chord-type-filter #'sevenths)
-;;     (scale-chord-filter #'chord-filter #'chord-butfifth)
-;;     (chord-seq '(II-
-;; 		 (octave . 2)
-;; 		 V
-;; 		 (octave . 3)
-;; 		 I
-;; 		 (octave . 3)
-;; 		 VI-
-;; 		 (octave . 3)
-;; 		 II-
-;; 		 (octave . 2)
-;; 		 V
-;; 		 (octave . 3)
-;; 		 I
-;; 		 I
-;; 		 ) 3)
-
-;;       #'chord-seq-play)
-
