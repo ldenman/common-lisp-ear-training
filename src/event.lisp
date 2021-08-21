@@ -8,6 +8,7 @@
    (cons 'velocity velocity)))
 
 (defun play-event (event)
+  (ensure-midi)
   (schedule-note (attr 'note event)
 		 (attr 'on-time event)
 		 (attr 'off-time event)

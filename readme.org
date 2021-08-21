@@ -1,13 +1,30 @@
 * Dependencies
-- quicklisp
-- *sbcl* dependent
-- portmidi - Download it locally
+** quicklisp
+- https://www.quicklisp.org/beta/#installation
+** *sbcl* dependent
+I am using SBCL and the #'schedule fn (in sequencer.lisp) spawns a
+thread. I believe the thread functionality is SBCL dependent.
+
+** portmidi - Download it locally
+This depends on the *portmidi* library to play midi in-memory to a
+hardware or software midi device of your choosing.
+
   - https://github.com/chfin/cl-portmidi
   - cd ~/quicklisp/local-projects
   - git clone https://github.com/chfin/cl-portmidi.git
-- midi library - Download it locally
+
+** midi library - Download it locally
+The MIDI library provides the ability to read/write midi files.
+
   - cd ~/quicklisp/local-projects
   - git clone https://github.com/ldenman/midi
+    
+** SLIME/SWANK :optional:investigate:
+- I seem to need this file to get SLIME/SWANK to work with portmidi:
+
+#+begin_example
+(setf SWANK:*COMMUNICATION-STYLE* :FD-HANDLER)
+#+end_example
 
 * Setup
 #+begin_src lisp
@@ -35,38 +52,37 @@ What kind of musical information is there to represent? To start... *Notes, Scal
 
 This program deals only with the notes on a standard 88 key piano as limiting the notes to 88 seems to be practical at this time.
 
-This project depends on the "portmidi" library to output midi to a hardware or software midi device of your choosing.
 
-* High level ideas
 
-  The piano is just a list of 88 notes.  From this fundamental
-  structure we can derive all sorts of musical structures.
+** High level ideas
 
-  I am personally interested in tonal structures such as the major and
-  minor scales, diatonic chords derived from major/minor scales, and
-  ear training concepts.
+  The piano is a _list_ of 88 notes.  From this structure we can
+  derive all sorts of musical structures.
 
-  In general, I want to create musical structures using commonly used
-  symbols, the same symbols that used in music theory and ear
-  training...
+  I'm interested in tonal structures... the major and minor scales,
+  diatonic chords derived from those scales, and ear training
+  concepts.
 
-  Specifically, I want *solfege* symbols to represent notes, such as:
+  In general, I want to create musical structure with commonly used
+  symbols, the same ones used in music theory and ear training
+  classes...
+
+  Specifically, I want *solfege* symbols to reference scale and chord tones, such as:
   
   - Ex.) The major scale in solfege: DO RE MI FA SO LA TI DO
   - Ex.) The nat. minor scale in solfege: DO RE ME FA SO SE LE TE DO
   - Ex.) The asc. chromatic scale: DO DI RE RI MI FA FI SO SI LA LI TI DO
   - Ex.) The desc. chromatic scale: DO TI TE LA LE SO SE FA MI ME RE RA DO
 
-  Beyond solfege, I want to have symbols for referring to diatonic
-  chords. In music theory and ear training chords are usually referred
-  to by Roman Numerals:
+  I also want symbols for referring to diatonic chords. In music
+  theory and ear training chords are usually referred to by Roman
+  Numerals:
 
   - Ex.) The most common chord progression: I V VI- IV
   - Ex.) The plagal cadence: I IV I
   - Ex.) The cycle V progression: I IV VII III- VI- III- V I
 
 * MIDI Smoke testing
-  
 ** List the midi devices available on your system:
 
   #+begin_src lisp  :package ld-music
@@ -103,28 +119,23 @@ You should hear a note play when you run #'smoke-test.
 - NOTE -- an ALIST grouping TYPE, NAME, VALUE, SOLFEGE, OCTAVE
 - SCALE -- an ALIST grouping NOTES and SCALE TEMPLATE
 - SCALE TEMPLATE -- a list of scale steps/solfege pairs used to realize scales
-  ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
 - CHORD -- a list of CHORD-TONES
 - CHORD-TONE -- an ALIST grouping TYPE, NOTE, DEGREE
 - SCALE-CHORD -- an ALIST grouping SCALE, CHORDS, ROMAN-NUMERAL-CHORDS 
 - RHYTHMIC-NOTE -- a pairing of NOTE and RHYTHM-VALUE where RHYTHM-VALUE is 1,2,4,8,16
 - EVENT -- an ALIST grouping NOTE, ON-TIME, OFF-TIME, VELOCITY
 
-INTERNAL MAKER FUNCTIONS
-#+begin_example
-  (make-scale-template '(w w h w w w h) '(do re mi fa so la ti do))
-  (make-note 'C4 72 'DO) 
-  (make-scale-from-template 'C4 'C5 (major-scale-template))
-  (make-scale scale-root template)
-  (make-scale-chords scale)
-  (make-chords start-note)
-#+end_example
-
 * Concepts
   
 ** Notes
 
 A note is technically a frequency like "A 440HZ". But in this program a note is represented as an ALIST with following attributes:
+
+- TYPE :: The type of the object (NOTE)
+- NAME :: The absolute name of the note on the keyboard
+- VALUE :: The MIDI Value
+- OCTAVE :: The keyboard octave
+- SOLFEGE :: The solfege syllable assigned to the note
 
 #+begin_src lisp :package ld-music :exports both
 (make-note 'A4 69 nil)
@@ -133,29 +144,17 @@ A note is technically a frequency like "A 440HZ". But in this program a note is 
 #+RESULTS:
 : ((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE) (OCTAVE . 4))
 
-- TYPE -- The type of the object (NOTE)
-- NAME -- The absolute name of the note on the keyboard
-- VALUE -- The MIDI Value
-- OCTAVE -- The keyboard octave
-- SOLFEGE : The solfege syllable assigned to the note
-
 ** Scale templates
 
-Scale templates are represented by a list of pairs (X,Y) where X is
-either W or H and Y is a solfege syllable.
+Scale templates are represented by a list of pairs (X . Y) where *X* is
+either W or H, representing 1 semitone or 2 semitones, respectivley and *Y* is a solfege syllable (ie. *DO*).
 
 - W :: represents 1 semitone
 - H :: represents 2 semitones
 
-This data is used when building scales to assign the correct solfege
-syllable to the note. 
-
-#+begin_src lisp :package ld-music :exports both
-(major-scale-template)
-#+end_src
-
-#+RESULTS:
-: ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
+This scale template is used to "realize" scales, stepping and
+collecting notes according to the semitone pattern (ie W W H W W W H)
+and assigning a solfege syllable to the note.
 
 Making a scale template is done like so:
 
@@ -167,7 +166,7 @@ Making a scale template is done like so:
 #+RESULTS:
 : ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
 
-Other scale templates are defined already:
+Other scale templates are defined:
 
 - Chromatic scale template
   #+begin_src lisp :package ld-music :exports both
@@ -498,22 +497,33 @@ functions for generating random notes
 ** util
 - Utility functions
 
-- (defun mapcdr (seq) (mapcar #'cdr seq))
-- (defun attr (item alist) (cdr (assoc item alist)))
-- (defun attr= (value item alist) (setf (cdr (assoc item alist)) value))
-- (defun random-element (l) (nth (random (length l)) l))
-- (defun take (n l) (subseq l 0 n))
-- (defun prepend-tail (lis) (append (last lis) (butlast lis)))
-- (defun attrs (item &rest attrlist)
-- (defun -> (item &rest fns)
-- (defun grow (l1 l2 &optional (idx 0))
-- (defun pairup (l1 l2)
-- (defun shuffle (sequence &optional (seed (make-random-state t)))
-- (defun any? (i l)
-- (defun lcontains-p (lx l)
-- (defun every-p (lx l)
-- (defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
-- (defun map-idx (s)
+   #+begin_src sh :exports results :results raw 
+   grep defun src/util.lisp
+   #+end_src
+
+   #+RESULTS:
+   (defun fdbug (code)
+   (defun mapcdr (seq) (mapcar #'cdr seq))
+   (defun attr (item alist) (cdr (assoc item alist)))
+   (defun attr= (value item alist) (setf (cdr (assoc item alist)) value))
+   (defun random-element (l) (nth (random (length l)) l))
+   (defun take (n l) (subseq l 0 n))
+   (defun prepend-tail (lis) (append (last lis) (butlast lis)))
+   (defun attrs (item &rest attrlist)
+   (defun -> (item &rest fns)
+   (defun grow (l1 l2 &optional (idx 0))
+   (defun pairup (l1 l2)
+   (defun shuffle (sequence &optional (seed (make-random-state t)))
+   (defun any? (i l)
+   (defun lcontains-p (lx l)
+   (defun every-p (lx l)
+   (defun find-all-if (pred sequ &rest keyword-args &key &allow-other-keys)
+   ;; (defun rotate (scale) (append (cdr scale) (list (car scale))))
+   ;; (defun rotate-n (n scale)
+   (defun map-idx (s)
+   (defun car-eq (item other)
+   (defun car-fn (fn args)
+   (defun flatten (structure)
 
 ** midi :cleanup:
 - Lower-level midi functions
@@ -579,7 +589,6 @@ functions for generating random notes
 - (defun chord-filter (fn)
 - (defun chord-type-filter (fn)
 - (defun chord-seq (seq &optional (octave 4))
-
 
 ** note
 - note representation and functions
@@ -650,7 +659,7 @@ functions for generating random notes
 - logic/functions to support games
 
 ** sequencer
-- logic for generating/writing midi sequences to file
+- logic for generating/writing midi sequences to file via the MIDI library
 - logic for generating midi sequences for portmidi
 
 - (defun schedule (time fn &rest args)
@@ -671,6 +680,9 @@ functions for generating random notes
 - (defun rhythm->seconds (r bpm)
 
 ** event
+Functions for representing an EVENT (NOTE ON-TIME OFF-TIME VELOCITY)
+and for playing an event (via portmidi).
+
 - (defun make-event (note on-time off-time velocity)
 - (defun play-event (event)
 - (defun play-events (events)
@@ -682,3 +694,4 @@ functions for generating random notes
     make-message* fns as make-message now exported
   - work on setting up exports in ASD file
   - should every file be in the same namespace?
+  - consider using chromatic scale by default in scale logic and deducing other scales from that 
