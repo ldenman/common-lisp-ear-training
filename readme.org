@@ -1,7 +1,7 @@
 * Features
 ** Completed
 - [X] create chord sequences using roman numerals
-  #+BEGIN_SRC lisp :package ld-music
+  #+BEGIN_SRC lisp :package ld-music :exports both
     (-> (make-scale 'c4)
 	(lambda (scale)
 	  (chord-sequence2 '(I IV V I) scale))
@@ -16,7 +16,7 @@
 
 - [X] create melodies using solfege syllables
   
-  #+BEGIN_SRC lisp :package ld-music
+  #+BEGIN_SRC lisp :package ld-music :exports both
     (-> (make-scale 'c4)
 	(lambda (scale)
 	  (scale-range 'c3 'c5 scale))
@@ -36,7 +36,7 @@
 
 - [X] add rhythm to melodic sequences
 
-  #+BEGIN_SRC lisp :package ld-music
+  #+BEGIN_SRC lisp :package ld-music :exports code
     (-> (make-scale 'c4)
 	(lambda (scale)
 	  (scale-range 'c3 'c5 scale))
