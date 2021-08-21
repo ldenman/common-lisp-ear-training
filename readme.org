@@ -497,11 +497,12 @@ functions for generating random notes
 ** util
 - Utility functions
 
-   #+begin_src sh :exports results :results raw 
+   #+begin_src sh :exports results :results pp
    grep defun src/util.lisp
    #+end_src
 
    #+RESULTS:
+   #+begin_example
    (defun fdbug (code)
    (defun mapcdr (seq) (mapcar #'cdr seq))
    (defun attr (item alist) (cdr (assoc item alist)))
@@ -524,6 +525,7 @@ functions for generating random notes
    (defun car-eq (item other)
    (defun car-fn (fn args)
    (defun flatten (structure)
+   #+end_example
 
 ** midi :cleanup:
 - Lower-level midi functions
