@@ -69,7 +69,7 @@
 ;; Solfege Trainer
 (defun solfege-trainer ()
   (let* ((scale (make-scale 'c4))
-	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
+	 (notes (note-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (l (loop
 		 for x from 0 to 100
@@ -193,7 +193,7 @@
     (sleep 1)
     (let* ((chords (remove-if-not (lambda (x) (= 4 (note-attr (car (cdr x )) 'octave))) (make-chords 'C4 #'triads)))
 	   (random-chord (nth (random (length chords)) chords)))
-      (prompt-chord-guess random-chord game (scale-range 'C4 'G5 (make-scale 'C4))))))
+      (prompt-chord-guess random-chord game (note-range 'C4 'G5 (make-scale 'C4))))))
 
 (defun run-melody-game (game)
   (loop while *playing* do

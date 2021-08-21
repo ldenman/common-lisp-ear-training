@@ -148,14 +148,16 @@ A note is technically a frequency like "A 440HZ". But in this program a note is 
 
 Scale templates are represented by a list of pairs (X . Y) where *X* is
 either W or H, representing 1 semitone or 2 semitones, respectivley and *Y* is a solfege syllable (ie. *DO*).
+*Y* may also be a LIST of enharmonic solfege syllables such as '(*DI RA*) or '(*FI SE*).
 
 - W :: represents 1 semitone
 - H :: represents 2 semitones
 
 This scale template is used to "realize" scales, stepping and
 collecting notes according to the semitone pattern (ie W W H W W W H)
-and assigning a solfege syllable to the note.
+and assigning a solfege syllable (or list of enharmonic solfa) to the note.
 
+*** Usage
 Making a scale template is done like so:
 
 #+begin_src lisp :package ld-music :exports both
@@ -166,9 +168,9 @@ Making a scale template is done like so:
 #+RESULTS:
 : ((W . DO) (W . RE) (H . MI) (W . FA) (W . SO) (W . LA) (H . TI))
 
-Other scale templates are defined:
+Some scale templates are defined as functions:
 
-- Chromatic scale template
+- Chromatic scale template uses enharmonic solfa:
   #+begin_src lisp :package ld-music :exports both
   (chromatic-scale-template)
   #+end_src
@@ -186,18 +188,195 @@ Other scale templates are defined:
 
 - Dorian scale template
   #+begin_src lisp :package ld-music :exports both
-    (make-scale-template '(w h w w w h w) '(do re me fa so la ti do))
+    (dorian-scale-template)
   #+end_src
 
   #+RESULTS:
   : ((W . DO) (H . RE) (W . ME) (W . FA) (W . SO) (H . LA) (W . TI))
 
-*** Scale functions
-
 ** Scales
 
-Scales are represented as ALISTS containing NOTES and a TEMPLATE.
+Scales are represented as ALISTS containing LIST of NOTES and a SCALE-TEMPLATE.
 
+- NOTES :: A LIST of NOTES
+- TEMPLATE :: The scale template used to realize the notes; defaults to the *major-scale-template*
+
+*** Usage
+
+**** #'make-scale
+The #'make-scale function is used to create scales from a template. The default scale template is the major scale. 
+
+  #+begin_src lisp :package ld-music :exports code
+  (make-scale 'c4)
+  #+end_src
+
+  #+RESULTS:
+  | NOTES    | ((TYPE . NOTE) (NAME . A0) (VALUE . 21) (SOLFEGE . LA) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . B0) (VALUE . 23) (SOLFEGE . TI) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . C0) (VALUE . 24) (SOLFEGE . DO) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . D0) (VALUE . 26) (SOLFEGE . RE) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . E0) (VALUE . 28) (SOLFEGE . MI) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . F0) (VALUE . 29) (SOLFEGE . FA) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . G0) (VALUE . 31) (SOLFEGE . SO) (OCTAVE . 0)) | ((TYPE . NOTE) (NAME . A1) (VALUE . 33) (SOLFEGE . LA) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . B1) (VALUE . 35) (SOLFEGE . TI) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . C1) (VALUE . 36) (SOLFEGE . DO) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . D1) (VALUE . 38) (SOLFEGE . RE) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . E1) (VALUE . 40) (SOLFEGE . MI) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . F1) (VALUE . 41) (SOLFEGE . FA) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . G1) (VALUE . 43) (SOLFEGE . SO) (OCTAVE . 1)) | ((TYPE . NOTE) (NAME . A2) (VALUE . 45) (SOLFEGE . LA) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . B2) (VALUE . 47) (SOLFEGE . TI) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . C2) (VALUE . 48) (SOLFEGE . DO) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . D2) (VALUE . 50) (SOLFEGE . RE) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . E2) (VALUE . 52) (SOLFEGE . MI) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . F2) (VALUE . 53) (SOLFEGE . FA) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . G2) (VALUE . 55) (SOLFEGE . SO) (OCTAVE . 2)) | ((TYPE . NOTE) (NAME . A3) (VALUE . 57) (SOLFEGE . LA) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . B3) (VALUE . 59) (SOLFEGE . TI) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) | ((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . E4) (VALUE . 76) (SOLFEGE . MI) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . F4) (VALUE . 77) (SOLFEGE . FA) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . G4) (VALUE . 79) (SOLFEGE . SO) (OCTAVE . 4)) | ((TYPE . NOTE) (NAME . A5) (VALUE . 81) (SOLFEGE . LA) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . B5) (VALUE . 83) (SOLFEGE . TI) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . C5) (VALUE . 84) (SOLFEGE . DO) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . D5) (VALUE . 86) (SOLFEGE . RE) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . E5) (VALUE . 88) (SOLFEGE . MI) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . F5) (VALUE . 89) (SOLFEGE . FA) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . G5) (VALUE . 91) (SOLFEGE . SO) (OCTAVE . 5)) | ((TYPE . NOTE) (NAME . A6) (VALUE . 93) (SOLFEGE . LA) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . B6) (VALUE . 95) (SOLFEGE . TI) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . C6) (VALUE . 96) (SOLFEGE . DO) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . D6) (VALUE . 98) (SOLFEGE . RE) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . E6) (VALUE . 100) (SOLFEGE . MI) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . F6) (VALUE . 101) (SOLFEGE . FA) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . G6) (VALUE . 103) (SOLFEGE . SO) (OCTAVE . 6)) | ((TYPE . NOTE) (NAME . A7) (VALUE . 105) (SOLFEGE . LA) (OCTAVE . 7)) | ((TYPE . NOTE) (NAME . B7) (VALUE . 107) (SOLFEGE . TI) (OCTAVE . 7)) | ((TYPE . NOTE) (NAME . C7) (VALUE . 108) (SOLFEGE . DO) (OCTAVE . 7)) |
+  | TEMPLATE | (W . DO)                                                             | (W . RE)                                                             | (H . MI)                                                             | (W . FA)                                                             | (W . SO)                                                             | (W . LA)                                                             | (H . TI)                                                             |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                      |                                                                       |                                                                       |                                                                       |                                                                       |                                                                       |                                                                       |
+  #+begin_src lisp :package ld-music :exports code
+  (make-scale 'c4 (chromatic-scale-template))
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  ((NOTES ((TYPE . NOTE) (NAME . A0) (VALUE . 21) (SOLFEGE . LA) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |A#0|) (VALUE . 22) (SOLFEGE LI TE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . B0) (VALUE . 23) (SOLFEGE . TI) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . C0) (VALUE . 24) (SOLFEGE . DO) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |C#0|) (VALUE . 25) (SOLFEGE DI RA) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . D0) (VALUE . 26) (SOLFEGE . RE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |D#0|) (VALUE . 27) (SOLFEGE RI ME) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . E0) (VALUE . 28) (SOLFEGE . MI) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . F0) (VALUE . 29) (SOLFEGE . FA) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |F#0|) (VALUE . 30) (SOLFEGE FI SE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . G0) (VALUE . 31) (SOLFEGE . SO) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |G#0|) (VALUE . 32) (SOLFEGE SI LE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . A1) (VALUE . 33) (SOLFEGE . LA) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |A#1|) (VALUE . 34) (SOLFEGE LI TE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . B1) (VALUE . 35) (SOLFEGE . TI) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . C1) (VALUE . 36) (SOLFEGE . DO) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |C#1|) (VALUE . 37) (SOLFEGE DI RA) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . D1) (VALUE . 38) (SOLFEGE . RE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |D#1|) (VALUE . 39) (SOLFEGE RI ME) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . E1) (VALUE . 40) (SOLFEGE . MI) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . F1) (VALUE . 41) (SOLFEGE . FA) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |F#1|) (VALUE . 42) (SOLFEGE FI SE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . G1) (VALUE . 43) (SOLFEGE . SO) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |G#1|) (VALUE . 44) (SOLFEGE SI LE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . A2) (VALUE . 45) (SOLFEGE . LA) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |A#2|) (VALUE . 46) (SOLFEGE LI TE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . B2) (VALUE . 47) (SOLFEGE . TI) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . C2) (VALUE . 48) (SOLFEGE . DO) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |C#2|) (VALUE . 49) (SOLFEGE DI RA) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . D2) (VALUE . 50) (SOLFEGE . RE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |D#2|) (VALUE . 51) (SOLFEGE RI ME) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . E2) (VALUE . 52) (SOLFEGE . MI) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . F2) (VALUE . 53) (SOLFEGE . FA) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |F#2|) (VALUE . 54) (SOLFEGE FI SE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . G2) (VALUE . 55) (SOLFEGE . SO) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |G#2|) (VALUE . 56) (SOLFEGE SI LE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . A3) (VALUE . 57) (SOLFEGE . LA) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |A#3|) (VALUE . 58) (SOLFEGE LI TE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . B3) (VALUE . 59) (SOLFEGE . TI) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |C#3|) (VALUE . 61) (SOLFEGE DI RA) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |D#3|) (VALUE . 63) (SOLFEGE RI ME) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |F#3|) (VALUE . 66) (SOLFEGE FI SE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |G#3|) (VALUE . 68) (SOLFEGE SI LE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |A#4|) (VALUE . 70) (SOLFEGE LI TE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |C#4|) (VALUE . 73) (SOLFEGE DI RA) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |D#4|) (VALUE . 75) (SOLFEGE RI ME) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . E4) (VALUE . 76) (SOLFEGE . MI) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . F4) (VALUE . 77) (SOLFEGE . FA) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |F#4|) (VALUE . 78) (SOLFEGE FI SE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . G4) (VALUE . 79) (SOLFEGE . SO) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |G#4|) (VALUE . 80) (SOLFEGE SI LE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . A5) (VALUE . 81) (SOLFEGE . LA) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |A#5|) (VALUE . 82) (SOLFEGE LI TE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . B5) (VALUE . 83) (SOLFEGE . TI) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . C5) (VALUE . 84) (SOLFEGE . DO) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |C#5|) (VALUE . 85) (SOLFEGE DI RA) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . D5) (VALUE . 86) (SOLFEGE . RE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |D#5|) (VALUE . 87) (SOLFEGE RI ME) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . E5) (VALUE . 88) (SOLFEGE . MI) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . F5) (VALUE . 89) (SOLFEGE . FA) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |F#5|) (VALUE . 90) (SOLFEGE FI SE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . G5) (VALUE . 91) (SOLFEGE . SO) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |G#5|) (VALUE . 92) (SOLFEGE SI LE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . A6) (VALUE . 93) (SOLFEGE . LA) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |A#6|) (VALUE . 94) (SOLFEGE LI TE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . B6) (VALUE . 95) (SOLFEGE . TI) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . C6) (VALUE . 96) (SOLFEGE . DO) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |C#6|) (VALUE . 97) (SOLFEGE DI RA) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . D6) (VALUE . 98) (SOLFEGE . RE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |D#6|) (VALUE . 99) (SOLFEGE RI ME) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . E6) (VALUE . 100) (SOLFEGE . MI) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . F6) (VALUE . 101) (SOLFEGE . FA) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |F#6|) (VALUE . 102) (SOLFEGE FI SE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . G6) (VALUE . 103) (SOLFEGE . SO) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |G#6|) (VALUE . 104) (SOLFEGE SI LE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . A7) (VALUE . 105) (SOLFEGE . LA) (OCTAVE . 7))
+    ((TYPE . NOTE) (NAME . |A#7|) (VALUE . 106) (SOLFEGE LI TE) (OCTAVE . 7))
+    ((TYPE . NOTE) (NAME . B7) (VALUE . 107) (SOLFEGE . TI) (OCTAVE . 7))
+    ((TYPE . NOTE) (NAME . C7) (VALUE . 108) (SOLFEGE . DO) (OCTAVE . 7)))
+   (TEMPLATE (H . DO) (H DI RA) (H . RE) (H RI ME) (H . MI) (H . FA) (H FI SE)
+    (H . SO) (H SI LE) (H . LA) (H LI TE) (H . TI)))
+  #+end_example
+
+  #+begin_src lisp :package ld-music :exports code
+  (make-scale 'c4 (minor-scale-template))
+  #+end_src
+
+  #+RESULTS:
+  #+begin_example
+  ((NOTES ((TYPE . NOTE) (NAME . |A#0|) (VALUE . 22) (SOLFEGE . TE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . C0) (VALUE . 24) (SOLFEGE . DO) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . D0) (VALUE . 26) (SOLFEGE . RE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |D#0|) (VALUE . 27) (SOLFEGE . ME) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . F0) (VALUE . 29) (SOLFEGE . FA) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . G0) (VALUE . 31) (SOLFEGE . SO) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |G#0|) (VALUE . 32) (SOLFEGE . LE) (OCTAVE . 0))
+    ((TYPE . NOTE) (NAME . |A#1|) (VALUE . 34) (SOLFEGE . TE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . C1) (VALUE . 36) (SOLFEGE . DO) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . D1) (VALUE . 38) (SOLFEGE . RE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |D#1|) (VALUE . 39) (SOLFEGE . ME) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . F1) (VALUE . 41) (SOLFEGE . FA) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . G1) (VALUE . 43) (SOLFEGE . SO) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |G#1|) (VALUE . 44) (SOLFEGE . LE) (OCTAVE . 1))
+    ((TYPE . NOTE) (NAME . |A#2|) (VALUE . 46) (SOLFEGE . TE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . C2) (VALUE . 48) (SOLFEGE . DO) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . D2) (VALUE . 50) (SOLFEGE . RE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |D#2|) (VALUE . 51) (SOLFEGE . ME) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . F2) (VALUE . 53) (SOLFEGE . FA) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . G2) (VALUE . 55) (SOLFEGE . SO) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |G#2|) (VALUE . 56) (SOLFEGE . LE) (OCTAVE . 2))
+    ((TYPE . NOTE) (NAME . |A#3|) (VALUE . 58) (SOLFEGE . TE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |D#3|) (VALUE . 63) (SOLFEGE . ME) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |G#3|) (VALUE . 68) (SOLFEGE . LE) (OCTAVE . 3))
+    ((TYPE . NOTE) (NAME . |A#4|) (VALUE . 70) (SOLFEGE . TE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |D#4|) (VALUE . 75) (SOLFEGE . ME) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . F4) (VALUE . 77) (SOLFEGE . FA) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . G4) (VALUE . 79) (SOLFEGE . SO) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |G#4|) (VALUE . 80) (SOLFEGE . LE) (OCTAVE . 4))
+    ((TYPE . NOTE) (NAME . |A#5|) (VALUE . 82) (SOLFEGE . TE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . C5) (VALUE . 84) (SOLFEGE . DO) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . D5) (VALUE . 86) (SOLFEGE . RE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |D#5|) (VALUE . 87) (SOLFEGE . ME) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . F5) (VALUE . 89) (SOLFEGE . FA) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . G5) (VALUE . 91) (SOLFEGE . SO) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |G#5|) (VALUE . 92) (SOLFEGE . LE) (OCTAVE . 5))
+    ((TYPE . NOTE) (NAME . |A#6|) (VALUE . 94) (SOLFEGE . TE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . C6) (VALUE . 96) (SOLFEGE . DO) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . D6) (VALUE . 98) (SOLFEGE . RE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |D#6|) (VALUE . 99) (SOLFEGE . ME) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . F6) (VALUE . 101) (SOLFEGE . FA) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . G6) (VALUE . 103) (SOLFEGE . SO) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |G#6|) (VALUE . 104) (SOLFEGE . LE) (OCTAVE . 6))
+    ((TYPE . NOTE) (NAME . |A#7|) (VALUE . 106) (SOLFEGE . TE) (OCTAVE . 7))
+    ((TYPE . NOTE) (NAME . C7) (VALUE . 108) (SOLFEGE . DO) (OCTAVE . 7)))
+   (TEMPLATE (W . DO) (H . RE) (W . ME) (W . FA) (H . SO) (W . LE) (W . TE)))
+  #+end_example
+
+**** #'scale-notes
+**** #'scale-range2
+**** #'note-range
+**** #'scale-octaves
+**** #'with-scale macro
+     
 ** Chord
 
 ** Chord Tones
@@ -792,4 +971,5 @@ and for playing an event (via portmidi).
     make-message* fns as make-message now exported
   - work on setting up exports in ASD file
   - should every file be in the same namespace?
+  - scale templates can be defined as VARS instead of functions
   - consider using chromatic scale by default in scale logic and deducing other scales from that 

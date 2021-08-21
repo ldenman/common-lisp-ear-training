@@ -173,7 +173,7 @@
 					   (append
 					    (if (not (eq (note-solfege (car notes)) 'do))
 						(resolve-note (car notes)
-							      (attr 'notes (attr 'scale level))))
+							      (scale-notes (attr 'scale level))))
 					    (resolve-notes level (cdr notes))))))))
 
 (defun do-try (level length seed result)
@@ -183,7 +183,7 @@
       (note-solfege-member-p note (attr 'solfege level))
       (not (note-equal-p note (car (last result))))))
 
-   (shuffle (attr 'notes (attr 'scale level))
+   (shuffle (scale-notes (attr 'scale level))
 	    (if (eq 't seed)
 		(sb-ext:seed-random-state seed)
 		(sb-ext:seed-random-state (+ length seed))))))

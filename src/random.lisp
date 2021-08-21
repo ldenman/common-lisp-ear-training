@@ -43,7 +43,7 @@
 
 (defun random-notes ()
   (let* ((scale (make-scale 'c4))
-	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
+	 (notes (note-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (l (loop
 		 for x from 0 to 100
@@ -59,7 +59,7 @@
 
 (defun random-chromatic ()
   (let* ((scale (make-scale 'c4 (chromatic-scale-template)))
-	 (notes (scale-range 'c2 'c3 (scale-notes scale))))
+	 (notes (note-range 'c2 'c3 (scale-notes scale))))
 
     (dolist (note-list (loop
 			 for x from 0 to 1000
@@ -82,7 +82,7 @@
 
 ;; (dolist (note (mapcar (lambda (solfege)
 ;; 			 (find-solfege solfege
-;; 				       (scale-range 'c3 'c4 (scale-notes (make-scale 'c4 (chromatic-scale-template))))))
+;; 				       (note-range 'c3 'c4 (scale-notes (make-scale 'c4 (chromatic-scale-template))))))
 ;; 		       '(do ti do di do re ra do mi me do fa mi do so se do)))
 ;;   (note-play note)
 ;;   (sleep 1)
@@ -103,23 +103,23 @@
 
 (defun play-tonic-subdominant-dominant2 (scale)
   (chord-sequence-play
-   (chord-sequence '(I IV V I) (triads (chord-builder (attr 'notes scale))) scale 4 ) 0.5))
+   (chord-sequence '(I IV V I) (triads (chord-builder (scale-notes scale))) scale 4 ) 0.5))
 
 (defun play-tonic-subdominant-dominant3 (scale)
   (chord-sequence-play
-   (chord-sequence '(I IV V I) (triads (chord-builder (attr 'notes scale))) scale 4 ) 0.5))
+   (chord-sequence '(I IV V I) (triads (chord-builder (scale-notes scale))) scale 4 ) 0.5))
 
 (defun sing-do ()
   (let* ((scale (random-major-scale2)))
     (play-tonic-subdominant-dominant3 scale)
     (sleep 2)
-    (note-play (car (attr 'notes (scale-octave-range 3 4 scale))))
+    (note-play (car (scale-notes (scale-octave-range 3 4 scale))))
 					;    (note-play (car scale))
     ))
 
 (defun random-chromatic2 ()
   (let* ((scale (make-scale 'c4 (chromatic-scale-template)))
-	 (notes (scale-range 'c2 'c3 (scale-notes scale)))
+	 (notes (note-range 'c2 'c3 (scale-notes scale)))
 	 (counter 0))
 
     (dolist (note (loop
@@ -131,7 +131,7 @@
 	  (chord-sequence-play
 	   (chord-sequence '(I IV V I)
 			   (triads (chord-builder
-				    (scale-range 'c2 'g5 (attr 'notes (make-scale 'c4 (major-scale-template)))))))
+				    (note-range 'c2 'g5 (scale-notes (make-scale 'c4 (major-scale-template)))))))
 	   0.5)
 	  )
 
@@ -165,9 +165,9 @@
 
   (let*
 ((scale (random-chromatic-scale))
-	 (notes (scale-octave-range 2 3 (attr 'notes scale)))
-	 (last-idx (position (car (last notes)) (attr 'notes scale)))
-	 (next-do (nth (+ 1 last-idx) (attr 'notes scale)))
+	 (notes (scale-octave-range 2 3 (scale-notes scale)))
+	 (last-idx (position (car (last notes)) (scale-notes scale)))
+	 (next-do (nth (+ 1 last-idx) (scale-notes scale)))
 	 (notes2 (append notes (list next-do)))
 	 (counter 0))
 
@@ -200,9 +200,9 @@
 
 (defun notes->midi ()
   (let* ((scale (random-chromatic-scale))
-	 (notes (scale-octave-range 2 3 (attr 'notes scale)))
-	 (last-idx (position (car (last notes)) (attr 'notes scale)))
-	 (next-do (nth (+ 1 last-idx) (attr 'notes scale)))
+	 (notes (scale-octave-range 2 3 (scale-notes scale)))
+	 (last-idx (position (car (last notes)) (scale-notes scale)))
+	 (next-do (nth (+ 1 last-idx) (scale-notes scale)))
 	 (notes2 (append notes (list next-do)))
 	 (counter 0))
 

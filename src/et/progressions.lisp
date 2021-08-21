@@ -73,7 +73,7 @@
 
 ;; Sequences
 (defun make-random-note-sequence (scale)
-  (let ((note (random-element (attr 'notes scale))))
+  (let ((note (random-element (scale-notes scale))))
     (make-cadence-sequence scale note)))
 
 (defun make-random-melody-sequence (scale octave &optional (octave-range 1) (length 10))
@@ -82,7 +82,7 @@
    (mapcar (lambda (x) (find-solfege
 			x
 			(scale-octave-range octave (+ octave octave-range)
-					    (attr 'notes scale))))
+					    (scale-notes scale))))
 	   (resolving-melody 'do (melody-rules) length))))
 
 (defun make-rhythmic-melody-sequence (scale measure-count octave)
