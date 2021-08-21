@@ -116,14 +116,14 @@ You should hear a note play when you run #'smoke-test.
 
 * DATA FORMATS
 
-- NOTE -- an ALIST grouping TYPE, NAME, VALUE, SOLFEGE, OCTAVE
-- SCALE -- an ALIST grouping NOTES and SCALE TEMPLATE
-- SCALE TEMPLATE -- a list of scale steps/solfege pairs used to realize scales
-- CHORD -- a list of CHORD-TONES
-- CHORD-TONE -- an ALIST grouping TYPE, NOTE, DEGREE
-- SCALE-CHORD -- an ALIST grouping SCALE, CHORDS, ROMAN-NUMERAL-CHORDS 
-- RHYTHMIC-NOTE -- a pairing of NOTE and RHYTHM-VALUE where RHYTHM-VALUE is 1,2,4,8,16
-- EVENT -- an ALIST grouping NOTE, ON-TIME, OFF-TIME, VELOCITY
+- NOTE :: an ALIST grouping TYPE, NAME, VALUE, SOLFEGE, OCTAVE
+- SCALE :: an ALIST grouping NOTES and SCALE TEMPLATE
+- SCALE TEMPLATE :: a list of scale steps/solfege pairs used to realize scales
+- CHORD :: a list of CHORD-TONES
+- CHORD-TONE :: an ALIST grouping TYPE, NOTE, DEGREE
+- SCALE-CHORD :: an ALIST grouping SCALE, CHORDS, ROMAN-NUMERAL-CHORDS 
+- RHYTHMIC-NOTE :: a pairing of NOTE and RHYTHM-VALUE where RHYTHM-VALUE is 1,2,4,8,16
+- EVENT :: an ALIST grouping NOTE, ON-TIME, OFF-TIME, VELOCITY
 
 * Concepts
   
@@ -155,7 +155,8 @@ either W or H, representing 1 semitone or 2 semitones, respectivley and *Y* is a
 
 This scale template is used to "realize" scales, stepping and
 collecting notes according to the semitone pattern (ie W W H W W W H)
-and assigning a solfege syllable (or list of enharmonic solfa) to the note.
+and assigning a solfege syllable (or list of enharmonic solfa) to the
+note.
 
 *** Usage
 Making a scale template is done like so:
@@ -372,9 +373,77 @@ The #'make-scale function is used to create scales from a template. The default 
   #+end_example
 
 **** #'scale-notes
-**** #'scale-range2
+
+Returns a list of all scale notes.
+
+  #+begin_src lisp :package ld-music :exports both
+  (take 12 (scale-notes (make-scale 'c4)))
+  #+end_src
+
+  #+RESULTS:
+  | (TYPE . NOTE) | (NAME . A0) | (VALUE . 21) | (SOLFEGE . LA) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . B0) | (VALUE . 23) | (SOLFEGE . TI) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . C0) | (VALUE . 24) | (SOLFEGE . DO) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . D0) | (VALUE . 26) | (SOLFEGE . RE) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . E0) | (VALUE . 28) | (SOLFEGE . MI) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . F0) | (VALUE . 29) | (SOLFEGE . FA) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . G0) | (VALUE . 31) | (SOLFEGE . SO) | (OCTAVE . 0) |
+  | (TYPE . NOTE) | (NAME . A1) | (VALUE . 33) | (SOLFEGE . LA) | (OCTAVE . 1) |
+  | (TYPE . NOTE) | (NAME . B1) | (VALUE . 35) | (SOLFEGE . TI) | (OCTAVE . 1) |
+  | (TYPE . NOTE) | (NAME . C1) | (VALUE . 36) | (SOLFEGE . DO) | (OCTAVE . 1) |
+  | (TYPE . NOTE) | (NAME . D1) | (VALUE . 38) | (SOLFEGE . RE) | (OCTAVE . 1) |
+  | (TYPE . NOTE) | (NAME . E1) | (VALUE . 40) | (SOLFEGE . MI) | (OCTAVE . 1) |
+
+**** #'scale-range
+Returns a new scale object containing a subset of notes
+
+  #+begin_src lisp :package ld-music :exports both
+    (scale-notes (scale-range 'c3 'c4  (make-scale 'c4)))
+  #+end_src
+
+  #+RESULTS:
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . C4) | (VALUE . 72) | (SOLFEGE . DO) | (OCTAVE . 4) |
+
 **** #'note-range
+Returns a subset of notes according to a specified range
+
+  #+begin_src lisp :package ld-music :exports both
+    (note-range 'c3 'c4  (scale-notes (make-scale 'c4)))
+  #+end_src
+
+  #+RESULTS:
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . C4) | (VALUE . 72) | (SOLFEGE . DO) | (OCTAVE . 4) |
+
+
 **** #'scale-octaves
+Returns an list of pairs (X . Y) where X is a NOTE and Y is an INTEGER
+value representing an *octave relative to the scale*.  The idea is
+that there is *absolute octaves* and *relative octaves*.
+
+- Absolute is what the piano octaves are like "C4" or "A#7". Absolute isn't related to a key center.
+- Relative octaves are relative to the key center/scale... meaning that *a new octave starts on the tonic note*.
+
+  #+begin_src lisp :package ld-music :exports pp
+    (take 3 (scale-octaves (scale-notes (make-scale 'c4))))
+  #+end_src
+
+  #+RESULTS:
+  : ((((TYPE . NOTE) (NAME . A0) (VALUE . 21) (SOLFEGE . LA) (OCTAVE . 0)) . 0) (((TYPE . NOTE) (NAME . B0) (VALUE . 23) (SOLFEGE . TI) (OCTAVE . 0)) . 0) (((TYPE . NOTE) (NAME . C0) (VALUE . 24) (SOLFEGE . DO) (OCTAVE . 0)) . 1))
+
 **** #'with-scale macro
      
 ** Chord
@@ -647,38 +716,144 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 *** Bass Game
 
 * Files
-** package
-- Defines the package and exports
-
-** random :cleanup:
-functions for generating random notes
-
+** note
+- note representation and functions
    #+begin_src sh :exports results :results pp
-   grep defun src/random.lisp
+   grep defun src/note.lisp
    #+end_src
 
    #+RESULTS:
    #+begin_example
-   (defun find-prev-do-helper (idx scale)
-   (defun find-prev-do (note scale)
-   (defun resolve-down (note scale)
-   (defun resolve-note (note scale)
-   (defun note-to-do (note scale)
-   (defun remove-after-do (scale)
-   (defun random-notes ()
-   (defun random-chromatic ()
-   (defun scale-octave-range-helper (o1 o2 scale)
-   (defun scale-octave-range (o1 o2 notes)
-   (defun play-tonic-subdominant-dominant2 (scale)
-   (defun play-tonic-subdominant-dominant3 (scale)
-   (defun sing-do ()
-   (defun random-chromatic2 ()
-   (defun random-chromatic3 ()
-   (defun notes->midi ()
+   (defun note-name-position (note-name &optional (scale (midi-notes)))
+   (defun find-note-in-octave (note scale)
+   (defun note-attr (note attr) (cdr (assoc attr note)))
+   (defun note-name (note) (note-attr note 'name))
+   (defun note-value (note) (note-attr note 'value))
+   (defun note-solfege (note) (note-attr note 'solfege))
+   (defun note-equal-p (x y)
+   (defun note-idx (note &optional (scale (midi-notes)))
+   (defun note-octave-up (note scale)
+   (defun note-octave-down (note scale)
+   (defun parse-note-octave (note-name)
+   (defun find-note (name &optional (scale (midi-notes)))
+   (defun make-note (name value solfege)
    #+end_example
 
-** output.lisp
-- Should be taken out of this library.
+** scale
+Funcations for making scales and scale templates representation.
+
+   #+begin_src sh :exports results :results pp
+   grep defun src/scale.lisp
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   (defun make-scale-template (steps solfege)
+   (defun chromatic-scale-template ()
+   (defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti) ))
+   (defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te)))
+   (defun dorian-scale-template () (make-scale-template '(w h w w w h w) '(do re me fa so la ti)))
+   (defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te)))
+   (defun scale-range (n1 n2 scale)
+   (defun make-scale-from-template (p1 p2 scale-template)
+   (defun build-scale-up (from-note-pos pattern)
+   (defun build-scale-down (from-note-pos pattern)
+   (defun assign-solfege (scale scale-template)
+   (defun build-scale (start-note pattern &optional (notes (midi-notes)))
+   (defun random-scale (template)
+   (defun random-scale2 (template)
+   (defun random-major-scale () (random-scale (major-scale-template)))
+   (defun random-major-scale2 () (random-scale2 (major-scale-template)))
+   (defun random-chromatic-scale () (random-scale2 (chromatic-scale-template )))
+   (defun scale-notes (scale)
+   (defun make-scale (scale-root &optional (template (major-scale-template)))
+   (defun scale-range2 (p1 p2 scale-data)
+   (defun scale-octaves (scale &optional (count 0))
+   (defun midi-notes-from-scale (midi-notes original-scale scale)
+   (defun midi-notes-from-scale-down-helper (midi-notes original-scale scale)
+   (defun with-scale-helper (scale my-fn)
+   (defun random-note (scale) (nth (random (length scale)) scale))
+   (defun random-notes (y scale) (loop for x from 1 to y collect (random-note scale)))
+   (defun solfege-chord (l scale)
+   (defun find-solfege (solfege lis)
+   (defun solfege->notes (scale solfege-list)
+   ;; (defun major-scales ()
+   ;; (defun spell-scale (root)
+   #+end_example
+
+** chord
+Chord representation and functions
+
+   #+begin_src sh :exports results :results pp
+   grep defun src/chord.lisp
+   #+end_src
+
+   #+RESULTS:
+   #+begin_example
+   (defun find-chord (octave romand-num chord-list scale)
+   (defun make-chord-tone (note degree)
+   (defun chord-tone-note (chord-tone)(attr 'note chord-tone))
+   (defun chord-degree (chord-tone) (attr 'degree chord-tone))
+   (defun chord-notes (chord) (mapcar #'chord-tone-note chord))
+   (defun chord-builder (l)
+   (defun make-chords (start-note &optional (filter-fn #'triads) (template (major-scale-template)))
+   (defun make-scale-chords (scale)
+   (defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
+   (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
+   (defun chord-root (chord)
+   (defun chord-sequence-play (chord-sequence &optional (sleep 1))
+   (defun chord-butroot (chord) (chord-remove-degree chord 1))
+   (defun chord-butfifth (chord) (chord-remove-degree chord 5))
+   (defun chord-drop-root (chord scale) 
+   (defun chord-invert-upper (chord)
+   (defun chord-tone-degree (chord-tone) (attr 'degree chord-tone))
+   (defun chord-remove-degree (chord degree)
+   (defun chord-take (n listofchords)
+   (defun triads (myl) (chord-take 3 myl))
+   (defun sevenths (myl) (chord-take 4 myl))
+   (defun ninths (myl) (chord-take 5 myl))
+   (defun elevenths (myl) (chord-take 6 myl))
+   (defun thirteenths (myl) (chord-take 7 myl))
+   (defun chord-invert (chord scale)
+   (defun chord-over-3 (root-position-chord scale)
+   (defun chord-over-5 (root-position-chord scale)
+   (defun major-solfege-chords ()
+   (defun chord-roman-numerals (chord-list)
+   (defun chord-sequence (chord-sequence chords scale &optional (octave 4))
+   (defun scale-chord-filter (fn &rest args)
+   (defun rebuild-chords ()
+   (defun octave-filter (octave)
+   (defun chord-filter (fn)
+   (defun chord-type-filter (fn)
+   (defun chord-seq (seq &optional (octave 4))
+   #+end_example
+
+** rhythm
+Logic for calculating rhythm durations based on BPM   
+
+   #+begin_src sh :exports results :results pp
+   grep defun src/rhythm.lisp
+   #+end_src
+
+   #+RESULTS:
+   : (defun make-rhythmic-notes (notes rhythm-list)
+   : (defun rhythm->duration-scaled (r bpm)
+   : (defun beat-length (beat bpm)
+   : (defun rhythm->seconds (r bpm)
+   : (defun rhythm-values (r)
+
+** event
+Functions for representing an EVENT (NOTE ON-TIME OFF-TIME VELOCITY)
+and for playing an event (via portmidi).
+
+   #+begin_src sh :exports results :results pp
+   grep defun src/event.lisp
+   #+end_src
+
+   #+RESULTS:
+   : (defun make-event (note on-time off-time velocity)
+   : (defun play-event (event)
+   : (defun play-events (events)
 
 ** util
 - Utility functions
@@ -745,147 +920,50 @@ functions for generating random notes
    (defun write-midi-file-format-1 (outfile midi-notes &optional (division 60))
    #+end_example
 
-** chord
-Chord representation and functions
-
-   #+begin_src sh :exports results :results pp
-   grep defun src/chord.lisp
-   #+end_src
-
-   #+RESULTS:
-   #+begin_example
-   (defun find-chord (octave romand-num chord-list scale)
-   (defun make-chord-tone (note degree)
-   (defun chord-tone-note (chord-tone)(attr 'note chord-tone))
-   (defun chord-degree (chord-tone) (attr 'degree chord-tone))
-   (defun chord-notes (chord) (mapcar #'chord-tone-note chord))
-   (defun chord-builder (l)
-   (defun make-chords (start-note &optional (filter-fn #'triads) (template (major-scale-template)))
-   (defun make-scale-chords (scale)
-   (defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
-   (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
-   (defun chord-root (chord)
-   (defun chord-sequence-play (chord-sequence &optional (sleep 1))
-   (defun chord-butroot (chord) (chord-remove-degree chord 1))
-   (defun chord-butfifth (chord) (chord-remove-degree chord 5))
-   (defun chord-drop-root (chord scale) 
-   (defun chord-invert-upper (chord)
-   (defun chord-tone-degree (chord-tone) (attr 'degree chord-tone))
-   (defun chord-remove-degree (chord degree)
-   (defun chord-take (n listofchords)
-   (defun triads (myl) (chord-take 3 myl))
-   (defun sevenths (myl) (chord-take 4 myl))
-   (defun ninths (myl) (chord-take 5 myl))
-   (defun elevenths (myl) (chord-take 6 myl))
-   (defun thirteenths (myl) (chord-take 7 myl))
-   (defun chord-invert (chord scale)
-   (defun chord-over-3 (root-position-chord scale)
-   (defun chord-over-5 (root-position-chord scale)
-   (defun major-solfege-chords ()
-   (defun chord-roman-numerals (chord-list)
-   (defun chord-sequence (chord-sequence chords scale &optional (octave 4))
-   (defun scale-chord-filter (fn &rest args)
-   (defun rebuild-chords ()
-   (defun octave-filter (octave)
-   (defun chord-filter (fn)
-   (defun chord-type-filter (fn)
-   (defun chord-seq (seq &optional (octave 4))
-   #+end_example
-
-** note
-- note representation and functions
-   #+begin_src sh :exports results :results pp
-   grep defun src/note.lisp
-   #+end_src
-
-   #+RESULTS:
-   #+begin_example
-   (defun note-name-position (note-name &optional (scale (midi-notes)))
-   (defun find-note-in-octave (note scale)
-   (defun note-attr (note attr) (cdr (assoc attr note)))
-   (defun note-name (note) (note-attr note 'name))
-   (defun note-value (note) (note-attr note 'value))
-   (defun note-solfege (note) (note-attr note 'solfege))
-   (defun note-equal-p (x y)
-   (defun note-idx (note &optional (scale (midi-notes)))
-   (defun note-octave-up (note scale)
-   (defun note-octave-down (note scale)
-   (defun parse-note-octave (note-name)
-   (defun find-note (name &optional (scale (midi-notes)))
-   (defun make-note (name value solfege)
-   #+end_example
-
-** scale
-- Scale representation and functions
-
-   #+begin_src sh :exports results :results pp
-   grep defun src/scale.lisp
-   #+end_src
-
-   #+RESULTS:
-   #+begin_example
-   (defun make-scale-template (steps solfege)
-   (defun chromatic-scale-template ()
-   (defun major-scale-template () (make-scale-template '(w w h w w w h) '(do re mi fa so la ti) ))
-   (defun minor-scale-template () (make-scale-template '(w h w w h w w) '(do re me fa so le te)))
-   (defun dorian-scale-template () (make-scale-template '(w h w w w h w) '(do re me fa so la ti)))
-   (defun phrygian-scale-template () (make-scale-template '(h w w w h w) '(do ra me fa so le te)))
-   (defun scale-range (n1 n2 scale)
-   (defun make-scale-from-template (p1 p2 scale-template)
-   (defun build-scale-up (from-note-pos pattern)
-   (defun build-scale-down (from-note-pos pattern)
-   (defun assign-solfege (scale scale-template)
-   (defun build-scale (start-note pattern &optional (notes (midi-notes)))
-   (defun random-scale (template)
-   (defun random-scale2 (template)
-   (defun random-major-scale () (random-scale (major-scale-template)))
-   (defun random-major-scale2 () (random-scale2 (major-scale-template)))
-   (defun random-chromatic-scale () (random-scale2 (chromatic-scale-template )))
-   (defun scale-notes (scale)
-   (defun make-scale (scale-root &optional (template (major-scale-template)))
-   (defun scale-range2 (p1 p2 scale-data)
-   (defun scale-octaves (scale &optional (count 0))
-   (defun midi-notes-from-scale (midi-notes original-scale scale)
-   (defun midi-notes-from-scale-down-helper (midi-notes original-scale scale)
-   (defun with-scale-helper (scale my-fn)
-   (defun random-note (scale) (nth (random (length scale)) scale))
-   (defun random-notes (y scale) (loop for x from 1 to y collect (random-note scale)))
-   (defun solfege-chord (l scale)
-   (defun find-solfege (solfege lis)
-   (defun solfege->notes (scale solfege-list)
-   ;; (defun major-scales ()
-   ;; (defun spell-scale (root)
-   #+end_example
-
 ** play
+- NEEDS CLEANUP
 - functions for playing notes
 
    #+begin_src sh :exports results :results pp
-   grep defun src/random.lisp
+   grep defun src/play.lisp
    #+end_src
 
    #+RESULTS:
    #+begin_example
-   (defun find-prev-do-helper (idx scale)
-   (defun find-prev-do (note scale)
-   (defun resolve-down (note scale)
-   (defun resolve-note (note scale)
-   (defun note-to-do (note scale)
-   (defun remove-after-do (scale)
-   (defun random-notes ()
-   (defun random-chromatic ()
-   (defun scale-octave-range-helper (o1 o2 scale)
-   (defun scale-octave-range (o1 o2 notes)
-   (defun play-tonic-subdominant-dominant2 (scale)
-   (defun play-tonic-subdominant-dominant3 (scale)
-   (defun sing-do ()
-   (defun random-chromatic2 ()
-   (defun random-chromatic3 ()
-   (defun notes->midi ()
+   (defun play-random (scale) (note-play (car (random-note scale))))
+   (defun chord-play (chord &optional (sleep 1))
+   (defun play-chords (chords)
+   (defun arp (l scale)
+   (defun rarp (l scale)
+   (defun play-tonic (scale) (note-play (car scale)))
+   (defun play-subdominant (scale) (note-play (nth 3 scale)))
+   (defun play-dominant (scale) (note-play (nth 4 scale)))
+   (defun tonic-subdominant-dominant2 (scale)
+   (defun tonic-subdominant-dominant (scale)
+   (defun play-tonic-subdominant-dominant (scale)
+   (defun smoke-test ()
    #+end_example
 
+** sequencer
+- logic for generating/writing midi sequences to file via the MIDI library
+- logic for generating midi sequences for portmidi
+
+   #+begin_src sh :exports results :results pp
+   grep defun src/sequencer.lisp
+   #+end_src
+
+   #+RESULTS:
+   : (defun schedule (time fn &rest args)
+   : (defun schedule-note (note &optional (on-time 0) off-time (velocity 80))
+   : (defun note->midi-message (note time-on time-off &optional (*midi-channel* 0))
+   : (defun midi-timing-track (bpm &optional (*midi-channel* 9))
+   : (defun midi-seq-format-1 (rhythmic-notes &optional (bpm 60))
+   : (defun midi-seq-format-0 (notes)
+   : (defun rhythmic-notes->midi-messages (notes/rhythms bpm)
+   : (defun rhythmic-notes->pm-events (notes/rhythms bpm &optional (*midi-channel* 0))
+
 ** games
-- logic/functions to support games
+- initial logic/functions to support games
 
    #+begin_src sh :exports results :results pp
    grep defun src/games.lisp
@@ -919,50 +997,39 @@ Chord representation and functions
    (defun reset-game ()
    #+end_example
 
-** sequencer
-- logic for generating/writing midi sequences to file via the MIDI library
-- logic for generating midi sequences for portmidi
+** random :cleanup:
+- NEEDS CLEANUP
+- functions for generating random notes / experimenting with note resolutions / cadences
 
    #+begin_src sh :exports results :results pp
-   grep defun src/sequencer.lisp
+   grep defun src/random.lisp
    #+end_src
 
    #+RESULTS:
-   : (defun schedule (time fn &rest args)
-   : (defun schedule-note (note &optional (on-time 0) off-time (velocity 80))
-   : (defun note->midi-message (note time-on time-off &optional (*midi-channel* 0))
-   : (defun midi-timing-track (bpm &optional (*midi-channel* 9))
-   : (defun midi-seq-format-1 (rhythmic-notes &optional (bpm 60))
-   : (defun midi-seq-format-0 (notes)
-   : (defun rhythmic-notes->midi-messages (notes/rhythms bpm)
-   : (defun rhythmic-notes->pm-events (notes/rhythms bpm &optional (*midi-channel* 0))
+   #+begin_example
+   (defun find-prev-do-helper (idx scale)
+   (defun find-prev-do (note scale)
+   (defun resolve-down (note scale)
+   (defun resolve-note (note scale)
+   (defun note-to-do (note scale)
+   (defun remove-after-do (scale)
+   (defun random-notes ()
+   (defun random-chromatic ()
+   (defun scale-octave-range-helper (o1 o2 scale)
+   (defun scale-octave-range (o1 o2 notes)
+   (defun play-tonic-subdominant-dominant2 (scale)
+   (defun play-tonic-subdominant-dominant3 (scale)
+   (defun sing-do ()
+   (defun random-chromatic2 ()
+   (defun random-chromatic3 ()
+   (defun notes->midi ()
+   #+end_example
 
-** rhythm
-- logic for calculating rhythm durations based on BPM   
+** package
+- Defines the package and exports
 
-   #+begin_src sh :exports results :results pp
-   grep defun src/rhythm.lisp
-   #+end_src
-
-   #+RESULTS:
-   : (defun make-rhythmic-notes (notes rhythm-list)
-   : (defun rhythm->duration-scaled (r bpm)
-   : (defun beat-length (beat bpm)
-   : (defun rhythm->seconds (r bpm)
-   : (defun rhythm-values (r)
-
-** event
-Functions for representing an EVENT (NOTE ON-TIME OFF-TIME VELOCITY)
-and for playing an event (via portmidi).
-
-   #+begin_src sh :exports results :results pp
-   grep defun src/event.lisp
-   #+end_src
-
-   #+RESULTS:
-   : (defun make-event (note on-time off-time velocity)
-   : (defun play-event (event)
-   : (defun play-events (events)
+** output.lisp
+- Should be taken out of this library.
 
 * Issues
   - setting slot-value 'midi:dd/nn/cc/bb doesn't work out of the box
