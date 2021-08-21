@@ -1,3 +1,65 @@
+* Features
+** Completed
+- [X] create chord sequences using roman numerals
+  #+BEGIN_SRC lisp :package ld-music
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (chord-sequence2 '(I IV V I) scale))
+	#'triads)
+  #+END_SRC
+
+  #+RESULTS:
+  | I  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) |
+  | IV | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) (DEGREE . 3)) |
+  | V  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) (DEGREE . 3)) |
+  | I  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) |
+
+- [X] create melodies using solfege syllables
+  
+  #+BEGIN_SRC lisp :package ld-music
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (scale-range 'c3 'c5 scale))
+	(lambda (scale)
+	  (solfege->notes scale '(DO RE MI FA SO LA TI DO))))
+  #+END_SRC
+
+  #+RESULTS:
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+
+- [X] add rhythm to melodic sequences
+
+  #+BEGIN_SRC lisp :package ld-music
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (scale-range 'c3 'c5 scale))
+	(lambda (scale)
+	  (solfege->notes scale '(DO RE MI FA SO LA TI DO)))
+	(lambda (notes)
+	  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8))))
+  #+END_SRC
+
+  #+RESULTS:
+  : ((((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) . 2) (((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) . 2) (((TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) . 8) (((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 8))
+
+- [X] preview sequences in-memory via portmidi
+- [X] write sequences to MIDI file
+- [X] ear training - random rhythmic melodies following cadence
+- [X] ear training - single note following cadence
+- [X] ear training - chord progression following cadence
+- [X] ear training game - chord game
+- [X] ear training game - bass melody game
+- [X] create custom scale templates
+** Upcoming
+- [ ] ear training game - melody game
+
 * Dependencies
 ** quicklisp
 - https://www.quicklisp.org/beta/#installation
@@ -649,7 +711,7 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 ** Chord sequencing
    #+begin_example
      (with-scale (build-scale 'C4 (major-scale-template))
-       (play-chords (sevenths (chord-sequence '(I IV V I)
+     (play-chords (sevenths (chord-sequence '(I IV V I)
 					      (scale-range 'C2 'G3 *current-scale*)))))
 
      (with-scale (build-scale 'C4 (major-scale-template))
@@ -666,7 +728,7 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
        (chord-sequence
 	'((octave . 3) I (octave . 3) VI- (octave . 3)  II- (octave . 2) V (octave . 3) I)
 	(chords (make-scale 'C4) #'sevenths))))
-   
+
      (chords (make-scale 'C4) #'sevenths)
 
    #+end_example

@@ -48,7 +48,6 @@
   (setf (cdr (assoc 'score game)) score)
   game)
 
-
 ;; Guess functions
 (defun read-guess () (mapcar #'intern (cl-ppcre:split "\\s+" (read-line))))
 
