@@ -108,13 +108,15 @@
 	  (cons (find-chord octave (car chord-sequence) (chord-roman-numerals chords) scale)
 		(chord-sequence (cdr chord-sequence) chords scale octave)))))
 
+(make-scale-chords (make-scale 'c4))
+
 (defun chord-sequence2 (chord-sequence scale &optional (octave 4))
   (let ((chords (attr 'chords (make-scale-chords scale))))
     (if chord-sequence
 	(if (and (listp (car chord-sequence)) (eq 'octave (car (car chord-sequence))))
 	    (chord-sequence (cdr chord-sequence) chords scale octave)
 	    (cons (find-chord octave (car chord-sequence) (chord-roman-numerals chords) scale)
-		  (chord-sequence (cdr chord-sequence) chords scale octave))))))
+		  (chord-sequence2 (cdr chord-sequence) scale octave))))))
 
 (defun scale-chord-filter (fn &rest args)
   (lambda (chord-data)
