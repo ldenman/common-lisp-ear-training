@@ -50,13 +50,81 @@
   : ((((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) . 2) (((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) . 2) (((TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) . 8) (((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 8))
 
 - [X] preview sequences in-memory via portmidi
+
+  #+BEGIN_SRC lisp :package ld-music :exports both
+    (let* ((bpm 60)
+	   (events (-> (make-scale 'c4)
+		       (lambda (scale)
+			 (solfege->notes (scale-range 'c3 'c5 scale) '(DO RE MI FA SO LA TI DO)))
+		       (lambda (notes)
+			 (rhythmic-notes->pm-events 
+			  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)) bpm)))))
+      events)
+  #+END_SRC
+
+  #+RESULTS:
+  | (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | (ON-TIME . 0)   | (OFF-TIME . 1)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) | (ON-TIME . 1)   | (OFF-TIME . 2)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) | (ON-TIME . 2)   | (OFF-TIME . 3)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) | (ON-TIME . 3)   | (OFF-TIME . 4)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) | (ON-TIME . 4)   | (OFF-TIME . 6)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) | (ON-TIME . 6)   | (OFF-TIME . 8)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) | (ON-TIME . 8)   | (OFF-TIME . 8.5) | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | (ON-TIME . 8.5) | (OFF-TIME . 9.0) | (VELOCITY . 80) |
+
+  - Use the #'play-events function
+
+  #+BEGIN_SRC lisp :package ld-music :exports code
+  (let* ((bpm 60)
+	 (events (-> (make-scale 'c4)
+		     (lambda (scale)
+		       (solfege->notes (scale-range 'c3 'c5 scale) '(DO RE MI FA SO LA TI DO)))
+		     (lambda (notes)
+		       (rhythmic-notes->pm-events (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)) bpm)))))
+    (play-events events))
+#+END_SRC
 - [X] write sequences to MIDI file
+  #+BEGIN_SRC  lisp :package ld-music :exports code
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (scale-range 'c3 'c5 scale))
+	(lambda (scale)
+	  (solfege->notes scale '(DO RE MI FA SO LA TI DO)))
+	(lambda (notes)
+	  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)))
+	(lambda (rhythmic-notes)
+ 	  (write-midi-file-format-1 "myoutput.midi" rhythmic-notes)))
+  #+END_SRC
+
+  #+RESULTS:
+  : NIL
+
 - [X] ear training - random rhythmic melodies following cadence
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 4))
+
+  #+END_SRC
+
 - [X] ear training - single note following cadence
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-cadence-note-sequence (make-random-note-sequence (make-scale 'c4)))
+  #+END_SRC
+
 - [X] ear training - chord progression following cadence
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-cadence-progression-sequence (make-random-progression-sequence (make-scale 'c4)))
+  #+END_SRC
+
 - [X] ear training game - chord game
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-chord-trainer)
+  #+END_SRC
+
 - [X] ear training game - bass melody game
-- [X] create custom scale templates
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-bass-game)
+  #+END_SRC
+
 ** Upcoming
 - [ ] ear training game - melody game
 
@@ -89,6 +157,16 @@ The MIDI library provides the ability to read/write midi files.
 #+end_example
 
 * Setup
+
+** Qsynth settings
+I am using the Qsynth software synth with following settings YMMV:
+
+- MIDI
+  - MIDI DRIVER: alsa_seq
+- AUDIO
+  - AUDIO DRIVER: jack
+
+** Load project
 #+begin_src lisp
     (ql:quickload "ld-music")
     (in-package :ld-music)

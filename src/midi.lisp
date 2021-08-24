@@ -104,9 +104,9 @@ Works like `make-message` but combines `upper` and `lower` to the status byte."
 				      :division 60)))
     (midi:write-midi-file my-midi-file outfile)))
 
-(defun write-midi-file-format-1 (outfile midi-notes &optional (division 60))
+(defun write-midi-file-format-1 (outfile midi-notes &optional (bpm 60))
   (let* ((my-midi-file (make-instance 'midi:midifile
 				      :format 1
-				      :tracks midi-notes
-				      :division division)))
+				      :tracks (midi-seq-format-1 midi-notes bpm)
+				      :division bpm)))
     (midi:write-midi-file my-midi-file outfile)))

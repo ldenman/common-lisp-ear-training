@@ -13,11 +13,13 @@
   (let ((next-chords (cdr (find-if (car-fn #'car-eq chord) chord-rules))))
     (if next-chords
 	(random-element next-chords))))
+
 (defun random-chord-progression (start-chord chord-rules n)
    (if (> n 0)
        (append
 	(list start-chord)
 	(random-chord-progression (next-chord start-chord chord-rules) chord-rules (- n 1)))))
+
 (defun resolving-chord-progression (start-chord chord-rules &optional (length 4))
   (let ((chord-progression  (random-chord-progression start-chord (chord-rules) length)))
     (if (eq start-chord (car (last chord-progression)))
