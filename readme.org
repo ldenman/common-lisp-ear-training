@@ -4,15 +4,15 @@
   #+BEGIN_SRC lisp :package ld-music :exports both
     (-> (make-scale 'c4)
 	(lambda (scale)
-	  (chord-sequence2 '(I IV V I) scale))
-	#'triads)
+	  (mapcdr (chord-sequence2 '(I IV V I) scale)))
+    #'triads)
   #+END_SRC
 
   #+RESULTS:
-  | I  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) |
-  | IV | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) (DEGREE . 3)) |
-  | V  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) (DEGREE . 3)) |
-  | I  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) (DEGREE . 5)) |
 
 - [X] create melodies using solfege syllables
   
