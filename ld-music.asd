@@ -17,4 +17,6 @@
 		 (:file "games")
                  (:file "sequencer")
                  (:file "rhythm")
-		 (:file "event")))))
+		 (:file "event")
+		 (:file "test")
+		 (:file "tests")		 ))))

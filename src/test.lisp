@@ -2,8 +2,6 @@
 
 (defvar *test-name* nil)
 (defvar *tests* nil)
-(defun reset-tests ()
-  (setf *tests* nil))
 
 (defmacro with-gensyms ((&rest names) &body body)
   `(let ,(loop for n in names collect `(,n (gensym)))
@@ -44,8 +42,6 @@
   "Report the results of a single test case. Called by 'check'."
   (if result
       result
-      (format t "~:[FAIL~;pass~] ... ~a: ~a~%" result *test-name* form)
-)
-
+      (format t "~:[FAIL~;pass~] ... ~a: ~a~%" result *test-name* form)))
 
 

@@ -29,20 +29,6 @@
 ;	(note-play note)
 	))))
 
-
-;(pm-reload 2)
-					;(random-chromatic2)
-					;(random-chromatic)
-;(smoke-test)
-
-;; (dolist (note (mapcar (lambda (solfege)
-;; 			 (find-solfege solfege
-;; 				       (note-range 'c3 'c4 (scale-notes (make-scale 'c4 (chromatic-scale-template))))))
-;; 		       '(do ti do di do re ra do mi me do fa mi do so se do)))
-;;   (note-play note)
-;;   (sleep 1)
-;;   )
-
 (defun sing-do ()
   (let* ((scale (random-major-scale2)))
     (play-tonic-subdominant-dominant3 scale)
