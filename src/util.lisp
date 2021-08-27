@@ -9,6 +9,7 @@
 	  ,code))
 
 (defun mapcdr (seq) (mapcar #'cdr seq))
+(defun attr2 (alist item) (cdr (assoc item alist)))
 (defun attr (item alist) (cdr (assoc item alist)))
 (defun attr= (value item alist) (setf (cdr (assoc item alist)) value))
 (defun random-element (l) (nth (random (length l)) l))
@@ -83,7 +84,6 @@
   (cond ((null structure) nil)
 	((atom structure) (list structure))
 	(t (mapcan #'flatten structure))))
-
 
 ;; Split sequence by #'pred
 (defun split-seq (pred seq)

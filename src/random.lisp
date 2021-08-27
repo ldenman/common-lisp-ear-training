@@ -47,7 +47,7 @@
   (let* ((scale (random-major-scale2)))
     (play-tonic-subdominant-dominant3 scale)
     (sleep 2)
-    (note-play (car (scale-notes (scale-octave-range 3 4 scale))))
+    (note-play (car (scale-octave-range 3 4 (scale-notes scale))))
 					;    (note-play (car scale))
     ))
 

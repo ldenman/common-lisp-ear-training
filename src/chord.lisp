@@ -3,7 +3,8 @@
 (defun find-chord (octave romand-num chord-list scale)
   (find-if
    (lambda (y)
-     (= (find-note-in-octave (chord-tone-note (car (cdr y))) (scale-notes scale)) octave))
+     (= (relative-octave (find-note-in-octave (chord-tone-note (car (cdr y))) (scale-notes scale)))
+	octave))
    (find-all-if (lambda (chord-tones) (eq romand-num (car chord-tones))) chord-list )))
 
 (defun make-chord-tone (note degree)

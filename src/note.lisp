@@ -3,20 +3,29 @@
 (defun note-name-position (note-name &optional (scale (midi-notes)))
   (position note-name scale :test (lambda (x y) (equal x (note-name y)))))
 
-(defun find-note-in-octave (note scale)
-  (cdr (find-if (lambda (n)
-	     (note-equal-p note (car n))) (scale-octaves scale))))
+(defun find-note-in-octave (note notes)
+  (find-if (lambda (n)
+	     (note-equal-p note (car n))) notes))
 
 ;; Note selector functions
 (defun note-attr (note attr) (cdr (assoc attr note)))
 (defun note-name (note) (note-attr note 'name))
 (defun note-value (note) (note-attr note 'value))
 (defun note-solfege (note) (note-attr note 'solfege))
+(defun note-octave (note) (note-attr note 'octave))
+(defun note-relative-octave (note)
+  (note-attr note 'relative-octave))
 (defun note-equal-p (x y)
   (and (equal (note-value x)
 	      (note-value y))
        (equal (note-name x)
 	      (note-name y))))
+
+(defun note-solfege-equalp (note solfege)
+  (if (listp (note-solfege note))
+      (member solfege (note-solfege note))
+      (equal solfege (note-solfege note))))
+
 (defun note-idx (note &optional (scale (midi-notes)))
   (position note scale :test #'note-equal-p))
 
@@ -44,4 +53,5 @@
    (cons 'name name)
    (cons 'value value)
    (cons 'solfege solfege)
-   (cons 'octave (parse-note-octave name ))))
+   (cons 'relative-octave nil)
+   (cons 'octave (parse-note-octave name))))
