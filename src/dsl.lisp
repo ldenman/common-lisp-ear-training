@@ -1,23 +1,15 @@
-(in-package :ld-music)
+;;;; DSL
+(defmacro song (&rest data)
+  `(quote ,data))
 
-(defun song (start-note solfege rhythm)
-  (make-rhythmic-notes
-   (solfege->notes
-    (scale-range2 'c3 'c5 (make-scale 'c3))
-    solfege)
-   rhythm))
+(song
+ (I  . 1)
+ (do 4 mi so mi)
+ (IV . 1)
+ (fa la so fa)
+ (V  . 1)
+ (so ti re fa)
+ (I  . 1)
+ (mi re do))
 
-(defun play-song (song)
-  (play-events (rhythmic-notes->pm-events song 60)))
-
-; (pm-reload 2)
-(play-song
- (song 'c4
-       '(do re mi
-	 fa so la
-	 do mi re
-	 do)
-       '(4 4 4
-	 8 8 8
-	 4 4 4
-	 1)))
+(song do 4 re mi fa so la)

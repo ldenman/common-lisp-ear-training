@@ -102,20 +102,10 @@
 ;; external
 (defun scale-range (p1 p2 scale-data)
   (let ((newscale (make-scale p1)))
-    (setf (cdr (assoc 'notes newscale))
-	  (note-range p1 p2 (scale-notes scale-data)))
+    (attr= (note-range p1 p2 (scale-notes scale-data))
+	   'notes
+	   newscale)
     newscale))
-
-;; external
-(defun scale-octaves (scale &optional (count 0))
-  (if scale
-      (if (eq (note-solfege (car scale)) 'do)
-	  (cons
-	   (cons (car scale) (+ 1 count))
-	   (scale-octaves (cdr scale) (+ 1 count)))
-	  (cons
-	   (cons (car scale) count)
-	   (scale-octaves (cdr scale) count)))))
 
 ;; external
 (defun with-scale-helper (scale my-fn)
@@ -143,9 +133,90 @@
 	      (car lis)
 	      (find-solfege solfege (cdr lis))))))
 
+(defun find-solfege2 (solfege lis &optional (octave 4))
+  (if lis
+      (if (listp (note-solfege (car lis)))
+	  (if (position solfege (note-solfege (car lis)))
+	      (car lis)
+	      (find-solfege solfege (cdr lis)))
+
+	  (if (eq solfege (note-solfege (car lis)))
+	      (car lis)
+	      (find-solfege solfege (cdr lis))))))
+
+
 (defun solfege->notes (scale solfege-list)
   (mapcar (lambda (s) (find-solfege s (scale-notes scale))) solfege-list))
 ;;;; SOLFEGE RELATED ;;;;
+
+(defun find-prev-do-helper (idx scale)
+  (if (eq (note-solfege (nth idx scale)) 'do)
+      (nth idx scale)
+      (find-prev-do-helper (- idx 1) scale)))
+
+(defun find-prev-do (note scale)
+  (position
+   (find-prev-do-helper (note-idx note scale) scale)
+   scale))
+
+(defun note-to-do (note scale)
+  (remove-after-do
+   (append (list (find-note (note-name note) scale))
+	   (remove-if-not
+	    (lambda (note)
+	      (position (note-solfege note) (mapcdr (major-scale-template))))
+	    (rest (subseq scale (note-idx (find-note (note-name note) scale) scale)))))))
+
+(defun remove-after-do (scale)
+  (if scale
+      (if (eq (note-solfege (car scale)) 'do)
+	  (cons (car scale) (remove-after-do '()))
+	  (cons (car scale)
+		(remove-after-do (cdr scale))))))
+
+;;;; Octave Functions ;;;;
+(defun scale-octave-range-helper (o1 o2 scale)
+  (if scale
+      (if (and (>= (cdr (car scale)) o1) (<=  (cdr (car scale)) o2))
+	  (cons (car (car scale))
+		(scale-octave-range-helper o1 o2 (cdr scale)))
+	  (scale-octave-range-helper o1 o2 (cdr scale)))))
+
+(defun scale-octave-range (o1 o2 notes)
+  (if notes
+      (if (eq 'do (note-solfege (car notes)))
+	  (scale-octave-range-helper o1 o2 (scale-octaves notes))
+	  (scale-octave-range o1 o2 (cdr notes)))))
+
+(defun scale-octaves (scale &optional (count 0))
+  (if scale
+      (if (eq (note-solfege (car scale)) 'do)
+	  (cons
+	   (cons (car scale) (+ 1 count))
+	   (scale-octaves (cdr scale) (+ 1 count)))
+	  (cons
+	   (cons (car scale) count)
+	   (scale-octaves (cdr scale) count)))))
+
+
+;;;; Note Resolutions ;;;;
+(defun resolve-down (note scale)
+  (let* ((prev-do-pos (find-prev-do note scale)))
+    (append 
+     (remove-if-not
+      (lambda (note)
+	(position (note-solfege note) (mapcdr (major-scale-template))))
+      (subseq scale prev-do-pos  (note-idx note scale)))
+     (list note))))
+
+(defun resolve-note (note scale)
+  (let ((down-resolve (resolve-down note scale))
+	(up-resolve  (note-to-do note scale)) )
+     (if (> (length down-resolve) (length up-resolve))
+	 up-resolve
+	 (reverse down-resolve))))
+
+
 
 ;; (defun major-scales ()
 ;;   '((c . (c d e f g a b))

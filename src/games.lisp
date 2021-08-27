@@ -29,23 +29,23 @@
 
 (defun find-answers (type game)
   (remove-if-not (lambda (item) (eq type (cdr (car item))))
-		   (cdr (assoc 'answers game))))
+		   (attr 'answers game)))
 
 (defun find-unique-answers (type game)
   (remove-duplicates (mapcar (lambda (i)
-			       (cons (car i) (assoc 'scale i))) (find-answers type game)) :test #'equal))
+			       (cons (car i) (attr 'scale i))) (find-answers type game)) :test #'equal))
 
 (defun repeat-answers (type game)
   (setf *newgame* (make-game 'new-game (lambda ())))
   (let ((answers (remove-duplicates (find-answers type game) :test (lambda (x y) (equal (car x) (car y))))))
     (setf *playing* t)
     (dolist (a answers)
-      (let ((scale (car (cdr (assoc 'scale (cdr a))))))
+      (let ((scale (attr 'scale (cdr a))))
 	(setf *current-scale* scale)
 	(prompt-guess (car (car a)) *newgame*)))))
 
 (defun update-score (score game)
-  (setf (cdr (assoc 'score game)) score)
+  (setf (attr 'score game) score)
   game)
 
 ;; Guess functions

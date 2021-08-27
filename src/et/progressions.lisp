@@ -68,7 +68,7 @@
 	 (melody-sequence (make-random-melody-sequence
 			   (make-scale 'd4) 3 3 (- (length rhythm) 1))))
     (make-cadence-sequence scale
-			   (make-rhythmic-notes (select-melody melody-sequence) rhythm))))
+			   (make-rhythmic-notes (cadseq-select-melody melody-sequence) rhythm))))
 
 (defun make-random-progression-sequence (scale &optional (chord-type-fn #'triads))
   (let ((random-sequence
@@ -82,34 +82,37 @@
 ;; Cadence Sequence
 (defun make-cadence-sequence (scale item)
   (cons (tonic-subdominant-dominant2 scale) item))
-(defun select-cadence (cadence-sequence) (car cadence-sequence))
+(defun cadseq-select-cadence (cadence-sequence) (car cadence-sequence))
 (defun select-progression (cadence-sequence) (cdr cadence-sequence))
-(defun select-melody (cadence-sequence) (cdr cadence-sequence))
-(defun select-note (cadence-sequence) (cdr cadence-sequence))
+(defun cadseq-select-melody (cadence-sequence) (cdr cadence-sequence))
+(defun cadseq-select-note (cadence-sequence) (cdr cadence-sequence))
 
 (defun play-cadence-progression-sequence (cadence-sequence)
-  (chord-sequence-play (select-cadence cadence-sequence))
+  (chord-sequence-play (cadseq-select-cadence cadence-sequence))
   (sleep 1)
   (chord-sequence-play (select-progression cadence-sequence)))
+
 (defun play-cadence-note-sequence (cadence-sequence)
-  (chord-sequence-play (select-cadence cadence-sequence))
+  (chord-sequence-play (cadseq-select-cadence cadence-sequence))
   (sleep 0.5)
-  (note-play (select-note cadence-sequence)))
+  (note-play (cadseq-select-note cadence-sequence)))
+
 (defun play-cadence-melody-sequence (cadence-sequence)
-  (chord-sequence-play (select-cadence cadence-sequence))
+  (chord-sequence-play (cadseq-select-cadence cadence-sequence))
   (sleep 0.5)
-  (dolist (note (select-melody cadence-sequence))
+  (dolist (note (cadseq-select-melody cadence-sequence))
     (note-play note)
     (sleep 1)))
 
 (defun play-rhythmic-melody-sequence (cadence-sequence)
-  (chord-sequence-play (select-cadence cadence-sequence))
+  (chord-sequence-play (cadseq-select-cadence cadence-sequence))
   (sleep 0.5)
   (play-events
-   (rhythmic-notes->pm-events (select-melody cadence-sequence)  90)))
-;(pm-reload 10)
+   (rhythmic-notes->pm-events (cadseq-select-melody cadence-sequence) 90)))
 
 ;; (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 4))
 ;; (play-cadence-progression-sequence (make-random-progression-sequence (make-scale 'c4)))
 ;; (play-cadence-note-sequence (make-random-note-sequence (make-scale 'c4)))
 ;; (play-rhythmic-melody-sequence (make-rhythmic-melody-sequence (make-scale 'c4) 2 2))
+
+

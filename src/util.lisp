@@ -19,10 +19,6 @@
   (if (cdr attrlist)
       (apply #'attrs (attr (car attrlist) item) (cdr attrlist) )
       (attr (car attrlist) item)))
-(defun -> (item &rest fns)
-  (if (cdr fns)
-      (apply #'-> (funcall (car fns) item) (cdr fns))
-      (funcall (car fns) item)))
 
 ;; Grow list2 to same size as list1
 (defun grow (l1 l2 &optional (idx 0))
@@ -87,3 +83,14 @@
   (cond ((null structure) nil)
 	((atom structure) (list structure))
 	(t (mapcan #'flatten structure))))
+
+
+;; Split sequence by #'pred
+(defun split-seq (pred seq)
+  (let ((l1)
+	(l2))
+    (dolist (s seq)
+      (if (funcall pred s)
+	  (setf l1 (append l1 (list s)))
+	  (setf l2 (append l2 (list s)))))
+    (cons l1 l2)))

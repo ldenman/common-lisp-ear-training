@@ -1,5 +1,5 @@
 (defpackage :ld-music
-  (:use :cl :sb-ext) ;; being sbcl dependant rn
+  (:use :cl :sb-ext :arrow-macros) ;; being sbcl dependant rn
   (:export
    :with-scale
    :make-scale

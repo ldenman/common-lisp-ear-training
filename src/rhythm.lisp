@@ -1,9 +1,5 @@
 (in-package :ld-music)
 
-;; A list of pairs of note to rhythm
-(defun make-rhythmic-notes (notes rhythm-list)
-  (pairup notes rhythm-list))
-
 (defun rhythm-values (r)
     (let ((res (case r
 	       (1 4)
@@ -24,7 +20,6 @@
 (defun rhythm->seconds (r bpm)
   (beat-length (rhythm-values r) bpm))
 
-
 (defun measure-beats (measure)
   (reduce #'+ (mapcar (lambda (beat)
 			(rhythm-values beat))
@@ -43,3 +38,36 @@
 (defun make-measures (n)
   (if (> n 0)
       (cons (make-measure) (make-measures (- n 1)))))
+
+;;;; Rhythmic Notes constructor
+(defun make-rhythmic-notes (notes rhythm-list)
+  (pairup notes rhythm-list))
+
+;;;; Rhythmic Notes selector
+(defun select-rhythm (notes/rhythms)
+  (cdr notes/rhythms))
+(defun select-note (notes/rhythms)
+  (car notes/rhythms))
+
+;; Transform list of rhythmic notes to midi messages
+;; Output suitable for writing to midi file via MIDI lib
+(defun rhythmic-notes->midi-messages (rhythmic-notes bpm)
+  (let ((result '())
+	(time 0))
+    (dolist (item rhythmic-notes)
+      (let ((rhythm (select-rhythm item))
+	    (note (select-note item)))
+	(push (note->midi-message note time (+ time (rhythm->duration-scaled rhythm bpm))) result)
+	(incf time (rhythm->duration-scaled rhythm bpm))))
+    (reverse result)))
+
+;; Transform list of rhythmic notes to PORTMIDI midi events
+(defun rhythmic-notes->pm-events (rhythmic-notes bpm &optional (*midi-channel* 0))
+  (let ((result '())
+	(time 0))
+    (dolist (item rhythmic-notes)
+      (let ((rhythm (select-rhythm item))
+	    (note (select-note item)))
+	(push (make-event note time (+ time (rhythm->seconds rhythm bpm)) 80) result)
+	(incf time (rhythm->seconds rhythm bpm))))
+    (reverse result)))

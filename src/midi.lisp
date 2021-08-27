@@ -4,14 +4,24 @@
 (defvar *midi-out3* nil)
 (setf *midi-out3* nil)
 
+(defun my-midi-setup ()
+  (launch-qsynth)
+  (sleep 2)
+  (pm-reload 2)
+  (smoke-test))
+
+(defun launch-qsynth ()
+  (uiop:launch-program "qsynth"))
+
+(defun setup-midi ()
+  (princ "CHOOSE YOUR MIDI DEVICE")
+  (princ (pm:list-devices))
+  (let ((id (read-line)))
+    (pm-reload (parse-integer id)))
+  (smoke-test))
+
 ;; TODO - don't use globals
 (defun pm-reload (midi-device-id)
-  (if *midi-out3*
-      (progn
-	(let ((oldid *midi-out3*))
-	  (setf *midi-out3* nil)
-	  (pm:close-midi oldid))))
-  (pm:list-devices)
   (pm:terminate)
   (pm:initialize)
   (setf *midi-out3* (pm:open-output midi-device-id 1024 0)))
@@ -19,7 +29,7 @@
 (defun ensure-midi ()
   (if *midi-out3*
       t
-      (error "MIDI not set up. Use (pm-reload DEVICEID)" )))
+      (error "MIDI not set up. Use (setup-midi)" )))
 
 ;; TODO - don't use globals
 (defun pm-terminate ()
@@ -86,9 +96,9 @@ Works like `make-message` but combines `upper` and `lower` to the status byte."
   "Stop multiple midi notes."
   (loop :for value :in values :do (note-off value channel stream)))
 
-(defun note-play (note &optional (velocity 80) (channel 1))
-  (pm:write-short-midi *midi-out3* 0 (pm:note-on channel (note-value note) 80)))
-(defun note-stop (note &optional (channel 1))
+(defun note-play (note &optional (velocity 80) (channel 0))
+  (pm:write-short-midi *midi-out3* 0 (pm:note-on channel (note-value note) velocity)))
+(defun note-stop (note &optional (channel 0))
   (princ (note-value note))
   (pm:write-short-midi *midi-out3* 0 (pm:note-off channel (note-value note) 0)))
 

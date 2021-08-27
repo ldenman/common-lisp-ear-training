@@ -77,25 +77,3 @@
       (incf time duration))
     result))
 
-;; Transform list of rhythmic notes to midi messages
-;; Output suitable for writing to midi file via MIDI lib
-(defun rhythmic-notes->midi-messages (notes/rhythms bpm)
-  (let ((result '())
-	(time 0))
-    (dolist (item notes/rhythms)
-      (let ((rhythm (cdr item))
-	    (note (car item)))
-	(setf result (append result (note->midi-message note time (+ time (rhythm->duration-scaled rhythm bpm)))))
-	(incf time (rhythm->duration-scaled rhythm bpm))))
-    result))
-
-;; Transform list of rhythmic notes to PORTMIDI midi events
-(defun rhythmic-notes->pm-events (notes/rhythms bpm &optional (*midi-channel* 0))
-  (let ((result '())
-	(time 0))
-    (dolist (item notes/rhythms)
-      (let ((rhythm (cdr item))
-	    (note (car item)))
-	(setf result (append result (list (make-event note time (+ time (rhythm->seconds rhythm bpm)) 80))))
-	(incf time (rhythm->seconds rhythm bpm))))
-    result))
