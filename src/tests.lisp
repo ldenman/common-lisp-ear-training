@@ -26,42 +26,60 @@
 (deftest test-major-scale-solfege ()
   (check
     (equal
-     '(LA TI DO RE MI FA SO LA TI DO RE MI FA SO LA TI DO RE MI FA SO LA TI DO RE MI FA SO LA TI DO RE MI FA SO LA TI DO RE MI FA SO LA TI DO RE MI FA SO LA TI DO)
+     '(LA TI
+       DO RE MI FA SO LA TI
+       DO RE MI FA SO LA TI
+       DO RE MI FA SO LA TI
+       DO RE MI FA SO LA TI
+       DO RE MI FA SO LA TI
+       DO RE MI FA SO LA TI
+       DO RE MI FA SO LA TI DO)
      (-> (make-scale 'c4 (major-scale-template))
        (mapnotes #'note-solfege)))))
 
 (deftest test-minor-scale-solfege ()
   (check
     (equal
-     '(TE DO RE ME FA SO LE TE DO RE ME FA SO LE TE DO RE ME FA SO LE TE DO RE ME FA SO LE TE DO RE ME FA SO LE TE DO RE ME FA SO LE TE DO RE ME FA SO LE TE DO)
+     '(TE DO RE ME FA SO LE TE
+       DO RE ME FA SO LE TE
+       DO RE ME FA SO LE TE
+       DO RE ME FA SO LE TE
+       DO RE ME FA SO LE TE
+       DO RE ME FA SO LE TE
+       DO RE ME FA SO LE TE DO)
      (-> (make-scale 'c4 (minor-scale-template))
        (mapnotes #'note-solfege)))))
 
 (deftest test-find-solfege ()
   (let ((solfege 'do)
 	(l (list (make-note 'c4 72 'do))))
-    (check
-      (equal 'do
-	     (note-solfege (find-solfege solfege l))))))
+    (check (equal 'do (note-solfege (find-solfege solfege l))))))
 
 (deftest test-find-solfege2 ()
-  (let* ((solfege 'do)
-	 (notes (attr 'notes (make-scale 'c4)))
-	 (found-note (find-solfege2 solfege notes 5)))
+  (let* ((notes (attr 'notes (make-scale 'c4)))
+	 (found-note (find-solfege2 'do notes 5)))
+
+    ;; verify note found in relative octave 
     (check (= 5 (note-relative-octave found-note)))
+    ;; verify note found by solfege
     (check (equal 'do (note-solfege found-note)))))
 
 (deftest test-find-solfege2-chromatic ()
-  (let* ((solfege 'di)
+  (let* ((relative-octave 5)
 	 (notes (attr 'notes (make-scale 'c4 (chromatic-scale-template))))
-	 (found-note (find-solfege2 solfege notes 5)))
-    (check found-note)
+	 (found-note (find-solfege2 'di notes relative-octave))
+	 (enharmonic-note (find-solfege2 'ra notes relative-octave)))
+
+    ;; verify note found in octave
     (check (= 5 (note-relative-octave found-note)))
-    (check (equal '(di ra) (note-solfege found-note)))))
+    ;; verify note found by solfege
+    (check (equal '(di ra) (note-solfege found-note)))
+    ;; verify note found by enharmonic solfege
+    (check (equal '(di ra) (note-solfege enharmonic-note)))))
 
 (deftest test-scale-octave-range ()
-  (check
-    (equal '(4 5)
+  ;; verify scale-octave-range returns notes within range
+  (check (equal '(4 5)
 	   (-> (make-scale 'c4)
 	     (lambda (scale)
 	       (scale-octave-range '4 '5 (attr 'notes scale)))
@@ -79,17 +97,18 @@
 (defun checker-fn (a b)
   (eval `(check (equal (quote ,a) (quote ,b)))))
 
-(defun check-note-resolutions (assertions &optional (scale (make-scale 'c4)))
+(defun check-note-resolutions (note->resolutions &optional (scale (make-scale 'c4)))
   (let ((notes (attr 'notes scale)))
     (let ((result t))
-      (dolist (assertion assertions)
+      (dolist (n->r note->resolutions)
 	(unless (checker-fn
-		   (second assertion)
-		   (test-resolve-note-helper (find-solfege2 (car assertion) notes) notes))
+		 (second n->r)
+		 (test-resolve-note-helper (find-solfege2 (first n->r) notes) notes))
 	  (setf result 'f)))
       result)))
 
 (deftest test-resolve-notes-major-scale ()
+  ;; verify diatonic notes can resolve to DO
   (check-note-resolutions '((do  (do))
 			    (re  (re do))
 			    (mi  (mi re do))
@@ -99,6 +118,7 @@
 			    (ti  (ti do)))))
 
 (deftest test-resolve--chromatic-scale ()
+  ;; verify chromatic notes can resolve to DO
   (check-note-resolutions '(( DO (do))
 			    ( DI ((DI RA) DO))
 			    ( RA ((DI RA) DO))
@@ -119,16 +139,15 @@
 
 
 ;;;; TEST DIATONIC CHORDS ;;;;
-
 ; seventh chords
 (deftest test-seventh-chords ()
-  (let ((chords   (->
-     	            (make-scale 'c4)
+  (let ((chords   (-> (make-scale 'c4)
 		    (scale-range3 'c4 'b6) 
 		    (make-scale-chords)
 		    (scale-chords)
-		    (sevenths)
-		    (maplis #'chord-notes))))
+		    (sevenths))))
+
+    ;; verify 7ths are returned
     (check (equal '((DO MI SO TI)
 		    (RE FA LA DO)
 		    (MI SO TI RE)
@@ -137,7 +156,7 @@
 		    (LA DO MI SO)
 		    (TI RE FA LA)
 		    (DO MI SO TI))
-		  (mapcar (lambda (n) (mapcar #'note-solfege n)) chords)))))
+		  (mapcar #'chord-solfege chords)))))
 
 ; triads
 (deftest test-triad-chords ()
@@ -146,8 +165,9 @@
 		    (scale-range3 'c4 'g5) 
 		    (make-scale-chords)
 		    (scale-chords)
-		    (triads)
-		    (maplis #'chord-notes))))
+		    (triads))))
+
+    ;; verify triads are returned
     (check (equal '((DO MI SO)
 		    (RE FA LA)
 		    (MI SO TI)
@@ -156,6 +176,45 @@
 		    (LA DO MI)
 		    (TI RE FA)
 		    (DO MI SO))
-		  (mapcar (lambda (n) (mapcar #'note-solfege n)) chords)))))
+		  (mapcar #'chord-solfege chords)))))
 
 ;;;; TEST DIATONIC CHORDS ;;;;
+(deftest test-chord-sequence ()
+  (let* ((chord-data (make-scale-chords (make-scale 'c4)))
+	 (sequence '(I II- III- IV V VI- VII I))
+	 (chords (chord-sequence sequence
+				 (scale-chords chord-data)
+				 (attrs chord-data 'scale 'notes))))
+
+    ;; verify default octave
+    (check (= 4 (-> chords
+		  #'chord-sequence-chords
+		  #'car
+		  #'chord-notes
+		  #'car
+		  #'note-octave)))
+    ;; verify chord sequence stored
+    (check (equal sequence (chord-sequence-romans chords)))
+
+    ;; verify solfege realized from roman numeral pattern
+    (check (equal '((DO MI SO)
+		    (RE FA LA)
+		    (MI SO TI)
+		    (FA LA DO)
+		    (SO TI RE)
+		    (LA DO MI)
+		    (TI RE FA)
+		    (DO MI SO))
+		  (mapcar #'chord-solfege (triads (chord-sequence-chords chords)))))))
+
+(deftest test-find-chord ())
+(deftest test-chord-builder ())
+(deftest test-chord-butroot ())
+(deftest test-chord-butfifth ())
+(deftest test-chord-drop-root ())
+(deftest test-chord-invert-upper ())
+(deftest test-make-scale-chords ())
+(deftest test-chord-invert ())
+(deftest test-chord-roman-numerals ())
+(deftest test-scale-chord-filter ())  
+(deftest test-chord-octave-filter ())

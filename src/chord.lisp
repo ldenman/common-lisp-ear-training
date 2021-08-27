@@ -3,7 +3,7 @@
 (defun find-chord (octave romand-num chord-list scale)
   (find-if
    (lambda (y)
-     (= (relative-octave (find-note-in-octave (chord-tone-note (car (cdr y))) (scale-notes scale)))
+     (= (note-relative-octave (chord-tone-note (car (cdr y))))
 	octave))
    (find-all-if (lambda (chord-tones) (eq romand-num (car chord-tones))) chord-list )))
 
@@ -43,7 +43,10 @@
 
 ;; CHORDS functions
 (defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
+(defun chord-sequence-romans (chord-sequence) (mapcar #'car chord-sequence))
 (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
+(defun chord-solfege (chord)
+  (mapcar #'note-solfege (mapcar #'chord-tone-note chord)))
 (defun chord-root (chord)
   (find-if (lambda (chord-tone) (= 1 (attr 'degree chord-tone))) chord))
 
