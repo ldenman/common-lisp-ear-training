@@ -7,7 +7,7 @@
 (defun my-midi-setup ()
   (launch-qsynth)
   (sleep 2)
-  (pm-reload 2)
+  (setup-midi)
   (smoke-test))
 
 (defun launch-qsynth ()
@@ -19,6 +19,7 @@
   (let ((id (read-line)))
     (pm-reload (parse-integer id)))
   (smoke-test))
+
 
 ;; TODO - don't use globals
 (defun pm-reload (midi-device-id)

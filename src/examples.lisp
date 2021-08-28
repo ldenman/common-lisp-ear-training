@@ -18,37 +18,32 @@
    bpm))
 
 
-(defun seq2 (melody rhythm &optional (scale (scale-range 'c2 'c5 (make-scale 'c3))) (bpm 60))
+(defun seq2 (melody rhythm &optional (scale (make-scale 'c3)) (bpm 60))
   (rhythmic-notes->pm-events
    (make-rhythmic-notes
     melody
     rhythm)
    bpm))
 
-(defun song2 (l &optional (scale (scale-range 'c2 'c5 (make-scale 'c4))) (octave 4))
-(if l
-	    (cond ((listp (car l))
-		   (song2 (cdr l) scale (cdr (car l))))
-		  ((numberp (car l))
-		   (cons (car l) (song2 (cdr l) scale octave)))
-		  (t (cons (find-solfege2 (car l) (attr 'notes scale) octave) (song2 (cdr l) scale octave))))))
+(defun song2 (l &optional (scale (make-scale 'c4)) (octave 4))
+  (if l
+      (cond ((listp (car l))
+	     (song2 (cdr l) scale (cdr (car l))))
+	    ((numberp (car l))
+	     (cons (car l) (song2 (cdr l) scale octave)))
+	    (t (cons (find-solfege2 (car l) (attr 'notes scale) octave) (song2 (cdr l) scale octave))))))
 
-(song
+(my-midi-setup)
+(smoke-test)
+
+(play-seq2
+ (song
  (lengthen-seq
   (song2 (myp '(do 4 do do 8 re mi 4
 		mi 8 re mi fa so 2
 		+ do 8 do do - so so so
-		mi mi mi - do do do
-		so 4 fa 8 mi 4 re 8 do 1)))))
-
-(song (lengthen-seq (song2 (myp '(do 4 do do 8 re mi 4
-	       mi 8 re mi fa so 2
-	       + do 8 do do - so so so
-	       mi mi mi - do do do
-				  so 4 fa 8 mi 4 re 8 do 1)))))
-
-
-
+		mi mi mi do do do
+		so 4 fa 8 mi 4 re 8 do 1))))))
 
 
 (defun song (l)
@@ -109,13 +104,17 @@
 
 (defun myp (s &optional (octave 4))
   (if s
-      (cond ((and (listp (car s))
-		  (member (car (car s)) '(+ -)))
-	     (let ((newoctave (funcall (car (car s)) octave (or (car (cdr (car s))) 1))))
-	       (cons (cons 'octave newoctave) (myp (cdr s) newoctave))))
-	    ((member (car s) '(+ -))
-	     (myp (push (list (car s)) (cdr s)) (funcall (car s) 1 octave)))
-	    (t (cons (car s) (myp (cdr s)))))))
+      (cond
+	((member (car s) '(+ -))
+	 (let ((newoct (if (equal '+ (car s))
+			   (+ 1 octave)
+			   (- octave 1))))
+	 (myp (append
+	       (list (cons 'octave newoct))
+	       (cdr s)) newoct)))
+      ((atom (car s))
+       (cons (car s) (myp (cdr s) octave)))
+      (t (cons (car s) (myp (cdr s) octave))))))
 
 ;; (let ((s '((+ 4)
 ;; 	   do 4
