@@ -182,22 +182,21 @@
 (deftest test-chord-sequence ()
   (let* ((chord-data (make-scale-chords (make-scale 'c4)))
 	 (sequence '(I II- III- IV V VI- VII I))
-	 (chords (chord-sequence sequence
-				 (scale-chords chord-data)
-				 (attrs chord-data 'scale 'notes))))
-
+	 (chords (chord-sequence2 sequence chord-data)))
     ;; verify default octave
-    (check (= 4 (-> chords
-		  #'chord-sequence-chords
-		  #'car
-		  #'chord-notes
-		  #'car
-		  #'note-octave)))
-    ;; verify chord sequence stored
-    (check (equal sequence (chord-sequence-romans chords)))
+    (check
+      (= 3 (-> chords
+	     #'chord-sequence-chords
+	     #'car
+	     #'chord-notes
+	     #'car
+	     #'note-octave))
+
+      ;; verify chord sequence stored
+      (equal sequence (chord-sequence-romans chords))
 
     ;; verify solfege realized from roman numeral pattern
-    (check (equal '((DO MI SO)
+      (equal '((DO MI SO)
 		    (RE FA LA)
 		    (MI SO TI)
 		    (FA LA DO)
@@ -207,14 +206,16 @@
 		    (DO MI SO))
 		  (mapcar #'chord-solfege (triads (chord-sequence-chords chords)))))))
 
-(deftest test-find-chord ())
-(deftest test-chord-builder ())
-(deftest test-chord-butroot ())
-(deftest test-chord-butfifth ())
-(deftest test-chord-drop-root ())
-(deftest test-chord-invert-upper ())
-(deftest test-make-scale-chords ())
-(deftest test-chord-invert ())
-(deftest test-chord-roman-numerals ())
-(deftest test-scale-chord-filter ())  
-(deftest test-chord-octave-filter ())
+
+
+;; (deftest test-find-chord ())
+;; (deftest test-chord-builder ())
+;; (deftest test-chord-butroot ())
+;; (deftest test-chord-butfifth ())
+;; (deftest test-chord-drop-root ())
+;; (deftest test-chord-invert-upper ())
+;; (deftest test-make-scale-chords ())
+;; (deftest test-chord-invert ())
+;; (deftest test-chord-roman-numerals ())
+;; (deftest test-scale-chord-filter ())  
+;; (deftest test-chord-octave-filter ())

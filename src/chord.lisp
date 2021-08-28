@@ -1,5 +1,14 @@
 (in-package :ld-music)
 
+(defun find-chord2 (octave romand-num chord-data)
+  (find-if
+   (lambda (y)
+     (= (note-relative-octave (chord-tone-note (car (cdr y)))) octave))
+   (find-all-if
+    (lambda (chord-tones)
+      (eq romand-num (car chord-tones)))
+    (attr 'roman-numeral-chords chord-data))))
+
 (defun find-chord (octave romand-num chord-list scale)
   (find-if
    (lambda (y)
@@ -73,6 +82,8 @@
 (defun ninths (myl) (chord-take 5 myl))
 (defun elevenths (myl) (chord-take 6 myl))
 (defun thirteenths (myl) (chord-take 7 myl))
+(defun chord-triad (chord)
+  (take 3 chord))
  
 (defun chord-invert (chord scale)
   (attr= (note-octave-up (chord-tone-note (car chord)) scale) 'note (car chord))
@@ -99,6 +110,14 @@
 	     chord)
 
 	    ) chord-list))
+
+(defun chord-sequence2 (chord-sequence chord-data &optional (octave 4))
+  (if chord-sequence
+      (if (and (listp (car chord-sequence))
+	       (eq 'octave (car (car chord-sequence))))
+	  (chord-sequence2 (cdr chord-sequence) chord-data (cdr (car chord-sequence)))
+	  (cons (find-chord2 octave (car chord-sequence) chord-data)
+		(chord-sequence2 (cdr chord-sequence) chord-data octave)))))
 
 (defun chord-sequence (chord-sequence chords scale &optional (octave 4))
   (if chord-sequence

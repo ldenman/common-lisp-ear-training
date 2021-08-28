@@ -160,9 +160,12 @@
 	    note
 	    (find-solfege2 solfege (cdr notes) octave)))))
 
-(defun solfege->notes (scale solfege-list)
-  (mapcar (lambda (s) (find-solfege s (scale-notes scale))) solfege-list))
-
+(defun solfege->notes (scale solfege-list &optional (octave 4))
+  (if solfege-list
+      (cond ((listp (car solfege-list))
+	     (solfege->notes scale (cdr solfege-list) (cdr (car solfege-list))))
+	    (t (cons (find-solfege2 (car solfege-list) (scale-notes scale) octave)
+		     (solfege->notes scale (cdr solfege-list) octave))))))
 ;;;; SOLFEGE RELATED ;;;;
 
 (defun find-prev-do-helper (idx scale)

@@ -1,132 +1,3 @@
-* Features
-** Completed
-- [X] create chord sequences using roman numerals
-  #+BEGIN_SRC lisp :package ld-music :exports both
-    (let ((scale (make-scale 'c4))
-	  (progression '(I IV V I)))
-      (triads (chord-sequence2 progression scale)))))
-  #+END_SRC
-
-  #+RESULTS:
-  | I  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) |
-  | IV | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) (DEGREE . 3)) |
-  | V  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) (DEGREE . 3)) |
-  | I  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) (DEGREE . 3)) |
-
-- [X] create melodies using solfege syllables
-  
-  #+BEGIN_SRC lisp :package ld-music :exports both
-    (-> (make-scale 'c4)
-	(lambda (scale)
-	  (scale-range 'c3 'c5 scale))
-	(lambda (scale)
-	  (solfege->notes scale '(DO RE MI FA SO LA TI DO))))
-  #+END_SRC
-
-  #+RESULTS:
-  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (OCTAVE . 4) |
-  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (OCTAVE . 4) |
-  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
-
-- [X] add rhythm to melodic sequences
-
-  #+BEGIN_SRC lisp :package ld-music :exports code
-    (-> (make-scale 'c4)
-	(lambda (scale)
-	  (scale-range 'c3 'c5 scale))
-	(lambda (scale)
-	  (solfege->notes scale '(DO RE MI FA SO LA TI DO)))
-	(lambda (notes)
-	  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8))))
-  #+END_SRC
-
-  #+RESULTS:
-  : ((((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) . 2) (((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) . 2) (((TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) . 8) (((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 8))
-
-- [X] preview sequences in-memory via portmidi
-
-  #+BEGIN_SRC lisp :package ld-music :exports both
-    (let* ((bpm 60)
-	   (events (-> (make-scale 'c4)
-		       (lambda (scale)
-			 (solfege->notes (scale-range 'c3 'c5 scale) '(DO RE MI FA SO LA TI DO)))
-		       (lambda (notes)
-			 (rhythmic-notes->pm-events 
-			  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)) bpm)))))
-      events)
-  #+END_SRC
-
-  #+RESULTS:
-  | (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | (ON-TIME . 0)   | (OFF-TIME . 1)   | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) | (ON-TIME . 1)   | (OFF-TIME . 2)   | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) | (ON-TIME . 2)   | (OFF-TIME . 3)   | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) | (ON-TIME . 3)   | (OFF-TIME . 4)   | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) | (ON-TIME . 4)   | (OFF-TIME . 6)   | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) | (ON-TIME . 6)   | (OFF-TIME . 8)   | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) | (ON-TIME . 8)   | (OFF-TIME . 8.5) | (VELOCITY . 80) |
-  | (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | (ON-TIME . 8.5) | (OFF-TIME . 9.0) | (VELOCITY . 80) |
-
-  - Use the #'play-events function
-
-  #+BEGIN_SRC lisp :package ld-music :exports code
-  (let* ((bpm 60)
-	 (events (-> (make-scale 'c4)
-		     (lambda (scale)
-		       (solfege->notes (scale-range 'c3 'c5 scale) '(DO RE MI FA SO LA TI DO)))
-		     (lambda (notes)
-		       (rhythmic-notes->pm-events (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)) bpm)))))
-    (play-events events))
-#+END_SRC
-- [X] write sequences to MIDI file
-  #+BEGIN_SRC  lisp :package ld-music :exports code
-    (-> (make-scale 'c4)
-	(lambda (scale)
-	  (scale-range 'c3 'c5 scale))
-	(lambda (scale)
-	  (solfege->notes scale '(DO RE MI FA SO LA TI DO)))
-	(lambda (notes)
-	  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)))
-	(lambda (rhythmic-notes)
- 	  (write-midi-file-format-1 "myoutput.midi" rhythmic-notes)))
-  #+END_SRC
-
-  #+RESULTS:
-  : NIL
-
-- [X] ear training - random rhythmic melodies following cadence
-  #+BEGIN_SRC lisp :package ld-music :exports code
-    (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 4))
-
-  #+END_SRC
-
-- [X] ear training - single note following cadence
-  #+BEGIN_SRC lisp :package ld-music :exports code
-    (play-cadence-note-sequence (make-random-note-sequence (make-scale 'c4)))
-  #+END_SRC
-
-- [X] ear training - chord progression following cadence
-  #+BEGIN_SRC lisp :package ld-music :exports code
-    (play-cadence-progression-sequence (make-random-progression-sequence (make-scale 'c4)))
-  #+END_SRC
-
-- [X] ear training game - chord game
-  #+BEGIN_SRC lisp :package ld-music :exports code
-    (play-chord-trainer)
-  #+END_SRC
-
-- [X] ear training game - bass melody game
-  #+BEGIN_SRC lisp :package ld-music :exports code
-    (play-bass-game)
-  #+END_SRC
-
-** Upcoming
-- [ ] ear training game - melody game
-
 * Dependencies
 ** quicklisp
 - https://www.quicklisp.org/beta/#installation
@@ -590,6 +461,14 @@ that there is *absolute octaves* and *relative octaves*.
 ** Chord Tones
 
 ** Scale Chords
+Scales and chords are two sides of the same coin.
+
+*Scale chords* provide an object with access to chords and the scale from which they derived.
+
+- Scale :: the scale
+- Chords :: the list of chords
+- Roman Numberal Chords :: an ALIST associating a roman numeral with the chord
+
 
 * Data and Functions
 
@@ -1447,3 +1326,163 @@ and for playing an event (via portmidi).
   - should every file be in the same namespace?
   - scale templates can be defined as VARS instead of functions
   - consider using chromatic scale by default in scale logic and deducing other scales from that 
+
+* Features
+** Completed
+- [ ] create chord progressions using roman numerals
+  #+BEGIN_SRC lisp :package ld-music :exports both
+    (let* ((chord-data (make-scale-chords (make-scale 'c4)))
+	   (sequence '((octave . 4)
+		       I
+		       (octave . 3)
+		       VI-
+		       (octave . 4)
+		       II-
+		       (octave . 3)
+		       V
+		       (octave . 4)
+		       I))
+	   )
+      (triads
+       (chord-sequence-chords
+	(chord-sequence2 sequence chord-data))))
+  #+END_SRC
+
+  #+RESULTS:
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A3) (VALUE . 57) (SOLFEGE . LA) (RELATIVE-OCTAVE . 3) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G2) (VALUE . 55) (SOLFEGE . SO) (RELATIVE-OCTAVE . 3) (OCTAVE . 2)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B3) (VALUE . 59) (SOLFEGE . TI) (RELATIVE-OCTAVE . 3) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 5)) |
+
+  #+BEGIN_SRC lisp :package ld-music :exports both
+      (let* ((chord-data (make-scale-chords (make-scale 'c4)))
+	     (sequence '(I II- III- IV V VI- VII I))
+	     (chords (chord-sequence2 sequence chord-data)))
+	(triads (mapcdr chords)))
+  #+END_SRC
+
+  #+RESULTS:
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (RELATIVE-OCTAVE . 5) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (RELATIVE-OCTAVE . 5) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C4) (VALUE . 72) (SOLFEGE . DO) (RELATIVE-OCTAVE . 5) (OCTAVE . 4)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E4) (VALUE . 76) (SOLFEGE . MI) (RELATIVE-OCTAVE . 5) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (RELATIVE-OCTAVE . 4) (OCTAVE . 4)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . D4) (VALUE . 74) (SOLFEGE . RE) (RELATIVE-OCTAVE . 5) (OCTAVE . 4)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . F4) (VALUE . 77) (SOLFEGE . FA) (RELATIVE-OCTAVE . 5) (OCTAVE . 4)) (DEGREE . 5)) |
+  | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 1)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 3)) | ((TYPE . CHORD-TONE) (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (RELATIVE-OCTAVE . 4) (OCTAVE . 3)) (DEGREE . 5)) |
+
+- [X] create melodies using solfege syllables
+  
+  #+BEGIN_SRC lisp :package ld-music :exports both
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (scale-range 'c3 'c5 scale))
+	(lambda (scale)
+	  (solfege->notes scale '(DO RE MI FA SO LA TI DO))))
+  #+END_SRC
+
+  #+RESULTS:
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+
+- [X] add rhythm to melodic sequences
+
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (scale-range 'c3 'c5 scale))
+	(lambda (scale)
+	  (solfege->notes scale '(DO RE MI FA SO LA TI DO)))
+	(lambda (notes)
+	  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8))))
+  #+END_SRC
+
+  #+RESULTS:
+  : ((((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) . 4) (((TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) . 2) (((TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) . 2) (((TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) . 8) (((TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) . 8))
+
+- [X] preview sequences in-memory via portmidi
+
+  #+BEGIN_SRC lisp :package ld-music :exports both
+    (let* ((bpm 60)
+	   (events (-> (make-scale 'c4)
+		       (lambda (scale)
+			 (solfege->notes (scale-range 'c3 'c5 scale) '(DO RE MI FA SO LA TI DO)))
+		       (lambda (notes)
+			 (rhythmic-notes->pm-events 
+			  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)) bpm)))))
+      events)
+  #+END_SRC
+
+  #+RESULTS:
+  | (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | (ON-TIME . 0)   | (OFF-TIME . 1)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . D3) (VALUE . 62) (SOLFEGE . RE) (OCTAVE . 3)) | (ON-TIME . 1)   | (OFF-TIME . 2)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . E3) (VALUE . 64) (SOLFEGE . MI) (OCTAVE . 3)) | (ON-TIME . 2)   | (OFF-TIME . 3)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . F3) (VALUE . 65) (SOLFEGE . FA) (OCTAVE . 3)) | (ON-TIME . 3)   | (OFF-TIME . 4)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . G3) (VALUE . 67) (SOLFEGE . SO) (OCTAVE . 3)) | (ON-TIME . 4)   | (OFF-TIME . 6)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . A4) (VALUE . 69) (SOLFEGE . LA) (OCTAVE . 4)) | (ON-TIME . 6)   | (OFF-TIME . 8)   | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . B4) (VALUE . 71) (SOLFEGE . TI) (OCTAVE . 4)) | (ON-TIME . 8)   | (OFF-TIME . 8.5) | (VELOCITY . 80) |
+  | (NOTE (TYPE . NOTE) (NAME . C3) (VALUE . 60) (SOLFEGE . DO) (OCTAVE . 3)) | (ON-TIME . 8.5) | (OFF-TIME . 9.0) | (VELOCITY . 80) |
+
+  - Use the #'play-events function
+
+  #+BEGIN_SRC lisp :package ld-music :exports code
+  (let* ((bpm 60)
+	 (events (-> (make-scale 'c4)
+		     (lambda (scale)
+		       (solfege->notes (scale-range 'c3 'c5 scale) '(DO RE MI FA SO LA TI DO)))
+		     (lambda (notes)
+		       (rhythmic-notes->pm-events (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)) bpm)))))
+    (play-events events))
+#+END_SRC
+- [X] write sequences to MIDI file
+  #+BEGIN_SRC  lisp :package ld-music :exports code
+    (-> (make-scale 'c4)
+	(lambda (scale)
+	  (scale-range 'c3 'c5 scale))
+	(lambda (scale)
+	  (solfege->notes scale '(DO RE MI FA SO LA TI DO)))
+	(lambda (notes)
+	  (make-rhythmic-notes notes '(4 4 4 4 2 2 8 8)))
+	(lambda (rhythmic-notes)
+ 	  (write-midi-file-format-1 "myoutput.midi" rhythmic-notes)))
+  #+END_SRC
+
+  #+RESULTS:
+  : NIL
+
+- [X] ear training - random rhythmic melodies following cadence
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 4))
+
+  #+END_SRC
+
+- [X] ear training - single note following cadence
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-cadence-note-sequence (make-random-note-sequence (make-scale 'c4)))
+  #+END_SRC
+
+- [X] ear training - chord progression following cadence
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-cadence-progression-sequence (make-random-progression-sequence (make-scale 'c4)))
+  #+END_SRC
+
+- [X] ear training game - chord game
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-chord-trainer)
+  #+END_SRC
+
+- [X] ear training game - bass melody game
+  #+BEGIN_SRC lisp :package ld-music :exports code
+    (play-bass-game)
+  #+END_SRC
+
+** Upcoming
+- [ ] ear training game - melody game
+
