@@ -18,5 +18,6 @@
                  (:file "sequencer")
                  (:file "rhythm")
 		 (:file "event")
-		 (:file "test")
-		 (:file "tests")		 ))))
+		 (:file "dsl")
+		 (:file "t/test")
+		 (:file "t/tests")))))

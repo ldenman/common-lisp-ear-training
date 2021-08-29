@@ -7,26 +7,36 @@
 (defun my-midi-setup ()
   (launch-qsynth)
   (sleep 2)
-  (setup-midi)
-  (smoke-test))
+  (pm:initialize)
+  (setup-midi))
+
+(defun midi-unload ()
+  (pm-terminate)
+  (kill-qsynth))
 
 (defun launch-qsynth ()
   (uiop:launch-program "qsynth"))
+(defun kill-qsynth ()
+  (uiop:run-program "killall -9 qsynth" :ignore-error-status t))
 
 (defun setup-midi ()
   (princ "CHOOSE YOUR MIDI DEVICE")
+  (pm:initialize)
   (princ (pm:list-devices))
   (let ((id (read-line)))
     (pm-reload (parse-integer id)))
   (smoke-test))
-
 
 ;; TODO - don't use globals
 (defun pm-reload (midi-device-id)
   (pm:terminate)
   (pm:initialize)
   (setf *midi-out3* (pm:open-output midi-device-id 1024 0)))
-
+;(pm:close-midi *midi-out3*)
+;(pm:list-devices)
+;(setup-midi)
+;(pm-reload 2)
+;(smoke-test)
 (defun ensure-midi ()
   (if *midi-out3*
       t
@@ -37,8 +47,8 @@
   (if *midi-out3*
       (progn
 	(let ((oldid *midi-out3*))
-	  (setf *midi-out3* nil)
-	  (pm:close-midi oldid))))
+	  (pm:close-midi oldid)
+	  (setf *midi-out3* nil))))
   (pm:list-devices)
   (pm:terminate))
 
