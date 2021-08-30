@@ -1,49 +1,7 @@
-* Dependencies
-** quicklisp
-- https://www.quicklisp.org/beta/#installation
-** *sbcl* dependent
-- I am using SBCL and the #'schedule fn (in sequencer.lisp) spawns a thread. I believe the thread functionality is SBCL dependent.
-- The use of #'sb-ext:seed-random-state function is SBCL dependent
+This is my experminetal pet project and is not meant for public use IMHO.
 
-** portmidi - Download it locally
-This depends on the *portmidi* library to play midi in-memory to a
-hardware or software midi device of your choosing.
-
-  - https://github.com/chfin/cl-portmidi
-  - cd ~/quicklisp/local-projects
-  - git clone https://github.com/chfin/cl-portmidi.git
-
-** midi library - Download it locally
-The MIDI library provides the ability to read/write midi files.
-
-  - cd ~/quicklisp/local-projects
-  - git clone https://github.com/ldenman/midi
-    
-** SLIME/SWANK :optional:investigate:
-- I seem to need this file to get SLIME/SWANK to work with portmidi:
-
-#+begin_example
-(setf SWANK:*COMMUNICATION-STYLE* :FD-HANDLER)
-#+end_example
-
-* Setup
-
-** Qsynth settings
-I am using the Qsynth software synth with following settings YMMV:
-
-- MIDI
-  - MIDI DRIVER: alsa_seq
-- AUDIO
-  - AUDIO DRIVER: jack
-
-** Load project
-#+begin_src lisp
-    (ql:quickload "ld-music")
-    (in-package :ld-music)
-#+end_src
-
-#+RESULTS:
-: #<PACKAGE "LD-MUSIC">
+You may be interested in some other Common Lisp music libraries below:
+  - https://github.com/MegaLoler/Music
 
 * Background
   #+begin_quote
@@ -61,8 +19,6 @@ What kind of musical information is there to represent? To start... *Notes, Scal
 - *Chords* - collections of notes usually derived from a scale
 
 This program deals only with the notes on a standard 88 key piano as limiting the notes to 88 seems to be practical at this time.
-
-
 
 ** High level ideas
 
@@ -91,6 +47,46 @@ This program deals only with the notes on a standard 88 key piano as limiting th
   - Ex.) The most common chord progression: I V VI- IV
   - Ex.) The plagal cadence: I IV I
   - Ex.) The cycle V progression: I IV VII III- VI- III- V I
+
+* Dependencies
+** quicklisp
+- https://www.quicklisp.org/beta/#installation
+** *sbcl* dependent
+- I am using SBCL and the #'schedule fn (in sequencer.lisp) spawns a thread. I believe the thread functionality is SBCL dependent.
+- The use of #'sb-ext:seed-random-state function is SBCL dependent
+
+** portmidi - Download it locally
+This depends on the *portmidi* library to play midi in-memory to a
+hardware or software midi device of your choosing.
+
+  - https://github.com/chfin/cl-portmidi
+  - cd ~/quicklisp/local-projects
+  - git clone https://github.com/chfin/cl-portmidi.git
+
+** midi library - Download it locally
+The MIDI library provides the ability to read/write midi files.
+
+  - cd ~/quicklisp/local-projects
+  - git clone https://github.com/ldenman/midi
+    
+* Setup
+
+** Qsynth settings
+I am using the Qsynth software synth with following settings YMMV:
+
+- MIDI
+  - MIDI DRIVER: alsa_seq
+- AUDIO
+  - AUDIO DRIVER: jack
+
+** Load project
+#+begin_src lisp
+    (ql:quickload "ld-music")
+    (in-package :ld-music)
+#+end_src
+
+#+RESULTS:
+: #<PACKAGE "LD-MUSIC">
 
 * MIDI Smoke testing
 ** List the midi devices available on your system:
@@ -468,7 +464,6 @@ Scales and chords are two sides of the same coin.
 - Scale :: the scale
 - Chords :: the list of chords
 - Roman Numberal Chords :: an ALIST associating a roman numeral with the chord
-
 
 * Data and Functions
 
@@ -1316,7 +1311,6 @@ and for playing an event (via portmidi).
    (defun lengthen-seq (l &optional (current-num 0))
    #+end_example
 
-
 * Issues
   - setting slot-value 'midi:dd/nn/cc/bb doesn't work out of the box
     because not exported. had to fork cl-midi library and add exports
@@ -1485,4 +1479,10 @@ and for playing an event (via portmidi).
 
 ** Upcoming
 - [ ] ear training game - melody game
-
+* Ideas for features.
+  - represent secondary dominants
+  - sequence chords and melodies
+  - represent inverted chords
+  - add rhythm to chord sequences
+  - support midi instruments
+  - add pentatonic ear training exercises

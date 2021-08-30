@@ -52,16 +52,16 @@
 
 (defun play-tonic-subdominant-dominant (scale)
   (progn
-    (note-play (note-octave-down (car scale)))
+;    (note-play (note-octave-down (car scale)))
     (solfege-chord '(DO MI SO) scale)
     (solfege-chord '(FA LA DO) scale)
     (solfege-chord '(SO TI RE) scale)
 
     (play-tonic scale)))
 
-(defun play-tonic-subdominant-dominant2 (scale)
+(defun play-tonic-subdominant-dominant2 (scale &optional (octave 4))
   (chord-sequence-play
-   (chord-sequence '(I IV V I) (triads (chord-builder (scale-notes scale))) scale 4 ) 0.5))
+   (chord-sequence '(I IV V I) (triads (chord-builder (scale-notes scale))) scale octave ) 0.5))
 
 (defun play-tonic-subdominant-dominant3 (scale)
   (chord-sequence-play

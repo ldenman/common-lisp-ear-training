@@ -103,10 +103,13 @@
 			      (intern (format nil "~A~d" random-letter 4))
 			      template)))
 ;; external
-(defun random-scale2 (template)
+(defun random-scale2 (template &optional range)
   (let* ((letters '(A B C D E F G C# D# F# G# A#))
-	 (random-letter (nth (random (length letters)) letters)))
-    (make-scale (intern (format nil "~A~d" random-letter 4)) template)))
+	 (random-letter (nth (random (length letters)) letters))
+	 (scale (make-scale (intern (format nil "~A~d" random-letter 4)) template)))
+    (if range
+	(scale-range3 scale (intern (format nil "~A~d" random-letter (car range))) (intern (format nil "~A~d" random-letter (cdr range))))
+	scale)))
 
 (defun random-major-scale () (random-scale (major-scale-template)))
 (defun random-major-scale2 () (random-scale2 (major-scale-template)))
@@ -207,6 +210,13 @@
       (if (note-solfege-equalp (car notes) 'do)
 	  (scale-octave-range-helper o1 o2 notes)
 	  (scale-octave-range o1 o2 (cdr notes)))))
+
+(defun scale-octave-range2 (o1 o2 scale)
+  (if notes
+      (if (note-solfege-equalp (car notes) 'do)
+	  (scale-octave-range-helper o1 o2 notes)
+	  (scale-octave-range o1 o2 (cdr notes)))))
+
 
 ;;;; Note Resolutions ;;;;
 (defun resolve-down (note scale)

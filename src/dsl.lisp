@@ -66,12 +66,11 @@
 ;;;; END RHYTHM HANLDER ;;;;
 
 
+
 ;;;; DSL PIPELINE ;;;;
 (defun ->rhythmic-notes (l)
   "convert the DSL list of notes rhythms to rhytmic note pairs"
-  (let* ((foo (split-seq #'numberp l))
-	 (rhythm (car foo))
-	 (melody (cdr foo)))
+  (destructuring-bind (rhythm . melody) (split-seq #'numberp l)
     (make-rhythmic-notes melody rhythm)))
 
 (defun solfadsl (dsl-v1 &optional (bpm 60))
