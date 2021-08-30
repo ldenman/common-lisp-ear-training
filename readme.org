@@ -96,30 +96,28 @@ I have these functions in my ~/.emacs file to quickly reload the project:
      (defun ld-music-reload ()
        (interactive)
        (ld-music-unload)
-       (ld-music-reload))
+       (ld-music-load))
 
      (defun ld-music-unload ()
        (interactive)
-       (slime-eval '(ld-music:midi-unload))
-       (sit-for 1)
-       (slime-quit-lisp)
-       (kill-buffer "*inferior-lisp*"))
+       (when (slime-connected-p)
+	 (slime-eval '(ld-music:midi-unload))))
+
+     (defun ld-music-unload-hard ()
+       (interactive)
+       (when (slime-connected-p)
+	 (slime-quit-lisp)
+	 (sit-for 1)
+	 (slime-kill-all-buffers)
+	 (sit-for 1)))
 
      (defun ld-music-load ()
        (interactive)
-       (slime)
-       (sit-for 2)
-       (slime-eval '(ql:quickload "ld-music"))
-       (slime-eval-async '(ld-music:my-midi-setup)))
-
-     ;https://github.com/slime/slime/issues/17
-     (defun slime-repl-skip-eval-when-reading (slime-eval &rest args)
-       (if (slime-reading-p)
-	   (user-error "Synchronous Lisp Evaluation suppressed while reading input")
-	   (apply slime-eval args)))
-
-     (advice-add 'slime-eval :around #'slime-repl-skip-eval-when-reading)
-     (advice-add 'slime-eval-async :around #'slime-repl-skip-eval-when-reading)
+       (if (not (slime-connected-p)) (slime))
+       (sit-for 1)
+       (when (slime-eval '(ql:quickload "ld-music"))
+	 (sit-for 1)
+	 (slime-eval-async '(ld-music:setup-midi))))
    #+end_src
 
 *** project testing functions
@@ -1370,6 +1368,45 @@ and for playing an event (via portmidi).
   - should every file be in the same namespace?
   - scale templates can be defined as VARS instead of functions
   - consider using chromatic scale by default in scale logic and deducing other scales from that 
+  - portmidi seems flakey in that sometimes the midi devices can't connect
+    #+begin_example
+      PortMidi: `Host error'
+	 [Condition of type SIMPLE-ERROR]
+
+      Restarts:
+       0: [RETRY] Retry SLIME REPL evaluation request.
+       1: [*ABORT] Return to SLIME's top level.
+       2: [ABORT] abort thread (#<THREAD "repl-thread" RUNNING {10026C1DD3}>)
+
+      Backtrace:
+	0: ((:METHOD CFFI:TRANSLATE-FROM-FOREIGN (T PORTMIDI::PM-ERROR-TYPE)) -10000 #<unused argument>) [fast-method]
+	1: (PORTMIDI:WRITE-MIDI #.(SB-SYS:INT-SAP #X7F552402ADA0) #.(SB-SYS:INT-SAP #X7F5531BF7FF0))
+	2: (PORTMIDI:WRITE-SHORT-MIDI #.(SB-SYS:INT-SAP #X7F552402ADA0) 0 5261456)
+	3: (SB-INT:SIMPLE-EVAL-IN-LEXENV (LD-MUSIC:SETUP-MIDI) #<NULL-LEXENV>)
+	4: (EVAL (LD-MUSIC:SETUP-MIDI))
+       --more--
+    #+end_example
+    #+begin_example
+      PortMidi: `Bad pointer'
+	 [Condition of type SIMPLE-ERROR]
+
+      Restarts:
+       0: [RETRY] Retry SLIME REPL evaluation request.
+       1: [*ABORT] Return to SLIME's top level.
+       2: [ABORT] abort thread (#<THREAD "repl-thread" RUNNING {10026C1DD3}>)
+
+      Backtrace:
+	0: ((:METHOD CFFI:TRANSLATE-FROM-FOREIGN (T PORTMIDI::PM-ERROR-TYPE)) -9995 #<unused argument>) [fast-method]
+	1: (PORTMIDI:CLOSE-MIDI #.(SB-SYS:INT-SAP #X7F552402ADA0))
+	2: (LD-MUSIC::PM-TERMINATE)
+	3: (LD-MUSIC::PM-RELOAD 2)
+	4: (LD-MUSIC:SETUP-MIDI)
+	5: (SB-INT:SIMPLE-EVAL-IN-LEXENV (LD-MUSIC:SETUP-MIDI) #<NULL-LEXENV>)
+	6: (EVAL (LD-MUSIC:SETUP-MIDI))
+       --more--
+
+    #+end_example
+    
 
 * Features
 ** Completed

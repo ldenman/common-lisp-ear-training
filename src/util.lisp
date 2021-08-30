@@ -2,7 +2,7 @@
 
 ;; Helpers
 (defun fdbug (code)
-  (dbug code)
+  (eval `(dbug ,code))
 )
 (defmacro dbug (code)
   `(progn (princ (format nil "~A" ,code))
