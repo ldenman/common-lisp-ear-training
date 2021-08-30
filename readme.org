@@ -70,7 +70,6 @@ The MIDI library provides the ability to read/write midi files.
   - git clone https://github.com/ldenman/midi
     
 * Setup
-
 ** Qsynth settings
 I am using the Qsynth software synth with following settings YMMV:
 
@@ -88,6 +87,57 @@ I am using the Qsynth software synth with following settings YMMV:
 #+RESULTS:
 : #<PACKAGE "LD-MUSIC">
 
+** Emacs Integrations
+   
+*** project reloading functions
+I have these functions in my ~/.emacs file to quickly reload the project:
+
+   #+begin_src elisp
+     (defun ld-music-reload ()
+       (interactive)
+       (ld-music-unload)
+       (ld-music-reload))
+
+     (defun ld-music-unload ()
+       (interactive)
+       (slime-eval '(ld-music:midi-unload))
+       (sit-for 1)
+       (slime-quit-lisp)
+       (kill-buffer "*inferior-lisp*"))
+
+     (defun ld-music-load ()
+       (interactive)
+       (slime)
+       (sit-for 2)
+       (slime-eval '(ql:quickload "ld-music"))
+       (slime-eval-async '(ld-music:my-midi-setup)))
+
+     ;https://github.com/slime/slime/issues/17
+     (defun slime-repl-skip-eval-when-reading (slime-eval &rest args)
+       (if (slime-reading-p)
+	   (user-error "Synchronous Lisp Evaluation suppressed while reading input")
+	   (apply slime-eval args)))
+
+     (advice-add 'slime-eval :around #'slime-repl-skip-eval-when-reading)
+     (advice-add 'slime-eval-async :around #'slime-repl-skip-eval-when-reading)
+   #+end_src
+
+*** project testing functions
+    #+begin_src elisp
+      (defun ld-music-runtests ()
+	(interactive)
+	(princ (slime-eval '(ld-music:run-tests))))
+
+      (define-minor-mode ld-music-test-mode
+	"ld-music-test-mode")
+
+      (defun ld-music-test ()
+	"run ld-music tests"
+	(when ld-music-test-mode
+	  (ld-music-runtest)))
+
+      (add-hook 'after-save-hook #'ld-music-test)
+    #+end_src
 * MIDI Smoke testing
 ** List the midi devices available on your system:
 

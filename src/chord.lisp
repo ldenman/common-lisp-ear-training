@@ -132,10 +132,6 @@
     (attr= (chord-roman-numerals chords) 'roman-numeral-chords chord-data)
     chord-data))
 
-(defun rebuild-chords ()
-  (lambda (chord-data)
-    (attr 'chords (make-scale-chords (attr 'scale chord-data)))))
-
 (defun octave-filter (octave)
   (lambda (chords)
     (remove-if-not

@@ -65,18 +65,15 @@
 
 (defun make-rhythmic-melody-sequence (scale measure-count octave)
   (let* ((rhythm (flatten (append (make-measures measure-count) '(1))))
-	 (melody-sequence (make-random-melody-sequence
-			   (make-scale 'd4) 3 3 (- (length rhythm) 1))))
+	 (melody-sequence (make-random-melody-sequence scale octave 3 (- (length rhythm) 1))))
     (make-cadence-sequence scale
 			   (make-rhythmic-notes (cadseq-select-melody melody-sequence) rhythm))))
 
 (defun make-random-progression-sequence (scale &optional (chord-type-fn #'triads))
   (let ((random-sequence
-	   (-> (make-scale-chords scale)
-	       (scale-chord-filter #'chord-type-filter chord-type-fn)
+	   (-> (make-scale-chords scale chord-type-fn)
 	       (scale-chord-filter #'chord-filter #'chord-butfifth)
-	       (scale-chord-filter #'chord-filter (lambda (x) (chord-drop-root x scale)))
-	       (chord-seq (resolving-chord-progression 'I (chord-rules) ) 2))))
+	       (chord-seq (resolving-chord-progression 'I (chord-rules) ) 4))))
     (make-cadence-sequence scale random-sequence)))
 
 ;; Cadence Sequence
@@ -110,9 +107,7 @@
   (play-events
    (rhythmic-notes->pm-events (cadseq-select-melody cadence-sequence) 90)))
 
-;; (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 4))
+;; (play-cadence-melody-sequence (make-random-melody-sequence (make-scale 'c4) 0 4))
 ;; (play-cadence-progression-sequence (make-random-progression-sequence (make-scale 'c4)))
 ;; (play-cadence-note-sequence (make-random-note-sequence (make-scale 'c4)))
 ;; (play-rhythmic-melody-sequence (make-rhythmic-melody-sequence (make-scale 'c4) 2 2))
-
-

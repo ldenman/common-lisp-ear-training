@@ -59,10 +59,6 @@
 
     (play-tonic scale)))
 
-(defun play-tonic-subdominant-dominant2 (scale &optional (octave 4))
-  (chord-sequence-play
-   (chord-sequence '(I IV V I) (triads (chord-builder (scale-notes scale))) scale octave ) 0.5))
-
 (defun play-tonic-subdominant-dominant3 (scale)
   (chord-sequence-play
    (chord-sequence '(I IV V I) (triads (chord-builder (scale-notes scale))) scale 4 ) 0.5))

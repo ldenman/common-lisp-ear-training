@@ -33,6 +33,7 @@
       (push name *tests*)))
 
 (defun run-tests ()
+  (load "t/tests.lisp")
   (let ((result t))
     (loop for test in *tests* collect
       (unless (funcall test) (setf result nil)))

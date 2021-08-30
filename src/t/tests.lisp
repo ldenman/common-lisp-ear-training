@@ -143,9 +143,8 @@
 (deftest test-seventh-chords ()
   (let ((chords   (-> (make-scale 'c4)
 		    (scale-range3 'c4 'b6) 
-		    (make-scale-chords)
-		    (scale-chords)
-		    (sevenths))))
+		    (make-scale-chords #'sevenths)
+		    (scale-chords))))
 
     ;; verify 7ths are returned
     (check (equal '((DO MI SO TI)
