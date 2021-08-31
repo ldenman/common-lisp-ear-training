@@ -780,7 +780,7 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 
 ** Tests
    #+begin_src sh :exports results :results pp
-   cat src/tests.lisp
+   cat src/t/tests.lisp
    #+end_src
 
    #+RESULTS:
@@ -930,9 +930,8 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
    (deftest test-seventh-chords ()
      (let ((chords   (-> (make-scale 'c4)
 		       (scale-range3 'c4 'b6) 
-		       (make-scale-chords)
-		       (scale-chords)
-		       (sevenths))))
+		       (make-scale-chords #'sevenths)
+		       (scale-chords))))
 
        ;; verify 7ths are returned
        (check (equal '((DO MI SO TI)
@@ -969,22 +968,21 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
    (deftest test-chord-sequence ()
      (let* ((chord-data (make-scale-chords (make-scale 'c4)))
 	    (sequence '(I II- III- IV V VI- VII I))
-	    (chords (chord-sequence sequence
-				    (scale-chords chord-data)
-				    (attrs chord-data 'scale 'notes))))
-
+	    (chords (chord-sequence2 sequence chord-data)))
        ;; verify default octave
-       (check (= 4 (-> chords
-		     #'chord-sequence-chords
-		     #'car
-		     #'chord-notes
-		     #'car
-		     #'note-octave)))
-       ;; verify chord sequence stored
-       (check (equal sequence (chord-sequence-romans chords)))
+       (check
+	 (= 3 (-> chords
+		#'chord-sequence-chords
+		#'car
+		#'chord-notes
+		#'car
+		#'note-octave))
+
+	 ;; verify chord sequence stored
+	 (equal sequence (chord-sequence-romans chords))
 
        ;; verify solfege realized from roman numeral pattern
-       (check (equal '((DO MI SO)
+	 (equal '((DO MI SO)
 		       (RE FA LA)
 		       (MI SO TI)
 		       (FA LA DO)
@@ -994,17 +992,19 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 		       (DO MI SO))
 		     (mapcar #'chord-solfege (triads (chord-sequence-chords chords)))))))
 
-   (deftest test-find-chord ())
-   (deftest test-chord-builder ())
-   (deftest test-chord-butroot ())
-   (deftest test-chord-butfifth ())
-   (deftest test-chord-drop-root ())
-   (deftest test-chord-invert-upper ())
-   (deftest test-make-scale-chords ())
-   (deftest test-chord-invert ())
-   (deftest test-chord-roman-numerals ())
-   (deftest test-scale-chord-filter ())  
-   (deftest test-chord-octave-filter ())
+
+
+   ;; (deftest test-find-chord ())
+   ;; (deftest test-chord-builder ())
+   ;; (deftest test-chord-butroot ())
+   ;; (deftest test-chord-butfifth ())
+   ;; (deftest test-chord-drop-root ())
+   ;; (deftest test-chord-invert-upper ())
+   ;; (deftest test-make-scale-chords ())
+   ;; (deftest test-chord-invert ())
+   ;; (deftest test-chord-roman-numerals ())
+   ;; (deftest test-scale-chord-filter ())  
+   ;; (deftest test-chord-octave-filter ())
    #+end_example
 
 
@@ -1061,7 +1061,7 @@ Funcations for making scales and scale templates representation.
    (defun scale-notes (scale)
    (defun note-range (n1 n2 notes)
    (defun random-scale (template)
-   (defun random-scale2 (template)
+   (defun random-scale2 (template &optional range)
    (defun random-major-scale () (random-scale (major-scale-template)))
    (defun random-major-scale2 () (random-scale2 (major-scale-template)))
    (defun random-chromatic-scale () (random-scale2 (chromatic-scale-template )))
@@ -1073,13 +1073,14 @@ Funcations for making scales and scale templates representation.
    (defun solfege-chord (l scale)
    (defun find-solfege (solfege lis)
    (defun find-solfege2 (solfege notes &optional (octave 4))
-   (defun solfege->notes (scale solfege-list)
+   (defun solfege->notes (scale solfege-list &optional (octave 4))
    (defun find-prev-do-helper (idx scale)
    (defun find-prev-do (note scale)
    (defun note-to-do (note scale)
    (defun remove-after-do (scale)
    (defun scale-octave-range-helper (o1 o2 notes)
    (defun scale-octave-range (o1 o2 notes)
+   (defun scale-octave-range2 (o1 o2 scale)
    (defun resolve-down (note scale)
    (defun resolve-note (note scale)
    ;; (defun major-scales ()
@@ -1095,6 +1096,7 @@ Chord representation and functions
 
    #+RESULTS:
    #+begin_example
+   (defun find-chord2 (octave romand-num chord-data)
    (defun find-chord (octave romand-num chord-list scale)
    (defun make-chord-tone (note degree)
    (defun chord-tone-note (chord-tone) (attr 'note chord-tone))
@@ -1102,10 +1104,11 @@ Chord representation and functions
    (defun chord-notes (chord) (mapcar #'chord-tone-note chord))
    (defun chord-builder (l)
    (defun make-chords (start-note &optional (filter-fn #'triads) (template (major-scale-template)))
-   (defun make-scale-chords (scale)
+   (defun make-scale-chords (scale &optional (filter-fn #'triads) (template (major-scale-template)))
    (defun scale-chords (scale-chord-data) (attr 'chords scale-chord-data))
    (defun chord-sequence-romans (chord-sequence) (mapcar #'car chord-sequence))
    (defun chord-sequence-chords (chord-sequence) (mapcdr chord-sequence))
+   (defun chord-solfege (chord)
    (defun chord-root (chord)
    (defun chord-butroot (chord) (chord-remove-degree chord 1))
    (defun chord-butfifth (chord) (chord-remove-degree chord 5))
@@ -1119,14 +1122,15 @@ Chord representation and functions
    (defun ninths (myl) (chord-take 5 myl))
    (defun elevenths (myl) (chord-take 6 myl))
    (defun thirteenths (myl) (chord-take 7 myl))
+   (defun chord-triad (chord)
    (defun chord-invert (chord scale)
     (defun chord-over-3 (root-position-chord scale)
    (defun chord-over-5 (root-position-chord scale)
    (defun major-solfege-chords ()
    (defun chord-roman-numerals (chord-list)
+   (defun chord-sequence2 (chord-sequence chord-data &optional (octave 4))
    (defun chord-sequence (chord-sequence chords scale &optional (octave 4))
    (defun scale-chord-filter (chord-data fn &rest args)
-   (defun rebuild-chords ()
    (defun octave-filter (octave)
    (defun chord-filter (fn)
    (defun chord-type-filter (fn)
@@ -1213,12 +1217,13 @@ and for playing an event (via portmidi).
    #+RESULTS:
    #+begin_example
    (defun my-midi-setup ()
+   (defun midi-unload ()
    (defun launch-qsynth ()
+   (defun kill-qsynth ()
    (defun setup-midi ()
    (defun pm-reload (midi-device-id)
    (defun ensure-midi ()
    (defun pm-terminate ()
-   (defun pm-initialize (midi-device-id)
    (defun midi-instruments () '(
    (defun midi-note-octave ()
    (defun midi-integers () (loop for x from 0 to 87 collect (+ 21 x)))
@@ -1263,7 +1268,6 @@ and for playing an event (via portmidi).
    (defun play-subdominant (scale) (note-play (nth 3 scale)))
    (defun play-dominant (scale) (note-play (nth 4 scale)))
    (defun play-tonic-subdominant-dominant (scale)
-   (defun play-tonic-subdominant-dominant2 (scale)
    (defun play-tonic-subdominant-dominant3 (scale)
    #+end_example
 
@@ -1293,29 +1297,26 @@ and for playing an event (via portmidi).
    #+RESULTS:
    #+begin_example
    (defun make-game (name logic-fn)
-   (defun play-game ()
    (defun update-game-lst (key item game)
    (defun my-play-game (game)
    (defun find-answers (type game)
    (defun find-unique-answers (type game)
-   (defun repeat-answers (type game)
-   (defun update-score (score game)
+   (defun playing-p (game)
+   ;; (defun repeat-answers (type game)
+   ;; (defun score (game)
+   ;; (defun stop-game (game)
    (defun read-guess () (mapcar #'intern (cl-ppcre:split "\\s+" (read-line))))
+   ;; (defun solfege-trainer ()
+   (defun run-melody-game (game)
+   (defun play-melody-game ()
+   (defun prompt-guess (answer game current-scale)
+   (defun run-chord-trainer (game)
+   (defun play-chord-trainer ()
+   (defun prompt-chord-guess (answer game scale)
    (defun set-bass-scale ()
    (defun play-bass-game ()
-   (defun solfege-trainer ()
-   (defun play-melody-game ()
-   (defun play-chord-trainer ()
-   (defun prompt-guess (answer game current-scale)
-   (defun prompt-bass-guess (answer game scale)
-   (defun prompt-chord-guess (answer game scale)
-   (defun run-chord-trainer (game)
-   (defun run-melody-game (game)
    (defun run-bass-game (game)
-   (defun run-game ()
-   (defun score ()
-   (defun stop-game (game)
-   (defun reset-game ()
+   (defun prompt-bass-guess (answer game scale)
    #+end_example
 
 ** random :cleanup:
@@ -1346,18 +1347,12 @@ and for playing an event (via portmidi).
    #+end_src
 
    #+RESULTS:
-   #+begin_example
-   (defun little-sequence (&optional (division 60))
-   (defun seq (solfege-melody rhythm &optional (scale (scale-range 'c3 'c5 (make-scale 'c3))) (bpm 60))
-   (defun play-seq (&rest args)
-   (defun play-seq2 (events)
-   (defun row-row-row-your-boat ()
-   (defun row-row-row-your-boat2 ()
-   (defun song (l)
-   (defun make-repeat (solfege number)
-   (defun solfege-pairp (i1 i2)
-   (defun lengthen-seq (l &optional (current-num 0))
-   #+end_example
+   : (defun little-sequence (&optional (division 60))
+   : (defun seq (solfege-melody rhythm &optional (scale (scale-range 'c3 'c5 (make-scale 'c3))) (bpm 60))
+   : (defun play-seq (&rest args)
+   : (defun play-seq2 (events)
+   : (defun row-row-row-your-boat ()
+   : (defun row-row-row-your-boat2 ()
 
 * Issues
   - setting slot-value 'midi:dd/nn/cc/bb doesn't work out of the box
@@ -1368,45 +1363,14 @@ and for playing an event (via portmidi).
   - should every file be in the same namespace?
   - scale templates can be defined as VARS instead of functions
   - consider using chromatic scale by default in scale logic and deducing other scales from that 
-  - portmidi seems flakey in that sometimes the midi devices can't connect
-    #+begin_example
-      PortMidi: `Host error'
-	 [Condition of type SIMPLE-ERROR]
-
-      Restarts:
-       0: [RETRY] Retry SLIME REPL evaluation request.
-       1: [*ABORT] Return to SLIME's top level.
-       2: [ABORT] abort thread (#<THREAD "repl-thread" RUNNING {10026C1DD3}>)
-
-      Backtrace:
-	0: ((:METHOD CFFI:TRANSLATE-FROM-FOREIGN (T PORTMIDI::PM-ERROR-TYPE)) -10000 #<unused argument>) [fast-method]
-	1: (PORTMIDI:WRITE-MIDI #.(SB-SYS:INT-SAP #X7F552402ADA0) #.(SB-SYS:INT-SAP #X7F5531BF7FF0))
-	2: (PORTMIDI:WRITE-SHORT-MIDI #.(SB-SYS:INT-SAP #X7F552402ADA0) 0 5261456)
-	3: (SB-INT:SIMPLE-EVAL-IN-LEXENV (LD-MUSIC:SETUP-MIDI) #<NULL-LEXENV>)
-	4: (EVAL (LD-MUSIC:SETUP-MIDI))
-       --more--
-    #+end_example
-    #+begin_example
-      PortMidi: `Bad pointer'
-	 [Condition of type SIMPLE-ERROR]
-
-      Restarts:
-       0: [RETRY] Retry SLIME REPL evaluation request.
-       1: [*ABORT] Return to SLIME's top level.
-       2: [ABORT] abort thread (#<THREAD "repl-thread" RUNNING {10026C1DD3}>)
-
-      Backtrace:
-	0: ((:METHOD CFFI:TRANSLATE-FROM-FOREIGN (T PORTMIDI::PM-ERROR-TYPE)) -9995 #<unused argument>) [fast-method]
-	1: (PORTMIDI:CLOSE-MIDI #.(SB-SYS:INT-SAP #X7F552402ADA0))
-	2: (LD-MUSIC::PM-TERMINATE)
-	3: (LD-MUSIC::PM-RELOAD 2)
-	4: (LD-MUSIC:SETUP-MIDI)
-	5: (SB-INT:SIMPLE-EVAL-IN-LEXENV (LD-MUSIC:SETUP-MIDI) #<NULL-LEXENV>)
-	6: (EVAL (LD-MUSIC:SETUP-MIDI))
-       --more--
-
-    #+end_example
-    
+  - +portmidi seems flakey in that sometimes the midi device can't connect after restarting REPL+
+    - this seemed to have to do with the connection to the device
+      being held open even after the SLIME repl was quit.
+    - should now be solved with corrected termination logic, specifically using:
+      #+BEGIN_EXAMPLE
+      (pm:abort-midi *midi-out*)
+      (pm:close-midi *midi-out*)
+      #+END_EXAMPLE
 
 * Features
 ** Completed
