@@ -1011,7 +1011,7 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 ** note
 - note representation and functions
    #+begin_src sh :exports results :results pp
-   grep defun src/note.lisp
+   grep "defun\|defmacro" src/note.lisp
    #+end_src
 
    #+RESULTS:
@@ -1038,7 +1038,7 @@ The *#'chord-take function* takes an integer and list of chords and returns a sh
 Funcations for making scales and scale templates representation.
 
    #+begin_src sh :exports results :results pp
-   grep defun src/scale.lisp
+   grep "defun\|defmacro" src/scale.lisp
    #+end_src
 
    #+RESULTS:
@@ -1068,6 +1068,7 @@ Funcations for making scales and scale templates representation.
    (defun scale-range (p1 p2 scale-data)
    (defun scale-range3 (scale-data p1 p2)
    (defun with-scale-helper (scale my-fn)
+   (defmacro with-scale (scale &body body)
    (defun random-note (scale) (nth (random (length scale)) scale))
    (defun random-notes (y scale) (loop for x from 1 to y collect (random-note scale)))
    (defun solfege-chord (l scale)
@@ -1091,7 +1092,7 @@ Funcations for making scales and scale templates representation.
 Chord representation and functions
 
    #+begin_src sh :exports results :results pp
-   grep defun src/chord.lisp
+   grep "defun\|defmacro" src/chord.lisp
    #+end_src
 
    #+RESULTS:
@@ -1141,7 +1142,7 @@ Chord representation and functions
 Logic for calculating rhythm durations based on BPM   
 
    #+begin_src sh :exports results :results pp
-   grep defun src/rhythm.lisp
+   grep "defun\|defmacro" src/rhythm.lisp
    #+end_src
 
    #+RESULTS:
@@ -1165,7 +1166,7 @@ Functions for representing an EVENT (NOTE ON-TIME OFF-TIME VELOCITY)
 and for playing an event (via portmidi).
 
    #+begin_src sh :exports results :results pp
-   grep defun src/event.lisp
+   grep "defun\|defmacro" src/event.lisp
    #+end_src
 
    #+RESULTS:
@@ -1177,12 +1178,13 @@ and for playing an event (via portmidi).
 - Utility functions
 
    #+begin_src sh :exports results :results pp
-   grep defun src/util.lisp
+   grep "defun\|defmacro" src/util.lisp
    #+end_src
 
    #+RESULTS:
    #+begin_example
    (defun fdbug (code)
+   (defmacro dbug (code)
    (defun mapcdr (seq) (mapcar #'cdr seq))
    (defun attr2 (alist item) (cdr (assoc item alist)))
    (defun attr (item alist) (cdr (assoc item alist)))
@@ -1211,7 +1213,7 @@ and for playing an event (via portmidi).
 - Lower-level midi functions
 
    #+begin_src sh :exports results :results pp
-   grep defun src/midi.lisp
+   grep "defun\|defmacro" src/midi.lisp
    #+end_src
 
    #+RESULTS:
@@ -1248,7 +1250,7 @@ and for playing an event (via portmidi).
 - functions for playing notes
 
    #+begin_src sh :exports results :results pp
-   grep defun src/play.lisp
+   grep "defun\|defmacro" src/play.lisp
    #+end_src
 
    #+RESULTS:
@@ -1257,6 +1259,7 @@ and for playing an event (via portmidi).
    (defun chord-sequence-play (chord-sequence &optional (sleep 1))
    (defun chord-play (chord &optional (sleep 1))
    (defun play-chords (chords)
+   (defmacro c (fn &body body) `(,fn (list ,@(mapcar (lambda (x) `',x) body))))
    (defun play-tonic (scale) (note-play (car scale)))
    (defun play-subdominant (scale) (note-play (nth 3 scale)))
    (defun play-dominant (scale) (note-play (nth 4 scale)))
@@ -1276,7 +1279,7 @@ and for playing an event (via portmidi).
 - logic for generating midi sequences for portmidi
 
    #+begin_src sh :exports results :results pp
-   grep defun src/sequencer.lisp
+   grep "defun\|defmacro" src/sequencer.lisp
    #+end_src
 
    #+RESULTS:
@@ -1291,7 +1294,7 @@ and for playing an event (via portmidi).
 - initial logic/functions to support games
 
    #+begin_src sh :exports results :results pp
-   grep defun src/games.lisp
+   grep "defun\|defmacro" src/games.lisp
    #+end_src
 
    #+RESULTS:
@@ -1324,7 +1327,7 @@ and for playing an event (via portmidi).
 - functions for generating random notes / experimenting with note resolutions / cadences
 
    #+begin_src sh :exports results :results pp
-   grep defun src/random.lisp
+   grep "defun\|defmacro" src/random.lisp
    #+end_src
 
    #+RESULTS:
@@ -1343,7 +1346,7 @@ and for playing an event (via portmidi).
 ** examples
 
    #+begin_src sh :exports results :results pp
-   grep defun src/examples.lisp
+   grep "defun\|defmacro" src/examples.lisp
    #+end_src
 
    #+RESULTS:
