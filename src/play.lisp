@@ -17,6 +17,11 @@
     (chord-play chord)
     (sleep 1)))
 
+(defun play-list-of-notes (list-of-notes)
+  (dolist (note list-of-notes)
+    (when note
+      (schedule-note note))))
+
 (defmacro c (fn &body body) `(,fn (list ,@(mapcar (lambda (x) `',x) body))))
 
 (defun play-tonic (scale) (note-play (car scale)))
@@ -31,17 +36,20 @@
 
 (defun tonic-subdominant-dominant (scale)
   (progn
-    (solfege-chord '(DO MI SO) scale)
-    (solfege-chord '(FA LA DO) scale)
-    (solfege-chord '(SO TI RE) scale)))
+    (solfege->notes  scale '(DO MI SO))
+    (solfege->notes  scale '(FA LA DO))
+    (solfege->notes  scale '(SO TI RE))))
 
 (defun play-tonic-subdominant-dominant (scale)
   (progn
-    (note-play (note-octave-down (car scale) scale))
-    (solfege-chord '(DO MI SO) scale)
-    (solfege-chord '(FA LA DO) scale)
-    (solfege-chord '(SO TI RE) scale)
-    (play-tonic scale)))
+;    (note-play (note-octave-down (attr 'notes (car scale)) (attr 'notes scale)))
+    (solfege->notes  scale '(DO MI SO) 4)
+    (solfege->notes scale  '(FA LA DO) 4)
+    (solfege->notes  scale '(SO TI RE) 4)
+;    (play-tonic scale)
+    ))
+
+(play-tonic-subdominant-dominant (make-scale 'c4))
 
 (defun smoke-test ()
   (note-play (make-note 'C4 72 nil)))
@@ -53,9 +61,9 @@
 (defun play-tonic-subdominant-dominant (scale)
   (progn
 ;    (note-play (note-octave-down (car scale)))
-    (solfege-chord '(DO MI SO) scale)
-    (solfege-chord '(FA LA DO) scale)
-    (solfege-chord '(SO TI RE) scale)
+    (solfege->notes scale  '(DO MI SO))
+    (solfege->notes  scale '(FA LA DO))
+    (solfege->notes scale  '(SO TI RE))
 
     (play-tonic scale)))
 

@@ -13,6 +13,7 @@
 		 (:file "chord")
 		 (:file "note")
 		 (:file "scale")
+		 (:file "solfege")
 		 (:file "play")
 		 (:file "games")
                  (:file "sequencer")

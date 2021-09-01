@@ -133,19 +133,6 @@
 	    (generate-notes-helper level (- length 1) seed (append result (list try)))))
       result))
 
-(defun note-solfege-filter (notes solfege)
-  (dolist (note notes)
-    (if (listp (note-solfege note))
-	(if (member solfege (note-solfege note))
-	    (progn
-	      (attr= solfege 'solfege note)
-	      note)))
-  notes)      )
-
-(defun solfege-filter (notes losolfege)
-  (dolist (solfege losolfege)
-    (note-solfege-filter notes solfege))
-  notes)
 
 (defun generate-notes (level length &optional (seed t))
   (let ((result (generate-notes-helper level length seed '())))
@@ -166,19 +153,6 @@
 	 (remove-if #'null result)
 	 (generate-notes-helper level length seed result)))
    (attr 'solfege level)))
-
-(defun note-solfege-member-p (note lofsolfege)
-  (if (listp (note-solfege note))
-      (some (lambda (s) (member s lofsolfege)) (note-solfege note))
-      (member (note-solfege note) lofsolfege)))
-
-(defun solfege-in-notes (notes)
-  (let ((solfege-all '()))
-    (dolist (note notes)
-      (if (listp (note-solfege note))
-	  (setf solfege-all (append solfege-all (note-solfege note)))
-	  (setf solfege-all (append solfege-all (list (note-solfege note))))))
-    solfege-all))
 
 (defun generate-examples-helper2 (level length s)
   (if (>= length (length (attr 'solfege level)))

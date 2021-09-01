@@ -8,6 +8,10 @@
   `(progn (princ (format nil "~A" ,code))
 	  ,code))
 
+(defmacro if-let ((var test-form) then-form &optional else-form)
+  `(let ((,var ,test-form))
+     (if ,var ,then-form ,else-form)))
+
 (defun mapcdr (seq) (mapcar #'cdr seq))
 (defun attr2 (alist item) (cdr (assoc item alist)))
 (defun attr (item alist) (cdr (assoc item alist)))

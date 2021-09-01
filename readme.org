@@ -1377,6 +1377,33 @@ and for playing an event (via portmidi).
 
 * Features
 ** Completed
+- [ ] DSL for generating rhythmic melodies
+  - Single octave melody
+    #+BEGIN_SRC lisp :package ld-music :exports code
+  (solfa
+   mi 8 re do re mi mi mi 4
+   re 8 re re 4 mi 8 so so 4
+   mi 8 re do re mi mi mi 4 re 8 re mi
+   re 8 do 1)
+    #+END_SRC
+
+    #+RESULTS:
+    : NIL
+
+  - Multiple octave melody w/ BPM setting
+    #+BEGIN_SRC lisp :package ld-music :exports code
+	(solfa
+         (:bpm 120)
+	 do 4 do do 8 re mi 4
+	 mi 8 re mi fa so 2 +
+	 do 8 do do - so so so
+	 mi mi mi do do do so 4
+	 fa 8 mi 4 re 8 do 1)
+    #+END_SRC
+
+    #+RESULTS:
+    : NIL
+
 - [ ] create chord progressions using roman numerals
   #+BEGIN_SRC lisp :package ld-music :exports both
     (let* ((chord-data (make-scale-chords (make-scale 'c4)))

@@ -26,17 +26,22 @@
       (member solfege (note-solfege note))
       (equal solfege (note-solfege note))))
 
+(defun note-solfege-member-p (note lofsolfege)
+  (if (listp (note-solfege note))
+      (some (lambda (s) (member s lofsolfege)) (note-solfege note))
+      (member (note-solfege note) lofsolfege)))
+
 (defun note-idx (note &optional (scale (midi-notes)))
   (position note scale :test #'note-equal-p))
 
 (defun note-octave-up (note scale)
-  (let* ((other-note (nth (+ 12 (note-idx note)) (midi-notes))))
+  (let* ((other-note (nth (+ 12 (note-idx note)) scale)))
     (when other-note
       (attr= (note-solfege note) 'solfege other-note)
       other-note)))
 (defun note-octave-down (note scale)
   (if (>= (- (note-idx note) 12) 0)
-      (let* ((other-note (nth (- (note-idx note) 12) (midi-notes))))
+      (let* ((other-note (nth (- (note-idx note) 12) scale)))
 	(when other-note
 	  (attr= (note-solfege note) 'solfege other-note)
 	  other-note))))
