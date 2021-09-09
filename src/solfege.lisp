@@ -17,7 +17,7 @@
 	    (solfachord-helper (cdr notes) solfege-list start-octave)))))
 
 (defun solfanotes (scale solfege-list &optional (start-octave 4))
-  (solfachord-helper (scale-notes scale) solfege-list start-octave))
+  (solfachord-helper (_notes scale) solfege-list start-octave))
 
 ;; (play-list-of-notes (solfanotes (make-scale 'c4 (chromatic-scale-template))
 ;; 				'(do mi so ti re fi la) 4))
@@ -50,18 +50,6 @@
   (dolist (solfege losolfege)
     (note-solfege-filter notes solfege))
   notes)
-
-(defun find-solfege (solfege lis)
-  "DEPRECATING. find note by solfege in lis of notes. returns the first note found in list order."
-  (if lis
-      (if (listp (note-solfege (car lis)))
-	  (if (position solfege (note-solfege (car lis)))
-	      (car lis)
-	      (find-solfege solfege (cdr lis)))
-
-	  (if (eq solfege (note-solfege (car lis)))
-	      (car lis)
-	      (find-solfege solfege (cdr lis))))))
 
 (defun find-solfege2 (solfege notes &optional (octave 4))
   "return note by SOLFEGE in NOTES relative to OCTAVE"

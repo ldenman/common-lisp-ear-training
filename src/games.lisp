@@ -135,7 +135,7 @@
 (defun prompt-chord-guess (answer game scale)
   (if (playing-p game)
       (progn
-	(play-tonic-subdominant-dominant2 scale 3)
+	(play-tonic-subdominant-dominant scale 3)
         (sleep 1)
 					;        (note-play (note-octave-down (car (cdr answer)) (scale-notes scale)))
 	(chord-play (cdr answer))
@@ -166,7 +166,6 @@
 		    (prompt-chord-guess answer game scale))))))))
 ;; (play-chord-trainer)
 ;; END CHORD TRAINER GAME ;;
-
 
 ;; BASS TRAINER GAME ;;
 (defun set-bass-scale ()

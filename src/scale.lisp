@@ -19,6 +19,7 @@
 ;;external
 (defun make-scale (scale-root &optional (template (major-scale-template)))
   (list
+   (cons 'type 'scale)
    (cons 'notes (assign-relative-octaves (build-scale scale-root template)))
    (cons 'template template)))
 
@@ -78,7 +79,7 @@
 	  (midi-notes-from-scale-down-helper midi-notes original-scale original-scale))))
 
 ;;internal
-(defun build-scale (start-note pattern &optional (notes (midi-notes)))
+(defun build-scale (start-note pattern)
   (let ((pos (note-name-position start-note)))
     (append (reverse (build-scale-down pos pattern))
 	    (rest (build-scale-up pos pattern)))))
@@ -86,7 +87,7 @@
 
 ;; external
 (defun scale-notes (scale)
-  (attr 'notes scale))
+  (_notes scale))
 
 ;; external
 (defun note-range (n1 n2 notes)
@@ -118,13 +119,13 @@
 ;; external
 (defun scale-range (p1 p2 scale-data)
   (let ((newscale (make-scale p1)))
-    (attr= (note-range p1 p2 (scale-notes scale-data))
+    (attr= (note-range p1 p2 (attr 'notes scale-data))
 	   'notes
 	   newscale)
     newscale))
 (defun scale-range3 (scale-data p1 p2)
   (let ((newscale (make-scale p1)))
-    (attr= (note-range p1 p2 (scale-notes scale-data))
+    (attr= (note-range p1 p2 (attr 'notes scale-data))
 	   'notes
 	   newscale)
     newscale))
@@ -153,7 +154,7 @@
 	  (scale-octave-range-helper o1 o2 notes)
 	  (scale-octave-range o1 o2 (cdr notes)))))
 
-(defun scale-octave-range2 (o1 o2 scale)
+(defun scale-octave-range2 (o1 o2 notes)
   (if notes
       (if (note-solfege-equalp (car notes) 'do)
 	  (scale-octave-range-helper o1 o2 notes)

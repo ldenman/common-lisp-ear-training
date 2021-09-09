@@ -1,5 +1,7 @@
 (in-package :ld-music)
 
+(defvar *midi-channel*)
+
 (defun schedule (time fn &rest args)
   "Schedule a function to be called after some amount of seconds."
   (schedule-timer
@@ -13,7 +15,7 @@
   "Play a note."
   (let ((value (note-value note))
 	(off-time (or off-time (+ on-time 1))))
-    (schedule on-time #'note-on value velocity)
+    (schedule on-time #'note-play note velocity)
     (schedule off-time #'note-off value)))
 
 ;; Make on and off message for note
@@ -36,7 +38,7 @@
 (defun midi-timing-track (bpm &optional (*midi-channel* 9))
   (let ((timing-track 
 	  (list (make-instance 'midi:time-signature-message
-			       :status #0xFF
+			       :status 255
 			       :time 0)
 		(make-instance 'midi:tempo-message
 			       :time 0

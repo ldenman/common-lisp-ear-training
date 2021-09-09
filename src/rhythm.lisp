@@ -33,7 +33,7 @@
 	  (make-measure
 	   (append result
 		   (list 
-		    (random-element '(4 8))))))))
+		    (random-element '(2 4))))))))
 
 (defun make-measures (n)
   (if (> n 0)

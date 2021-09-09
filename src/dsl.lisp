@@ -24,8 +24,7 @@
 	 (let* ((data (car s))
 		(newoct (newoct octave data)))
 	   (solfadsl-handle-octaves (append (list
-					   (cons 'octave
-						 newoct))
+					   (cons 'octave newoct))
 					  (cdr s)) newoct)))
 	((member (car s) '(+ -))
 	 (let ((newoct (if (equal '+ (car s))
@@ -45,7 +44,7 @@
 	       (solfadsl-handle-solfege (rest l) scale (rest item)))
 	      ((numberp item)
 	       (cons item (solfadsl-handle-solfege (cdr l) scale octave)))
-	      (t (cons (find-solfege2 item (attr 'notes scale) octave)
+	      (t (cons (find-solfege2 item (scale-notes scale) octave)
 		       (solfadsl-handle-solfege (cdr l) scale octave)))))))
 
 

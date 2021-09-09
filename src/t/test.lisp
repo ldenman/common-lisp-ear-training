@@ -33,8 +33,7 @@
       (push name *tests*)))
 
 (defun run-tests ()
-  (load "t/tests.lisp")
-  (let ((result t))
+ (let ((result t))
     (loop for test in *tests* collect
       (unless (funcall test) (setf result nil)))
     result))
@@ -44,5 +43,3 @@
   (if result
       result
       (format t "~:[FAIL~;pass~] ... ~a: ~a~%" result *test-name* form)))
-
-

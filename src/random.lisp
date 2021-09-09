@@ -31,7 +31,7 @@
 
 (defun sing-do ()
   (let* ((scale (random-major-scale2)))
-    (play-tonic-subdominant-dominant3 scale)
+    (play-tonic-subdominant-dominant scale)
     (sleep 2)
     (note-play (car (scale-octave-range 3 4 (scale-notes scale))))
 					;    (note-play (car scale))
@@ -46,14 +46,11 @@
 		    for x from 0 to 1000
 		    collect (random-element notes)))
 
-      (if (= 0 (mod counter 4))
-
-	  (chord-sequence-play
-	   (chord-sequence '(I IV V I)
-			   (triads (chord-builder
-				    (note-range 'c2 'g5 (scale-notes (make-scale 'c4 (major-scale-template)))))))
-	   0.5)
-	  )
+      ;; (if (= 0 (mod counter 4))
+	  
+      ;; 	  ;; play cadence
+	  
+      ;; 	  )
 
       (note-play note)
       (sleep 1)
@@ -91,9 +88,6 @@
     (dolist (note (loop
 		    for x from 0 to 1000
 		    collect (random-element notes2)))
-
-      ;; (if (= 0 (mod counter 4))
-      ;; 	  (play-tonic-subdominant-dominant3 scale))
 
       (dolist (n (resolve-note note notes2))
 	(princ (note-solfege n))

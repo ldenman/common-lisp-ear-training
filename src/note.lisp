@@ -1,5 +1,17 @@
 (in-package :ld-music)
 
+;; Note constructor
+
+(defun make-note (name value solfege)
+  (list
+   (cons 'type 'note)
+   (cons 'name name)
+   (cons 'value value)
+   (cons 'solfege solfege)
+   (cons 'relative-octave nil)
+   (cons 'octave (parse-note-octave name))))
+
+
 (defun note-name-position (note-name &optional (scale (midi-notes)))
   (position note-name scale :test (lambda (x y) (equal x (note-name y)))))
 
@@ -40,11 +52,9 @@
       (attr= (note-solfege note) 'solfege other-note)
       other-note)))
 (defun note-octave-down (note scale)
-  (if (>= (- (note-idx note) 12) 0)
-      (let* ((other-note (nth (- (note-idx note) 12) scale)))
-	(when other-note
-	  (attr= (note-solfege note) 'solfege other-note)
-	  other-note))))
+  (if (>= (- (note-idx note (scale-notes scale)) 12) 0)
+      (if-let (other-note (nth (- (note-idx note (scale-notes scale)) 12) (scale-notes scale)))
+	other-note)))
 
 (defun parse-note-octave (note-name)
   (parse-integer (car (multiple-value-list (cl-ppcre:scan-to-strings "\\d" (symbol-name note-name))))))
@@ -52,11 +62,4 @@
 (defun find-note (name &optional (scale (midi-notes)))
   (find-if (lambda (note) (eq (note-name note) name)) scale))
 
-(defun make-note (name value solfege)
-  (list
-   (cons 'type 'note)
-   (cons 'name name)
-   (cons 'value value)
-   (cons 'solfege solfege)
-   (cons 'relative-octave nil)
-   (cons 'octave (parse-note-octave name))))
+
