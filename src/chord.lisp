@@ -64,11 +64,26 @@
      (cons 'template template)
      (cons 'roman-numeral-chords (chord-roman-numerals chords)))))
 
-(defun make-chord-sequence (chord-sequence scale &optional (octave 4))
-  (attach-type 'chord-sequence (chord-sequence2 chord-sequence
-						(make-scale-chords scale)
-						octave)))
+(defun make-chord-sequence (chord-sequence chord-item &optional (octave 4))
+  (tag 'chord-sequence
+       (chord-sequence chord-sequence chord-item octave)))
 
+ ;;;; Converts a list of roman numerals into chords
+(defun chord-sequence-helper (chord-sequence chord-data &optional (octave 4))
+  (if chord-sequence
+      (if (and (listp (car chord-sequence))
+	       (eq 'octave (car (car chord-sequence))))
+	  (chord-sequence-helper (cdr chord-sequence) chord-data (cdr (car chord-sequence)))
+	  (cons (find-chord2 octave (car chord-sequence) chord-data)
+		(chord-sequence-helper (cdr chord-sequence) chord-data octave)))))
+
+;;;; Scale chord sequence
+(defun chord-sequence (seq item &optional (octave 4))
+  (cond ((scale? item)
+	 (chord-sequence-helper seq (make-scale-chords item) octave))
+	((scale-chords? item)
+	 (chord-sequence-helper seq item octave))))
+;(chord-sequence '(I) (scale? (make-scale 'c4)))
 ;; selectors
 
 ;;;; scale chord
@@ -95,8 +110,7 @@
   (cdr roman-numeral->chord))
 
 ;; functions
-(defun chord-length (chord)
-  (length (chord-tones chord)))
+
 
 (defun find-chord2 (octave romand-num chord-data)
   (find-if
@@ -114,6 +128,9 @@
 (defun chord-modify-chord-tones (chord chord-tones)
   (attr= chord-tones 'chord-tones chord)
   chord)
+
+(defun chord-length (chord)
+  (length (chord-tones chord)))
 
 (defun chord-root (chord)
   (find-if (lambda (chord-tone) (= 1 (attr 'degree chord-tone))) chord))
@@ -133,6 +150,34 @@
 
 (defun chord-remove-degree (chord degree)
   (remove-if (lambda (chord-tone) (= degree (chord-tone-degree chord-tone))) chord))
+
+(defun c-take (n chord)
+  (let ((chord-tones (take n (chord-tones chord))))
+    (chord-modify-chord-tones chord chord-tones)
+    chord))
+
+(defun chord-triad (chord)
+  (c-take 3 chord))
+(defun chord-seventh (chord) (c-take 4 chord))
+(defun chord-ninth (chord) (c-take 5 chord))
+(defun chord-eleventh (chord) (c-take 6 chord))
+(defun chord-thirteenth (chord) (c-take 7 chord))
+
+(defun chord-invert (chord scale)
+  (attr= (note-octave-up (chord-tone-note (car chord)) scale) 'note (car chord))
+  (append (rest chord) (list (car chord))))
+ (defun chord-over-3 (root-position-chord scale)
+  (chord-invert root-position-chord scale))
+(defun chord-over-5 (root-position-chord scale)
+  (chord-invert (chord-invert root-position-chord scale) scale))
+
+(defun find-roman-numeral-by-solfege (chord)
+  (cdr (find (note-solfege
+	 (car (chord-notes chord)))
+	(major-solfege-chords)
+	:test (lambda (note-solfege other) (eq note-solfege (car other))))))
+
+;; aggregrate chord functions
 (defun chord-take (n listofchords)
   (mapcar (lambda (chord)
 	    (chord-modify-chord-tones chord
@@ -143,16 +188,6 @@
 (defun ninths (myl) (chord-take 5 myl))
 (defun elevenths (myl) (chord-take 6 myl))
 (defun thirteenths (myl) (chord-take 7 myl))
-(defun chord-triad (chord)
-  (take 3 chord))
- 
-(defun chord-invert (chord scale)
-  (attr= (note-octave-up (chord-tone-note (car chord)) scale) 'note (car chord))
-  (append (rest chord) (list (car chord))))
- (defun chord-over-3 (root-position-chord scale)
-  (chord-invert root-position-chord scale))
-(defun chord-over-5 (root-position-chord scale)
-  (chord-invert (chord-invert root-position-chord scale) scale))
 
 (defun major-solfege-chords ()
   '((do . I)
@@ -163,26 +198,11 @@
     (la . VI-)
     (ti . VII)))
 
-(defun find-roman-numeral-by-solfege (chord)
-  (cdr (find (note-solfege
-	 (car (chord-notes chord)))
-	(major-solfege-chords)
-	:test (lambda (note-solfege other) (eq note-solfege (car other))))))
-
 (defun chord-roman-numerals (chord-list)
   (mapcar (lambda (chord)
 	    (let ((roman-numeral (find-roman-numeral-by-solfege chord)))
 	      (cons roman-numeral chord)))
 	  chord-list))
-
-(defun chord-sequence2 (chord-sequence chord-data &optional (octave 4))
-  (if chord-sequence
-      (if (and (listp (car chord-sequence))
-	       (eq 'octave (car (car chord-sequence))))
-	  (chord-sequence2 (cdr chord-sequence) chord-data (cdr (car chord-sequence)))
-	  (cons (find-chord2 octave (car chord-sequence) chord-data)
-		(chord-sequence2 (cdr chord-sequence) chord-data octave)))))
-
 
 (defun scale-chord-filter (chord-data fn &rest args)
   (let ((chords (funcall (apply fn args) (attr 'chords chord-data))))
@@ -202,7 +222,3 @@
 
 (defun chord-type-filter (fn)
   (lambda (chord-data) (funcall fn chord-data)))
-
-(defun chord-seq (chord-data seq &optional (octave 4))
-  (attach-type 'chord-sequence
-	       (chord-sequence2 seq chord-data octave)))

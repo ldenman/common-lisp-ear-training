@@ -90,7 +90,7 @@
 (defun prompt-guess (answer game current-scale)
   (if (playing-p game)
       (progn
-	(play-tonic-subdominant-dominant2 current-scale)
+	(play-tonic-subdominant-dominant current-scale)
 	(sleep 1)
 	(dolist (a answer)
 	  (note-play a)
@@ -178,7 +178,6 @@
 
 (defun play-bass-game ()
   (my-play-game (make-game 'bass #'run-bass-game)))
-;(play-bass-game)
 
 (defun run-bass-game (game)
   (loop while (playing-p game) do

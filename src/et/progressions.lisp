@@ -71,16 +71,17 @@
 
 (defun make-random-progression-sequence (scale &optional (chord-type-fn #'triads))
   (let ((random-sequence
-	   (-> (make-scale-chords scale chord-type-fn)
-	       (chord-seq (resolving-chord-progression 'I (chord-rules) ) 4))))
+	  (-> (make-scale-chords scale)
+	    (scale-chords)
+	    (make-chord-sequence (resolving-chord-progression 'I (chord-rules) ) 4))))
     (make-cadence-sequence scale random-sequence)))
 
 ;; Cadence Sequence
 (defun make-cadence-sequence (scale item)
   (cons (tonic-subdominant-dominant scale) item))
 
-(defun cadseq-cadence (cadence-sequence) (car cadence-sequence))
-(defun cadseq-contents (cadence-sequence) (cdr cadence-sequence))
+(defun cadseq-cadence (cadence-sequence) (tag 'cadence-sequence (car cadence-sequence)))
+(defun cadseq-contents (cadence-sequence) (tag 'chord-sequence (cdr cadence-sequence)))
 
 (defun play-cadence-note-sequence (cadence-sequence)
   (play (cadseq-cadence cadence-sequence))

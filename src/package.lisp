@@ -15,3 +15,7 @@
    :note-value
 )
   )
+
+(defpackage :org.oop.ld-music
+  (:use :cl)
+  )

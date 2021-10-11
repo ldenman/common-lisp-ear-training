@@ -153,11 +153,11 @@ I have these functions in my ~/.emacs file to quickly reload the project:
 ** Initialize the midi device and smoke test
    
   #+begin_src lisp :package ld-music
-    (pm-initialize 2)
+    (setup-midi)
   #+end_src
 
   #+RESULTS:
-  : #.(SB-SYS:INT-SAP #X55AE35D700D0)
+  : NIL
 
 You should hear a note play when you run #'smoke-test.
 
@@ -1358,6 +1358,7 @@ and for playing an event (via portmidi).
    : (defun row-row-row-your-boat2 ()
 
 * Issues
+  - make-chords should set the relative octaves properly
   - setting slot-value 'midi:dd/nn/cc/bb doesn't work out of the box
     because not exported. had to fork cl-midi library and add exports
   - update local cl-portmidi library to get updates and remove
@@ -1458,14 +1459,14 @@ and for playing an event (via portmidi).
   #+END_SRC
 
   #+RESULTS:
-  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (OCTAVE . 3) |
-  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (OCTAVE . 4) |
-  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (OCTAVE . 4) |
-  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . D3) | (VALUE . 62) | (SOLFEGE . RE) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . E3) | (VALUE . 64) | (SOLFEGE . MI) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . F3) | (VALUE . 65) | (SOLFEGE . FA) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . G3) | (VALUE . 67) | (SOLFEGE . SO) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 3) |
+  | (TYPE . NOTE) | (NAME . A4) | (VALUE . 69) | (SOLFEGE . LA) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . B4) | (VALUE . 71) | (SOLFEGE . TI) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 4) |
+  | (TYPE . NOTE) | (NAME . C3) | (VALUE . 60) | (SOLFEGE . DO) | (RELATIVE-OCTAVE . 4) | (OCTAVE . 3) |
 
 - [X] add rhythm to melodic sequences
 
@@ -1567,3 +1568,221 @@ and for playing an event (via portmidi).
   - add rhythm to chord sequences
   - support midi instruments
   - add pentatonic ear training exercises
+* Abstraction Layers
+** horizontal bariers
+  - seperate use from implementaion
+  - want to be able to design any sort of implementation, separate from use
+** vertical barriers
+   - imagine a company with individual personel records, and linked and DBs are put together
+   - form any place in company need to be able to inquire about data regardless of implementation details
+   - things that don't work:
+     - dictate a top down uniform record
+
+- generic operators :: what it does depends on the data it's looking at
+- should have a distributed personell system in mind
+
+- not only do we have abstraction bariers, but a vertical barier such that representations don't intefere with each other
+
+- particular objects (complex numbers, user records, etc) might have "typed" data
+** COMMENT typed data
+   - there's some cloud that has some ordinary data and also a "type". going from regular data to typed data.
+
+     #+begin_src lisp
+       (defun attach-type (type contents)
+	 (cons type contents))
+       (defun type (datum)
+	 (car datum))
+       (defun contents (datum)
+	 (cdr datum))
+     #+end_src
+** generic selectors "dispatch on type"
+
+     #+begin_src lisp
+       (defun real-part (z)
+	 (cond ((rectangular? z)
+	       (real-part-rectangular
+		(contents z)))
+	       ((polar? z)
+		(real-part-polar
+		 (contents z)))))
+     #+end_src
+
+
+     
+   - problems with it is that george and martha had to rename their functions
+   - the other is... what happens when you bring someone new into the system?
+     - george and martha don't care, they are in their own worlds
+     - the manager has to come through all these operations/procedures
+     - inflexibility is when work has to be done to accomodate change
+     - the manager really isn't doing anything, only being a paper pusher
+     - what do these procedures really do? the bottleneck is completely in the bureacracy.
+     - there's a table, all the manager is doing is acting as this table?
+      |           | polar           | rect           |
+      | REAL PART | real-part-polar | real-part-rect |
+      | IMAG-PART |                 |                |
+      |           |                 |                |
+
+     - how do you fix bureacracy? automate out of existance....
+** Data Directed programming
+   the data objects themselves carry around the information about how to operate on them.
+
+     #+begin_src lisp
+       (put key1 key2 value)
+       (get key1 key2)
+     #+end_src   
+
+     - george and martha install their operations in the table
+       george puts the rectangular operations in the table
+       #+begin_src lisp
+	 (put 'rectangular 'real-part
+	      real-part-rectangular)
+	 (put 'rectangular 'imag-part
+	      image-part-rectangular)
+       #+end_src
+
+       martha does the same thing
+       #+begin_src lisp
+	 (put 'polar 'real-part
+	      real-part-polar)
+	 (put 'polar 'imag-part
+	      image-part-polar)
+	 (put 'polar magnitude-part
+	      magnitude-polar)
+       #+end_src
+
+       when harry comes along, he needs to add his procedures to the table
+** COMMENT Operator function
+
+   #+begin_src lisp
+     (defun operate (op object)
+       (let ((proc (get (type object)) op))
+	 (if (not (null proc))
+	     (funcall proc (contents object))
+	     (error "undefined operator"))))
+   #+end_src
+   
+*** Operate selectors
+
+    #+begin_src lisp
+      (defun real-part (obj)
+	(operate 'real-part obj))
+      (defun imag-part (obj)
+	(operate 'imag-part obj))
+      (defun magnitude (obj)
+	(operate 'magnitude obj))
+      (defun angle (obj)
+	(operate 'angle obj))
+    #+end_src
+
+    calling (real-part z)
+    will use #'operate like (operate 'real-part z) which calls
+    (get 'polar 'real-part) which calls (contents z)
+    which returns the *untyped data*
+
+    
+*** Chains of types
+    - everytime that there is a vertical barrier, a type directs where to go by attaching types
+
+*** polynomials
+
+    - represented by typed data object
+
+    (polynomial x <term-list>)
+    x15 + 2x7 + 5
+    ((15 1) (7 2) (0 5))
+      |  |
+order |  |-coefficient
+
+
+#+begin_src lisp
+  (defun make-polynomial (var term-list)
+  (attach-type 'polynomial
+	       (cons var term-list)))
+#+end_src
+
+#+begin_src lisp
+      (defun +poly (p1 p2)
+	(if (same-var? (var p1) (var p2))
+	    (make-polynomial
+	     (var p1)
+	     (+terms (term-list p1)
+		     (term-list p2)))
+	    (error "Polys not in same var")))
+
+
+	(defun +terms (l1 l2)
+	  (cond ((empty-termlist? l1) l2)
+		((empty-termlist? l2) l1)
+		(t
+		 (let ((t1 (first-term l1))
+		       (t2 (first-term l2)))
+		   (cond
+		     ((> (order t1) (order t2))
+		      (adjoin-term
+		       t1
+		       (+terms (rest-terms l1) l2)))
+		     ((< (order t1) (order t2))
+		      (adjoin-term
+		       t2
+		       (+terms l1 (rest-terms l2))))
+		     (t (adjoin-term
+			 (make-term (order t1)
+				    (add (coeff t1)
+					 (coeff t2)))
+			 (+terms (rest-terms l1)
+				 (rest-terms l2)))))))))
+#+end_src
+
+- we reduced adding polynomials to the generic #'add
+- we've just added polynomials, but the coefficients of the
+  polynomials can be anything the system can add: rational, complex,
+  rectangular, polar, or ordinary.
+- the system automatically can handle a variety of polynomials
+- the generic #'add operator doesn't care and can add a variety of variables
+- polynomials themselves are things that can be added
+  (x^2+1 )y^2+(x^3-2x)y+(x^4-7)
+- not only can we deal with rational, complex, rect, polar, ordinary,
+  we can deal with any mixing/matching of "tower of types" because we
+  used the generic #'add fn instead of #'+
+
+  
+* Dreaming of DSLs
+
+  #+begin_src lisp
+    (melody do4 re4 mi fa so)
+    (chord I)
+    (chord do mi so)
+    (note do4)
+    (with-scale c major)
+  #+end_src
+
+  <sexp> ::=
+  #+begin_src bnf
+    <atom> ::= <literal atom> | <numeral> | -<numeral>
+    <literal atom> ::= <atom letter>
+		   ::= <literal atom><atom letter>
+		   ::= <literal atom><digit>
+    <numeral>      ::= <digit> | <numeral><digit>
+    <atom letter>  ::= A | B | C ... | Z
+    <digit>        ::= 0 | 1 | 2 ... | 9
+  #+end_src
+
+  #+begin_src bnf
+    <form> ::= <constant> | <application> | <variable>
+    <constant> ::= <sexp> 
+    <application> ::= <function-part>[<arg>, ...,<arg>]
+    <function-part> ::= <identifier>
+    <arg> ::= <form>
+    <variable> ::= <identifier>
+    <identifier> ::= <letter> | <identifier><letter> | <identifier><digit>
+    <letter> ::= a | b | c ... | z
+    <digit> ::= 1 | 2 | ... | 9  
+  #+end_src
+
+  #+begin_src bnf
+    <midinote>	     ::= <numeral>
+    <numeral>        ::= <digit> | <numeral><digit>
+    <noteidentifier> ::= <noteletter> | <noteidentifier><noteletter> | <noteidentifier><digit>
+    <noteletter>     ::= a | b | c ... | g
+    <digit>          ::= 0 | 1 | 2 ... | 9
+  #+end_src

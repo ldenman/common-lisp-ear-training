@@ -23,36 +23,44 @@
 	((chord-tone? item) (chord-tone-note item))))
 
 (defun play (item)
-  (cond
-    ((note? item) (note-play item))
-    ((cadence-sequence? item) (dolist (chord (contents item))
-				(play-chord-notes-nonasync (mapcar #'_note chord))))
-    ((chord-sequence? item) (chord-sequence-play (contents item)))
-    ((chord? item) (chord-play-nonasync item))
-    ((listp item) (play-chord-notes-nonasync item))))
+  (if (taggedp item)
+      (cond
+	((cadence-sequence? item) (play-chord-notes (untag item)))
+	((chord-sequence? item) (chord-sequence-play (untag item))))
+      (cond
+	((chord? item) (chord-play-nonasync item))
+	((note? item) (note-play item))
+	((listp item) (play-chord-notes-nonasync item)))))
 
 (defun play-random (scale) (note-play (car (random-note scale))))
 
+;; assumes chord is list of chord tones
 (defun chord-play-nonasync (chord &optional (sleep 0.5))
   (play-chord-notes-nonasync (chord-notes chord)))
 
+;; assumes chord is list of chord tones
 (defun chord-sequence-play (chord-sequence &optional (sleep 1))
   (dolist (chord (chord-sequence-chords chord-sequence))
     (chord-play-nonasync chord)
     (mysleep sleep)))
 
+;; assumes chord-list is a list of list of notes
+(defun play-chord-notes (chord-list &optional (sleep 1))
+  (dolist (chord chord-list)
+    (play-chord-notes-nonasync chord)
+    (mysleep sleep)))
+
+;; assumes chord is list of chord tones
 (defun chord-play (chord &optional (sleep 1))
   (chord-play-nonasync chord sleep))
 ;(smoke-test)
 
-
-
 (defun play-chord-notes-nonasync (notes &optional (sleep 1))
   (dolist (note notes)
     (when note
-      (note-play note)))
-  (mysleep sleep))
+      (note-play note))))
 
+;; assumes chord is list of chord tones
 (defun play-chords (chords)
   (dolist (chord chords)
     (chord-play chord)
@@ -63,24 +71,16 @@
     (when note
       (schedule-note note))))
 
-(defmacro c (fn &body body) `(,fn (list ,@(mapcar (lambda (x) `',x) body))))
-
-(defun tonic-subdominant-dominant2 (scale)
-  (->  (make-scale-chords scale)
-;       (scale-chord-filter #'chord-filter (lambda (x) (chord-drop-root x scale)))
-       (chord-seq '(I IV V I) 2)))
-
 (defun tonic-subdominant-dominant (scale &optional (octave 4))
-  (attach-type 'cadence-sequence
-	       (list
-		(solfanotes  scale '(DO MI SO) octave)
-		(solfanotes  scale '(FA LA DO) octave)
-		(solfanotes  scale '(SO TI RE) octave)
-		(solfanotes  scale '(DO MI SO) octave))))
+  (list
+   (solfanotes  scale '(DO MI SO) octave)
+   (solfanotes  scale '(FA LA DO) octave)
+   (solfanotes  scale '(SO TI RE) octave)
+   (solfanotes  scale '(DO MI SO) octave)))
 
 (defun play-tonic-subdominant-dominant (scale &optional (octave 4))
-  (mapcar #'play-chord-notes-nonasync (tonic-subdominant-dominant (make-scale 'c4) octave)))
+  (play (tonic-subdominant-dominant scale octave)))
 
-(defun play-tonic (scale) (note-play (car scale)))
-(defun play-subdominant (scale) (note-play (nth 3 scale)))
-(defun play-dominant (scale) (note-play (nth 4 scale)))
+(defun play-tonic (scale) (play (car scale)))
+(defun play-subdominant (scale) (play (nth 3 scale)))
+(defun play-dominant (scale) (play (nth 4 scale)))

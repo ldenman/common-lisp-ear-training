@@ -7,6 +7,7 @@
 		:serial t
 		:components
 		((:file "package")
+		 (:file "types")
 		 (:file "random")
 		 (:file "util")
 		 (:file "midi")

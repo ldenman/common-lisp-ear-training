@@ -44,6 +44,11 @@
                    (elt s (1- i))))
     s))
 
+
+(defun list-of? (pred list)
+  (if list
+      (every pred list)))
+
 (defun any? (i l)
   (if l
       (if (eq i (car l))
@@ -98,3 +103,13 @@
 	  (setf l1 (append l1 (list s)))
 	  (setf l2 (append l2 (list s)))))
     (cons l1 l2)))
+(defun substringp (needle haystack &key (test 'char=))
+  (search (string needle)
+	  (string haystack)
+	  :test test))
+
+(defvar *ignore-sleep* nil)
+
+(defun mysleep (&rest args)
+  (unless *ignore-sleep*
+    (apply #'sleep args)))

@@ -185,7 +185,7 @@
 (deftest test-chord-sequence ()
   (let* ((chord-data (make-scale-chords (make-scale 'c4)))
 	 (sequence '(I II- III- IV V VI- VII I))
-	 (chords (chord-sequence2 sequence chord-data)))
+	 (chords (chord-sequence sequence chord-data)))
     ;; verify default octave
     (check
     (= 3
