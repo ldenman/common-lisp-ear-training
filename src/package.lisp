@@ -13,5 +13,7 @@
    :notes
    :note-solfege
    :note-value
+   :midi-close
+   :midi-setup
 )
   )

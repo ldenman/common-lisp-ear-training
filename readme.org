@@ -100,8 +100,9 @@ I have these functions in my ~/.emacs file to quickly reload the project:
 
      (defun ld-music-unload ()
        (interactive)
+       (shell-command "killall qsynth")
        (when (slime-connected-p)
-	 (slime-eval '(ld-music:midi-unload))))
+	 (slime-eval '(ld-music:midi-close))))
 
      (defun ld-music-unload-hard ()
        (interactive)
@@ -113,12 +114,15 @@ I have these functions in my ~/.emacs file to quickly reload the project:
 
      (defun ld-music-load ()
        (interactive)
+       (start-process "qsynth" "qsynth" "qsynth")
        (if (not (slime-connected-p)) (slime))
        (sit-for 1)
        (when (slime-eval '(ql:quickload "ld-music"))
-	 (sit-for 1)
-	 (slime-eval-async '(ld-music:setup-midi))))
+	 (sit-for 1)))
    #+end_src
+
+   #+RESULTS:
+   : ld-music-load
 
 *** project testing functions
     #+begin_src elisp
