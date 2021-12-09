@@ -57,6 +57,7 @@
 	(setf *midi-out* midi-interface))))
 
 (defun midi-reset! ()
+  (ignore-errors (midi-close))
   (setf *midi-out* nil)
   (init-midi!))
 
@@ -158,3 +159,8 @@
 ;;;; Initialize the *midi-out* variable
 (init-midi!)
 (setup)
+;; (midi-setup)
+;; (pm:terminate)
+;; (pm:initialize)
+;; (midi-reset!)
+;; (midi-setup)
