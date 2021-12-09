@@ -98,3 +98,16 @@
 	  (setf l1 (append l1 (list s)))
 	  (setf l2 (append l2 (list s)))))
     (cons l1 l2)))
+
+(defun mscore (arg)
+  (uiop:run-program "killall musescore.mscore" :ignore-error-status t)
+  (uiop:run-program (format nil "musescore.mscore ~a" arg) :ignore-error-status t))
+(defun launch-qsynth ()
+  (uiop:launch-program "qsynth"))
+(defun kill-qsynth ()
+  (uiop:run-program "killall -9 qsynth" :ignore-error-status t))
+
+(defun repeat (x n)
+  (if (= n 1)
+      (cons x nil)
+      (cons x (repeat x (1- n)))))

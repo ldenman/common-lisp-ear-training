@@ -1,11 +1,10 @@
 (in-package :ld-music)
 
 (defun little-sequence (&optional (division 60))
-  (midi-seq-format-1
-   (make-rhythmic-notes
-    (take 15 (scale-notes (scale-range 'c3 'c5 (make-scale 'c4))))   
-    (grow (take 15 (scale-notes (scale-range 'c3 'c5 (make-scale 'c4))))
-	  '(1 2 2 4 4 4 4 8 8 8 8 8 8 8 ))) division))
+  (make-rhythmic-notes
+   (take 16 (scale-notes (scale-range 'c3 'd5 (make-scale 'c4))))   
+   (grow (take 16 (scale-notes (scale-range 'c3 'd5 (make-scale 'c4))))
+	 '(8))) )
 
 ;(write-midi-file-format-1 "output2.midi" (little-sequence))
 ;(write-midi-file-format-1 "output1.midi" (little-sequence 120) 120)

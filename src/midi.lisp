@@ -75,11 +75,6 @@
 (defun smoke-test (&optional (dev *midi-out*))
   (funcall dev 'smoke-test))
 
-(defun launch-qsynth ()
-  (uiop:launch-program "qsynth"))
-(defun kill-qsynth ()
-  (uiop:run-program "killall -9 qsynth" :ignore-error-status t))
-
 (defun ensure-midi ()
   (if (midi-stream)
       t
@@ -105,10 +100,7 @@
   "Stop all notes on a channel of a midi stream."
   (loop for x in (midi-notes) do (note-stop x channel)))
 
-(defun setup ()
-  (launch-qsynth)
-  (sleep 3)
-  (midi-setup 10))
+
 
 (defun note-on (value &optional (velocity 80) (channel 0) (stream (midi-stream)))
   "Play a midi note."
@@ -155,6 +147,10 @@
     (midi:write-midi-file my-midi-file outfile)))
 
 
+(defun setup ()
+  (launch-qsynth)
+  (sleep 3)
+  (midi-setup 10))
 
 ;;;; Initialize the *midi-out* variable
 (init-midi!)

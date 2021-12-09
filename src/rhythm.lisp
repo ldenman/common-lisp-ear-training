@@ -11,14 +11,27 @@
 
 ;; convert rhythm value (ex. 1 2 4 8 16)) to a scaled duration based on bpm. The
 ;; scaling and rounding so that we send positive integer time value in the notes->midi-messages fn.
-(defun rhythm->duration-scaled (r bpm)
-  (round (* (rhythm-values r) bpm)))
-
 (defun beat-length (beat bpm)
   (/ 60 (/ bpm beat)))
 
+(defun rhythm->duration-scaled (r bpm)
+  (let ((res (case r
+	       (1 (*  4 bpm))
+	       (2 (*  2 bpm))
+	       (4 (*  1 bpm ))
+	       (8 (*  0.5 bpm))
+	       (16 (* 0.25 bpm )))))
+    (round res)))
+
 (defun rhythm->seconds (r bpm)
-  (beat-length (rhythm-values r) bpm))
+    (let ((res (case r
+	       (1 4)
+	       (2 2)
+	       (4 1)
+	       (8 0.5)
+	       (16 0.25))))
+    (beat-length res bpm)))
+
 
 (defun measure-beats (measure)
   (reduce #'+ (mapcar (lambda (beat)
@@ -49,17 +62,22 @@
 (defun select-note (notes/rhythms)
   (car notes/rhythms))
 
-;; Transform list of rhythmic notes to midi messages
-;; Output suitable for writing to midi file via MIDI lib
-(defun rhythmic-notes->midi-messages (rhythmic-notes bpm)
+
+
++;; Transform list of rhythmic notes to midi messages
++;; Output suitable for writing to midi file via MIDI lib
+(defun rhythmic-notes->midi-messages (notes/rhythms bpm)
   (let ((result '())
 	(time 0))
-    (dolist (item rhythmic-notes)
-      (let ((rhythm (select-rhythm item))
-	    (note (select-note item)))
-	(push (note->midi-message note time (+ time (rhythm->duration-scaled rhythm bpm))) result)
+    (dolist (item notes/rhythms)
+      (let ((rhythm (cdr item))
+	    (note (car item)))
+	(setf result
+	      (append
+	       result
+	       (note->midi-message note time (+ time (rhythm->duration-scaled rhythm bpm)))))
 	(incf time (rhythm->duration-scaled rhythm bpm))))
-    (reverse result)))
+    result))
 
 ;; Transform list of rhythmic notes to PORTMIDI midi events
 (defun rhythmic-notes->pm-events (rhythmic-notes bpm &optional (*midi-channel* 0))

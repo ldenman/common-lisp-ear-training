@@ -140,6 +140,23 @@ I have these functions in my ~/.emacs file to quickly reload the project:
 
       (add-hook 'after-save-hook #'ld-music-test)
     #+end_src
+
+*** other
+#+BEGIN_SRC emacs-lisp
+  (defun preview-midi (file)
+    (interactive "fFile: ")
+    (shell-command (format "midi2ly %s -o ~/output.midi.ly" file))
+    (shell-command (format "lilypond --pdf -o ~/output.pdf ~/output.midi.ly"))
+    (shell-command "evince ~/output.pdf.pdf"))
+  (defun preview-midi-output ()
+  (interactive)
+    (preview-midi "~/output2.midi"))
+
+#+END_SRC
+
+#+RESULTS:
+: preview-midi
+
 * MIDI Smoke testing
 ** List the midi devices available on your system:
 
